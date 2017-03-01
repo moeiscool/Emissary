@@ -28,6 +28,8 @@ s.redis();
 s.jp=function(d,x){if(!d||d==""||d=="null"){if(x){d=x}else{d={}}};try{d=JSON.parse(d)}catch(er){if(x){d=x}else{d={}}};return d;}
 //json string
 s.js=function(d){d=JSON.stringify(d);if(d=="null"){d=null;};return d;}
+//md5 tag
+s.md5=function(x){return crypto.createHash('md5').update(x).digest("hex");}
 //random tag
 s.gid=function(x){
     if(!x){x=10};var t = "";var p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -1260,47 +1262,54 @@ app.get('/:page/:ke', function (req,res){
 });
 //login
 app.post(['/login'], function (req,res){
-    req.body.user=req.body.user.toLowerCase()
-    if (empty(req.body.user)) {
-        $ret['msg'] = "Username field was empty.";
-    } elseif (empty(req.body.pass)) {
-        $ret['msg'] = "Password field was empty.";
-    } elseif (!empty(req.body.user) && !empty(req.body.pass)) {
-        $db=loadSQL('chat');
-        $k='';$ka=array(req.body.user,md5(req.body.pass));if(isset($_POST['ke'])&&$_POST['ke']!==''){$k=' AND ke = ?';$ka[]=$_POST['ke'];}
-        $db->select('id,ke,mail,login,ref,name,shto,shfr,ops,ids,type','Ops','login = ? AND pass = ?'.$k,$ka);$sq=$db->fetch_assoc_all();
-        if(count($sq)>1&&count($sq)!=1){$ret['msg'] = "Please choose one of your Keys";$ret['pkg']=$sq;}
-        if(count($sq)===1){//found master
-            $sq=$sq[0];
-            $db->select('*','API','ke = ?',array($sq['ke']));$api=$db->fetch_assoc_all();
-            $db->select('*','Details','ke=?',array($sq['ke']));
+    req.ret={ok:false};
+    req.body.user=req.body.user.toLowerCase().trim()
+    if (req.body.user==='') {
+        req.ret.msg = "Username field was empty.";
+    } else if (req.body.pass==='') {
+        req.ret.msg = "Password field was empty.";
+    } else if (req.body.user!=='' && req.body.pass!=='') {
+        $k='';$ka=[req.body.user,s.md5(req.body.pass)];
+        if(isset(req.body.ke)&&req.body.ke!==''){
+            $k=' AND ke = ?';$ka.push(req.body.ke);
+        }
+        sql.query('SELECT id,ke,mail,login,ref,name,shto,shfr,ops,ids,type FROM Ops WHERE login = ? AND pass = ?'+$k,$ka,function(err,r){
+            if(r&&r[0]){
+        if(r.length>1&&r.length!=1){
+            req.ret.msg = "Please choose one of your Keys";
+            $ret['pkg']=r;
+        }
+        if(count(r)===1){//found master
+            r=r[0];
+            $db->select('*','API','ke = ?',array(r['ke']));$api=$db->fetch_assoc_all();
+            $db->select('*','Details','ke=?',array(r['ke']));
             $ret['u']=array();$ret['success']=true;
-            $sq['ids']=json_decode($sq['ids'],true);
-            if(isset($sq['ids']['pp'])){
-                $ret['u']['pp'] = $sq['ids']['pp'];
+            r['ids']=json_decode(r['ids'],true);
+            if(isset(r['ids']['pp'])){
+                $ret['u']['pp'] = r['ids']['pp'];
             }
             $ret['u']['M'] = 1;
             $ret['u']['auth'] = gid(24);
             $ret['u']['api'] = $api;
-            $ret['u']['lv'] = $sq['type'];
-            $ret['u']['id'] = $sq['id'];
-            $ret['u']['ke'] = $sq['ke'];
-            $ret['u']['ref'] = $sq['ref'];
-            $ret['u']['mail'] = $sq['mail'];
-            $ret['u']['login'] = $sq['login'];
-            $ret['u']['name'] = $sq['name'];
+            $ret['u']['lv'] = r['type'];
+            $ret['u']['id'] = r['id'];
+            $ret['u']['ke'] = r['ke'];
+            $ret['u']['ref'] = r['ref'];
+            $ret['u']['mail'] = r['mail'];
+            $ret['u']['login'] = r['login'];
+            $ret['u']['name'] = r['name'];
             $ret['u']['Title']='Superuser';
-            $ret['u']['shto'] = $sq['shto'];
-            $ret['u']['shfr'] = $sq['shfr'];
-            $ret['u']['ops']= json_decode($sq['ops'],true);
+            $ret['u']['shto'] = r['shto'];
+            $ret['u']['shfr'] = r['shfr'];
+            $ret['u']['ops']= json_decode(r['ops'],true);
             $ret['u']['det']=$db->fetch_assoc();
-            $ret['u']['ids']=$sq['ids'];
+            $ret['u']['ids']=r['ids'];
             if(!isset($ret['u']['det'])){$ret['u']['det']='{}';}
             addtoSession($ret['u']);
         }
-        if(count($sq)===0){//no master
-            if(isset($_POST['ke'])&&$_POST['ke']!==''){//key is set
-                $db->select('*','Details','ke = ? AND subs LIKE ? AND subs LIKE ?',array($db->escape($_POST['ke']),'%"Username":"'.$db->escape(req.body.user).'"%','%"Password":"'.$db->escape(req.body.pass).'"%'));
+        if(count(r)===0){//no master
+            if(isset(req.body.ke)&&req.body.ke!==''){//key is set
+                $db->select('*','Details','ke = ? AND subs LIKE ? AND subs LIKE ?',array($db->escape(req.body.ke),'%"Username":"'.$db->escape(req.body.user).'"%','%"Password":"'.$db->escape(req.body.pass).'"%'));
                 $row = $db->fetch_assoc();
                 if(isset($row['ke'])){//found one
                     $row['subs']=json_decode($row['subs'],true);$r=null;
@@ -1310,14 +1319,14 @@ app.post(['/login'], function (req,res){
                         }
                     }
                     if($r!==null){
-                        $db->select('*','Ops','ke = ?',array($db->escape($_POST['ke'])));$sq=$db->fetch_assoc();
+                        $db->select('*','Ops','ke = ?',array($db->escape(req.body.ke)));$sq=$db->fetch_assoc();
                         if(!isset($r['Id'])){$r['Id']=req.body.user;}
                         $ret['u']=array();$ret['success']=true;
                         $ret['u']['lv'] = $sq['type'];
                         $ret['u']['pp'] = $r['PP'];
                         $ret['u']['id'] = $r['Id'];
                         $ret['u']['auth'] = gid(24);
-                        $ret['u']['ke'] = $_POST['ke'];
+                        $ret['u']['ke'] = req.body.ke;
                         $ret['u']['name'] = $r['Name'];
                         $ret['u']['mail'] = $r['Username'];
                         $ret['u']['Title'] = $r['Title'];
@@ -1348,15 +1357,17 @@ app.post(['/login'], function (req,res){
                         }
                         addtoSession($ret['u']);
                     }else{
-                        $ret['msg'] = "Password incorrect, or Account does not exist. Check your key.";
+                        req.ret.msg = "Password incorrect, or Account does not exist. Check your key.";
                     }
                 } else {
-                      $ret['msg'] = "Check your key.";
+                      req.ret.msg = "Check your key.";
                 }
             }else{
-                $ret['msg'] = "Password incorrect, or Account does not exist.";
+                req.ret.msg = "Password incorrect, or Account does not exist.";
             }
         }
+            }
+        })
     }
 });
 //
