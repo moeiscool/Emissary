@@ -1,0 +1,214 @@
+<meta charset="UTF-8">
+<div id="mm-script-drop" style="display:none"></div>
+<style async>
+    <% include ../libs/css/chaticons.css %>
+    <% include ../libs/css/chaticons-embedded.css %>
+    <% include ../libs/css/animate.css %>
+    <% include ../libs/css/custom.css %>
+    <% include ../libs/css/emoticons.css %>
+    <% include ../libs/css/images.css %>
+    <% include ../libs/css/rating.css %>
+    <% include ../libs/css/embed.css %>
+</style>
+<div class="CloudChat">
+<div id="unm-file-preview" unmFile="ci"><img></div>
+<form id="mm-translator">
+        <div><select name="fr" class="unm-form-control"><option value="en">English</option></select></div>
+        <div><select name="to" class="unm-form-control"><option value="fr">French</option></select></div>
+        <div><button class="btn-unm btn-block">Translate</button></div>
+</form>
+<div id="mm-chat-greet"></div>
+    <div id="mm-VideoBlock" full="0" style="display:none">
+<div class="handle_bar"><i class="chi-video-chat"></i><div class="pull-right"></div></div><video class="me" autoplay></video><video class="op" autoplay></video><div class="phone_icons"><a winc="fs" class="btn btn-primary" style="display:none"><i class="chi-chat-1"></i></a><a winc="ca" class="btn btn-danger"><i class="chi-cancel-circle"></i></a></div>
+    </div>
+	<div id="mm-chat-launch" class="mm-chat-toggle">
+	    <span class="faces">
+	        <i class="chi-emo-coffee" ></i>
+	    </span>
+	    <div class="unm-bubble"><span></span></div>
+	</div>
+	<section id="mm-chat-window" class="bmsg nops">
+	    <header class="unm_topbar clearfix">
+            <div class="unm-file-attachments"></div>
+	        <span class="snoti"></span>
+<!--	        <i class="chi-popup popout" title="Pop Out"></i>-->
+	        <div style="float:right">
+                <i class="chi-video-chat hid_selected" mm-videoChat="s" style="display:none"></i>
+	            <i class="chi-right-circle mm-chat-toggle" title="Hide Chat"></i>
+	            <i class="chi-cancel-circle" close title="End Chat"></i>
+	        </div>
+	    </header>
+	    <div id="mm-admin-list"></div>
+	    <div class="body-hold">
+	    <section class="chat_section add_details">
+	    <div class="mm_shade">
+            <div class="unm-pg-1" pgfc="1">
+                <div class="beauty-hold">
+                    <div class="text-center">
+                        <div class="unm_logo_img"></div>
+                        <h1 class="unm_lang_1">We're Online!</h1>
+                        <p class="unm_lang_2">Operators are ready to answer your questions!</p>
+                    </div>
+                    <div class="unm-list-group-item">
+                        <select id="unmDept" name="dept" class="unm-form-control">
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="text-center mm-operator-poke">
+                        <p class="unm_lang_3">Want someone in particular? These operators are available now.</p>
+                        <form id="mm-admin-choose" class="mm-admin-choose" style="margin-bottom:10px"></form>
+                    </div>
+                    <div class="unm-list-group-item">
+                        <button id="mm-chat-init" class="btn-unm btn-primary btn-ghost btn-block unm_lang_btn_1">Chat Now!</button>
+                    </div>
+                </div>
+            </div>
+            <div class="unm-pg-1 ubox" pgfc="2" style="display:none">
+<!--                quickmsg-->
+                <div class="unmbody">
+                    <li class="from-server unm-list-group-item text-center unm-bub-h from-them text-center clearfix">
+                        <div class="unm-bubble"><div class="unm-chat-collage mm-admin-choose mm-operator-poke"></div><div>
+                            <div class="unm_logo_img"></div>
+                            <h1 class="unm_lang_1">We're Online!</h1>
+                            <p class="unm_lang_2">Operators are ready to answer your questions!</p>
+                        </div></div></li>
+                </div>
+                <div class="unmfooter">
+                    <textarea placeholder="Enter Message" class="unm-form-control" id="mm-chat-quickmsg" rows=1></textarea>
+                </div>
+            </div>
+            <div class="unm-pg-1 ubox" pgfc="3" style="display:none">
+<!--                bulletin-->
+                <div class="unmbody"></div>
+                <div class="unmfooter"></div>
+            </div>
+<!--
+            <div class="unmbody"></div>
+            <div class="unmfooter"></div>
+-->
+	    </div>
+	    </section>
+	    <section class="chat_section diah">
+	        <div class="diah_shade">
+	        <div class="dialogue_cont">
+                <div id="mm-attach-bubble" class="scroll-style scroll-style-5" style="display:none"><a mm-attach="d" class="btn-unm btn-block"><i class="chi-attach"></i>Upload File</a><div><ul id="unm_files_list"></ul></div></div>
+	        <div class="dialogue scroll-style scroll-style-5" id="mm-chat-messages"></div>
+	        <div class="typing_operators"></div>
+	        </div>
+	        <form class="unm-ia">
+	            <div>
+                    <div class="mm-emojis" style="display:none"></div>
+                    <textarea placeholder="Enter Message" name="words" class="unm-form-control" id="mm-chat-send" rows=1></textarea>
+	                <span class="unm-btns"><a mm-attach="c" class="hid_selected" title="Share a File (Secure Connection Required)"><i class="chi-attach"></i></a><a id="mm-emojis"><i class="chi-emo-laugh" title="Emoticons"></i></a><a title="Send Message" onclick="$(this).parents('form').submit()"><i class="chi-right-circle"></i></a></span>
+	            </div>
+	        </form>
+<form id="mm-chat-attach" style="display:none!important" method="post" enctype="multipart/form-data">
+    <input type="file" name="upl" id="mm-attach-upl">
+    <input type="submit" name="submit">
+</form>
+            </div>
+	        <form id="mm-user-details">
+                <div class="unm_lang_details_1">Would you like to reference your name?</div>
+	            <div class="unm-list-group-item">
+	              <input id="unmName" type="text" placeholder="Name" name="name" class="unm-form-control no-border">
+	            </div>
+	            <div class="unm-list-group-item" style="margin-bottom:10px">
+	              <input id="unmMail" type="email" placeholder="Email" name="mail" class="unm-form-control no-border">
+	            </div>
+	            <div class="unm-list-group-item">
+	            <div class="btn-group btn-group-justified ch2">
+	                <button type="button" class="btn-unm btn-ghost btn-danger btn-block unm_lang_details_btn_2">Chat as Guest</button>
+	                <button type="submit" class="btn-unm btn-ghost btn-info btn-block unm_lang_details_btn_1">Okay</button>
+	            </div>
+	            </div>
+	          </form>
+	    </section>
+	    <section id="mm-chat-away">
+	        <div class="mm_shade">
+                <div class="beauty-hold">
+                    <div class="text-center">
+                        <h1>
+                            <i class="chi-emo-coffee"></i>
+                        </h1>
+                        <p class="unm_lang_away_1">Sorry we're unable to chat with you right now, would you like to leave us a message?</p>
+                    </div>
+                    <form class="mm_leave_msg">
+                            <div class="form-group">
+                              <input id="unmLName" type="text" placeholder="Name" name="name" class="unm-form-control no-border">
+                            </div>
+                            <div class="form-group">
+                              <input id="unmLMail" type="email" placeholder="Email" name="mail" class="unm-form-control no-border">
+                            </div>
+                            <div class="form-group">
+                                <textarea id="unmLMsg" name="msg" class="unm-form-control no-border"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-lg btn-ghost btn-primary btn-unm btn-block unm_lang_away_btn_1">Submit</button>
+                            </div>
+                        <div style="margin-top:10px"></div>
+                    </form>
+                </div>
+	        </div>
+	    </section>
+	    <section class="chat_section" id="mm-chat-rating">
+	        <div class="mm_shade">
+	        <div class="beauty-hold">
+                <h3 class="unm_lang_rate_1">How Did We Do?</h3>
+	            <form class="mm_send_rating text-center">
+	                <div class="rateables"></div>
+	                <div class="btn-group btn-group-justified ch2"><a class="btn-unm btn btn-ghost btn-danger mm-chat-toggle">No Thanks</a><a href="javascript:$('.mm_send_rating').submit()" class="btn-unm btn btn-ghost btn-primary">Submit</a></div>
+	            </form>
+	        </div>
+	        </div>
+	    </section>
+	    </div>
+	<div id="mm-script-drop"></div><div id="mm-style-drop"></div>
+<audio id="AUDIO_BEEP" src="//dashboard.unmetered.chat/libs/audio/pop.mp3" preload="auto"></audio>
+	</section>
+</div>
+<script type="text/javascript" async>
+try{
+    <% if($_GET.jquery===''){ %>
+        <% include ../libs/js/jquery.min.js %>
+    <% } %>
+    <% include ../libs/js/langs.js %>
+if(typeof window.io!=='function'){<% include ../libs/js/socket.js %>}
+var CloudChat=io.connect('<%= host %>');
+<% if(https===true){ %>if(typeof Peer!=='function'){<% include ../libs/js/peer.min.js %>}<% } %>
+if(typeof $().rating!=='function'){<% include ../libs/js/rating.js %>}
+if(typeof $.emoticons!=='object'){<% include ../libs/js/emoticons.js %>}
+if(typeof $.livestamp!=='object'){<% include ../libs/js/livestamp.min.js %>}
+if(typeof window.html2canvas!=='function'){<% include ../libs/js/html2canvas.min.js %>}
+if(typeof window.cimice!=='object'){<% include ../libs/js/cimice.min.js %>}
+    window.UNMTIME=setInterval(function(){
+        if(window.jQuery){
+            clearInterval(window.UNMTIME);
+            delete(window.UNMTIME);
+            (function($){
+                if(!$.CloudChat){$.CloudChat={}}
+                $.CloudChat.base={},$.CloudChat.Peers={}
+                window.UNMTIME=setInterval(function(){
+                    if(CloudChat&&$&&$.CloudChat){
+                        clearInterval(window.UNMTIME);delete(window.UNMTIME);
+                        <% include ../libs/js/global.js %>
+                        <% include ../libs/js/embed.vars.js %>
+                        $(document).ready(function(){
+                            $.CloudChat.base.puu=1;
+                            $.CloudChat.ops={};
+                            $.CloudChat.nit=$.CloudChat.base.init('t',new Date);
+                            $.CloudChat.videoChat=0;
+                            $.CloudChat.ke='<%= ke %>';
+                            $.CloudChat.host='<%= host %>';
+                            <% include ../libs/js/embed.js %>
+                            <% if(https===true){ %><% include ../libs/js/embed.peer.js %><% } %>
+                            if(CloudChat&&CloudChat.connected===false){CloudChat.connect()};
+                        })
+                    }
+                },500)
+            })(jQuery)
+        }else{
+            console.log('No jQuery, Chat Cannot Load. Retrying...');
+        };
+    },500);
+}catch(error){console.log('CloudChat Error ',error)}
+</script>

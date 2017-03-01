@@ -1,0 +1,11 @@
+{
+  "port": 80,
+  "utcOffset": "-0800",
+  "db": {
+    "host": "127.0.0.1",
+    "user": "chat",
+    "password": "",
+    "database": "chat-unmetered",
+    "port":3306
+  }
+}
