@@ -126,14 +126,14 @@ if (AudioContext) {
             e.preventDefault();e.e=$(this);
             e.s=e.e.serialize();e.cf=e.e.find('input,[type=submit]').prop('disabled',true);
             if(e.s.ke===''){$('#login_msg').text('Please Enter Your Key');return false;}
-            $.post('<%= host %>/p/a/',e.s,function(d){
+            $.post('<%= host %>/login',e.s,function(d){
                 console.log(d)
                 try{d=JSON.parse(d)}catch(er){d={success:false,text:d}}
                 if(!d.msg){d.msg=''}
                 d.p=$('#pkg'),e.ll=$('#login_msg');
                 if(d.success===true){
                     HBR.loggedIn=true;
-                    $.get('<%= host %>/pg/block/body',function(w){$('#login-content').remove();$('#MAIN_FRAME').html(w);$user=d.u;HBCd();})
+//                    $.get('<%= host %>/pg/block/body',function(w){$('#login-content').remove();$('#MAIN_FRAME').html(w);$user=d.u;HBCd();})
                 }else{
                     if(d.pkg){d.msg+='<span id="pkg">';
                         $.each(d.pkg,function(n,v){
