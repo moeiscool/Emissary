@@ -12,15 +12,15 @@
                         <section class="vbox">
                         <section class="scrollable" style="background:#fbfbfb">
                             <ul class="nav nav-list sh-menu">
-                <?php if(isset($_SESSION['M'])){?>
+                <% if(session.M==1){ %>
                             <li class="no-border unmTab active" unmtab="0">
                             <a>
                             <div class="sh-icon"><i class="fa fa-user"></i></div>
                             <p class="sh-text">Account</p>
                             </a>
                             </li>
-                <?php }?>
-                <?php if($_SESSION['Title']==='Superuser'){?>
+                <% } %>
+                <% if(session.Title==='Superuser'){ %>
                             <li class="no-border unmTab" unmtab="1">
                             <a>
                             <div class="sh-icon"><i class="fa fa-user-secret"></i></div>
@@ -33,15 +33,15 @@
                             <p class="sh-text">Sharing</p>
                             </a>
                             </li>
-                <?php }?>
-                <?php if($_SESSION['Title']==='Superuser'&&intval($_SESSION['lv'])>0){?>
+                <% } %>
+                <% if(session.Title==='Superuser'&&parseInt(session.lv)>0){ %>
                             <li class="no-border unmTab" unmtab="api">
                             <a>
                             <div class="sh-icon"><i class="fa fa-key"></i></div>
                             <p class="sh-text">API</p>
                             </a>
                             </li>
-                <?php }?>
+                <% } %>
                             <li class="no-border unmTab" unmtab="9">
                             <a>
                             <div class="sh-icon"><i class="fa fa-plug"></i></div>
@@ -60,7 +60,7 @@
                             <p class="sh-text">Chat Bot</p>
                             </a>
                             </li>
-                <?php if($_SESSION['Title']==='Superuser'){?>
+                <% if(session.Title==='Superuser'){ %>
                             <li class="unmTab" unmtab="8">
                                 <a>
                                     <div class="sh-icon"><i class="fa fa-rss"></i></div>
@@ -91,7 +91,7 @@
                             <p class="sh-text">Rating Form</p>
                             </a>
                             </li>
-                <?php }?>
+                <% } %>
 <!--
                             <li class="unmTab" unmtab="7">
                             <a>
@@ -108,7 +108,7 @@
                         <section class="vbox">
                         <section class="scrollable">
             <div class="display-table sh-container-child">
-                <?php if(isset($_SESSION['M'])){?>
+                <% if(session.M==1){ %>
             <div class="unmFrame" unmtab="0" id="modal_account_info">
                 <div class="modal-header m-b">
                     <h4 class="modal-title no-margin">Account Info</h4>
@@ -116,30 +116,29 @@
                 </div>
                 <section class="hbox">
                     <aside class="aside text-center">
-<div class="my_avatar thumb-lg propic" style="margin:5px;border: 1px solid #ddd;border-radius:50%"><div class="img" style="background-image: url('<?=$_SESSION['pp']?>');"></div></div>
+<div class="my_avatar thumb-lg propic" style="margin:5px;border: 1px solid #ddd;border-radius:50%"><div class="img" style="background-image: url('<%= session.pp %>');"></div></div>
                     </aside>
                     <aside>
                         <form class="display-table">
                             <div class="form-group">
                                 <label for="account_profile_picture">Profile Picture <small>A URL. An external image link.</small></label>
-                                <div><input type="text" class="form-control" name="pp" value="<?=$_SESSION['pp']?>" id="account_profile_picture"></div>
+                                <div><input type="text" class="form-control" name="pp" value="<%= session.pp %>" id="account_profile_picture"></div>
                             </div>
                             <div class="form-group">
                                 <label for="account_name_change">Name <small>Your display name for your visitors.</small></label>
-                                <div><input type="text" class="form-control" name="name" value="<?=$_SESSION['name']?>" id="account_name_change"></div>
+                                <div><input type="text" class="form-control" name="name" value="<%= session.name %>" id="account_name_change"></div>
                             </div>
                             <div class="form-group">
                                 <label for="account_mail_change">Email <small>When you are away emails will be forwarded here. Emails about payments are handled through the UNMETERED.IO Client Area login.</small></label>
-                                <div><input type="text" class="form-control" name="mail" value="<?=$_SESSION['mail']?>" id="account_mail_change"></div>
+                                <div><input type="text" class="form-control" name="mail" value="<%= session.mail %>" id="account_mail_change"></div>
                             </div>
-                <?php $demo=($_SESSION['ke']!=='DEMO');?>
                             <div class="form-group">
                                 <label for="account_login_change">Login ID <small>Your login address</small></label>
-                                <div><input type="text" class="form-control"    <?php if($demo){ ?>name="login"<?php }  ?> value="<?=$_SESSION['login']?>" id="account_login_change"></div>
+                                <div><input type="text" class="form-control" name="login" value="<%= session.login %>" id="account_login_change"></div>
                             </div>
                             <div class="form-group">
                                 <label for="account_pass_change">Password <small>Leave blank for no change.</small></label>
-                                <div><input type="password" class="form-control" <?php if($demo){ ?>name="pass"<?php }  ?> id="account_pass_change"></div>
+                                <div><input type="password" class="form-control" name="pass" id="account_pass_change"></div>
                             </div>
                             <div class="form-group">
                                 <label for="account_pass_verify">Verify Password <small>Only fill if you wish to change your password.</small></label>
@@ -147,15 +146,15 @@
                             </div>
                             <div class="form-group">
                                 <label for="account_discount">Discount Code <small>If you have forgotten to add yours during sign up please do so here.</small></label>
-                                <div><input type="text" class="form-control" name="ref" value="<?=$_SESSION['ref']?>" id="account_discount"></div>
+                                <div><input type="text" class="form-control" name="ref" value="<%= session.ref %>" id="account_discount"></div>
                             </div>
                             <div class="form-group">
                                 <label for="account_banned_ips">Banned IPs <small>To prevent an IP from being able to connect to the chat service.</small></label>
-                                <div><input type="text" class="form-control" name="banned" value="<?=$_SESSION['ids']['banned']?>" id="account_banned_ips"></div>
+                                <div><input type="text" class="form-control" name="banned" value="<%= session.ids.banned %>" id="account_banned_ips"></div>
                             </div>
                             <div class="form-group">
                                 <label for="account_banned_ips_function">Banned IP Callback <small>Javascirpt function to run when a banned IP has come online.</small></label>
-                                <div><input type="text" class="form-control" name="bannedf" value="<?=$_SESSION['ids']['bannedf']?>" id="account_banned_ips_function"></div>
+                                <div><input type="text" class="form-control" name="bannedf" value="<%= session.ids.bannedf %>" id="account_banned_ips_function"></div>
                             </div>
                         </form>
                     </aside>
@@ -178,9 +177,9 @@
                         return false;
                     });
                 </script>
-                <?php } ?>
+                <% } %>
                 
-                <?php if($_SESSION['Title']==='Superuser'){?>
+                <% if(session.Title==='Superuser'){ %>
                 <div class="unmFrame" unmtab="api" id="modal_api" tbp style="display:none">
             <div class="modal-header">
                 <h4 class="modal-title no-margin">API Keys</h4>
@@ -208,7 +207,7 @@
                     });
                 </script>
                 </div>
-                <?php }?>
+                <% } %>
             <div class="unmFrame" unmtab="9" id="modal_account_apps" style="display:none">
                 <div class="modal-header m-b">
                     <h4 class="modal-title no-margin">Slack Connctions</h4>
@@ -219,15 +218,15 @@
                     <h4 class="modal-title no-margin">Firebase Storage</h4>
                     <small>Use your own storage or use our pay per data storage. Our Firebase comes with 2GB Free.</small>
                 </div>
-                <?php if($_SESSION['M']===1){ ?>
+                <% if(session.M==1){ %>
                 <form class="display-table" id="firebase_storage">
-                    <div class="form-group"><label for="firebase_apiKey">Firebase API Key</label><div><input class="form-control" id="firebase_apiKey" name="apiKey" value="<?=$_SESSION['ids']['firebase']['apiKey']?>"></div></div>
-                    <div class="form-group"><label for="firebase_authDomain">Firebase Authentication Domain</label><div><input class="form-control" id="firebase_authDomain" name="authDomain" value="<?=$_SESSION['ids']['firebase']['authDomain']?>"></div></div>
-                    <div class="form-group"><label for="firebase_storageBucket">Firebase Storage Bucket</label><div><input class="form-control" id="firebase_storageBucket" name="storageBucket" value="<?=$_SESSION['ids']['firebase']['storageBucket']?>"></div></div>
+                    <div class="form-group"><label for="firebase_apiKey">Firebase API Key</label><div><input class="form-control" id="firebase_apiKey" name="apiKey" value="<%= session.ids.firebase.apiKey %>"></div></div>
+                    <div class="form-group"><label for="firebase_authDomain">Firebase Authentication Domain</label><div><input class="form-control" id="firebase_authDomain" name="authDomain" value="<%= session.ids.firebase.authDomain %>"></div></div>
+                    <div class="form-group"><label for="firebase_storageBucket">Firebase Storage Bucket</label><div><input class="form-control" id="firebase_storageBucket" name="storageBucket" value="<%= session.ids.firebase.storageBucket %>"></div></div>
                 </form>
-                <?php } ?>
+                <% } %>
                 </div>
-            <div class="unmFrame" unmtab="1" id="modal_subaccounts" tbp <?php if(isset($_SESSION['M'])){?>style="display:none"<?php } ?>>
+            <div class="unmFrame" unmtab="1" id="modal_subaccounts" tbp <% if(session.M==1){ %>style="display:none"<% }  %>>
             <div class="modal-header">
                 <h4 class="modal-title no-margin">Sub-Accounts</h4>
                 <small>You can create <a target="_blank" href="//dashboard.unmetered.chat">Sub-Account logins</a> here.</small>
@@ -576,7 +575,7 @@
                 <div class="display-table">
                 <div class="modal-header">
                     <h4 class="modal-title no-margin">Embedding</h4>
-                    <small>Your unique chat key is <span style="background:#ededed"><?=$_SESSION['ke']?></span>. To embed your chat widget you must first add the site to your trusted domains list.</small>
+                    <small>Your unique chat key is <span style="background:#ededed"><%= session.ke %></span>. To embed your chat widget you must first add the site to your trusted domains list.</small>
                 </div>
                 </div>
                 <div class="display-table">
@@ -585,7 +584,7 @@
                     <h4 class="modal-title no-margin">The code</h4>
                     <small>Loads the Widget and Styles. <b>jQuery must already be included.</b></small>
                 </div>
-                <textarea style="width:100%;height:60px" class="form-control"><script type="text/javascript" async>(function($){$.ls={e:localStorage,n:'CloudChatE_'};$.ls.g=$.ls.e.getItem($.ls.n);if($.ls.g&&$.ls.g.length>10){$("body").append($.ls.g)}else{$.get("//<?=$config['www']['embed']?>/<?=$_SESSION['ke']?>",function(d){$.ls.e.setItem($.ls.n,d);$("body").append(d)})}})(jQuery)</script></textarea>
+                <textarea style="width:100%;height:60px" class="form-control"><script type="text/javascript" async>(function($){$.ls={e:localStorage,n:'CloudChatE_'};$.ls.g=$.ls.e.getItem($.ls.n);if($.ls.g&&$.ls.g.length>10){$("body").append($.ls.g)}else{$.get("<%= host %>/embed/<%= session.ke %>",function(d){$.ls.e.setItem($.ls.n,d);$("body").append(d)})}})(jQuery)</script></textarea>
                 <div class="modal-header">
                     <h4 class="modal-title no-margin">Getting errors?</h4>
                     <small>Some jQuery setups leave the variable <span style="background:#ededed">$</span> undefined. Please paste this line just <b>before</b> the chat code.</small>
@@ -622,7 +621,7 @@
                         <h4 class="modal-title no-margin">Trusted Domains</h4>
                         <small>Only these domains will be allowed to use your embed code. Separate by commas.</small>
                     </div>
-                <textarea style="width:100%;height:60px" id="trusted_domains" class="form-control"><?=$_SESSION['ids']['trusted'];?></textarea>
+                <textarea style="width:100%;height:60px" id="trusted_domains" class="form-control"><%= session.ids.trusted; %></textarea>
                     <small class="col-md-12" style="margin-top:10px"><b>Example 1</b> : unmetered.io, unmetered.ca, unmetered.link <i>Allows only the origins specified.</i><br>
                     <b>Example 2</b> : unmetered <i>Allows all origins with "unmetered".</i></small>
                 </div>

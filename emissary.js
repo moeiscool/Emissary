@@ -1258,14 +1258,12 @@ app.get('/', function (req,res){
 });
 app.get('/:page/:ke', function (req,res){
     
-    res.render(req.params.page,{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')});
+    res.render(req.params.page,{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host'),config:config});
 });
 //login
 app.post('/dashboard', function (req,res){
     req.ret={ok:false};
     function send (x){
-                    console.log(x)
-
         if(x.success===true){
             x.sudo=function(c){
                 switch(c){
@@ -1278,6 +1276,8 @@ app.post('/dashboard', function (req,res){
                 }
                 return false;
             }
+            x.config=config;
+            x.host=req.protocol+'://'+req.get('host');
             res.render('home',x)
         }else{
             res.render('dashboard',{ke:x.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')})

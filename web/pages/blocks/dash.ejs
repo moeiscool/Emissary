@@ -1,4 +1,4 @@
-<div class="bmsg animated fadeIn" chat="Dashboard" uid="<?=$_SESSION['ke']?>" flash="1" sound="1" focus="1">
+<div class="bmsg animated fadeIn" chat="Dashboard" uid="<%= session.ke %>" flash="1" sound="1" focus="1">
     <section class="vbox">
     <section class="hbox stretch">
         <aside>
@@ -11,14 +11,14 @@
                         <label class="dash-element" title="Turn on Chatbot. Master and Superusers can edit responses only.">
                             <input class="bootswitch" size="" swTOGGLE="cbt" type="checkbox" id="chatbot_toggle" value="1">
                         </label>
-                        <?php if(isset($_SESSION['ids']['slack'])){ ?>&nbsp;
+                        <% if(session.ids.slack){ %>&nbsp;
                         <label class="dash-element" title="Save uncaptured chat messages to your slack personal channel">
                                 <input class="bootswitch" swTOGGLE="snu" type="checkbox" id="slack_save_uncap" value="1">
                         </label>
-                        <?php } ?>&nbsp;
+                        <% } %>&nbsp;
                             <a class="btn btn-ghost btn-success" toggle="status">&nbsp;<i class="fa fa-user"></i> <span class="it">On</span>line&nbsp;</a>&nbsp; <a class="btn btn-ghost btn-primary" toggle="audio1">&nbsp;<i class="fa fa-volume-up"></i> Sound&nbsp;</a>
                     </div>
-                    <h3 class="font1 displayname" style="margin:0;"><?=$_SESSION['name']?></h3>
+                    <h3 class="font1 displayname" style="margin:0;"><%= session.name %></h3>
                 </header>
                 <section class="scrollable wrapper">
 <!--            <div class="display-table weather-bar" id="stat_weather"></div>-->

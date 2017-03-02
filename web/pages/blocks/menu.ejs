@@ -4,7 +4,7 @@
             <table>
                 <tr>
                     <td style="width:50px"><div class="my_avatar" style="margin:5px"><div class="img" style="background-image:url(//dashboard.unmetered.chat/libs/images/logo.png)"></div></div></td>
-                    <td style="padding-left:5px"><span class="username"></span><?php if($_SESSION['Title']!=='Agent'){echo'<br><small>'.$_SESSION['Title'].'</small>';}?></td>
+                    <td style="padding-left:5px"><span class="username"></span><% if(session.Title!=='Agent'){ %><br><small><%= session.Title %></small><% } %></td>
                 </tr>
             </table>
             </li>
@@ -43,7 +43,7 @@
         <i class="fa fa-clone"></i>&nbsp;<small class="link-title">Auto-Close Popouts</small>
         </a>
     </li>
-<?php if($_SESSION['Title']==='Superuser'||$_SESSION['Title']==='Operator'){ ?>
+<% if(session.Title==='Superuser'||session.Title==='Operator'){ %>
     <li>
     <a class="auto" title="View Statistics" data-toggle="modal" data-target="#Statistics">
     <i class="fa fa-signal"></i>&nbsp;<small class="link-title">Statistics</small>
@@ -54,14 +54,14 @@
     <i class="fa fa-history"></i>&nbsp;<small class="link-title">History</small>
     </a>
     </li>
-<?php };?>
-<?php if($_SESSION['Title']==='Superuser'){ ?>
+<% } %>
+<% if(session.Title==='Superuser'){ %>
     <li>
     <a data-toggle="modal" data-target="#AccountModal">
     <i class="fa fa-user-secret"></i>&nbsp;<small class="link-title">Settings</small>
     </a>
     </li>
-<?php }?>
+<% } %>
     <!--
     <li>
     <a toggle="fulls" class="auto" title="Full Screen, (Performance issues on some browsers)">

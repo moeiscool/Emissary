@@ -1,31 +1,49 @@
-<link rel="icon" href="/libs/images/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="/libs/images/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="/libs/images/favicon-32x32.png" sizes="32x32">
-<link rel="icon" type="image/png" href="/libs/images/favicon-16x16.png" sizes="16x16">
-<link rel="manifest" href="/libs/images/manifest.json">
-<link rel="mask-icon" href="/libs/images/safari-pinned-tab.svg" color="#5bbad5">
-<meta name="apple-mobile-web-app-title" content="CloudChat">
-<meta name="application-name" content="CloudChat">
-<meta name="theme-color" content="#ffffff">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - UNMETERED.Chat</title>
+<!--	<link rel="stylesheet" type="text/css" href="//media.unmetered.io/minimize/uchat.css" async><script src="//media.unmetered.io/minimize/chat.js"></script> -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/libs/images/icon/apple-touch-icon.png">
+    <link rel="mask-icon" href="/libs/images/icon/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="/libs/images/icon/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/libs/css/bootstrap.min.css" async>
+	<link rel="stylesheet" type="text/css" href="/libs/css/font-awesome.min.css" async>
+	<link rel="stylesheet" type="text/css" href="/libs/css/animate.css" async>
+	<script src="/libs/js/jquery.min.js"></script>
+	<script src="/libs/js/jquery-ui.min.js"></script>
+	<script src="/libs/js/bootstrap.min.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/libs/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/libs/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/libs/images/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/libs/images/icon/manifest.json">
+    <link rel="mask-icon" href="/libs/images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="apple-mobile-web-app-title" content="CloudChat">
+    <meta name="application-name" content="CloudChat">
+    <meta name="theme-color" content="#ffffff">
 
-<link rel="stylesheet" type="text/css" href="/libs/css/font-awesome-animation.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/flags.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/chaticons.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/vbox.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/vis.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-datetimepicker.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-switch.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-select.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/emoticons.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/pnotify.custom.min.css">
-<!--<link rel="stylesheet" type="text/css" href="/libs/css/framework7.ios.min.css">-->
-<link rel="stylesheet" type="text/css" href="/libs/css/tooltipster.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/chrome-tabs.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/chrome-tabs-dark-theme.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-editable3.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/jquery.minicolors.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/jquery.contextMenu.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/custom.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/main.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/theme.css">
-<link rel="stylesheet" type="text/css" href="/libs/css/sidebarEffects.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/font-awesome-animation.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/flags.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/chaticons.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/vbox.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/vis.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-switch.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/emoticons.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/pnotify.custom.min.css">
+    <!--<link rel="stylesheet" type="text/css" href="/libs/css/framework7.ios.min.css">-->
+    <link rel="stylesheet" type="text/css" href="/libs/css/tooltipster.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/chrome-tabs.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/chrome-tabs-dark-theme.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/bootstrap-editable3.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/jquery.minicolors.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/jquery.contextMenu.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/theme.css">
+    <link rel="stylesheet" type="text/css" href="/libs/css/sidebarEffects.css">
+</head>
+<style>
+    *{line-height:1;margin:0;padding:0;}
+    body{font-family:'Segoe UI','Lucida Grande','Ubuntu','sans-serif'}
+</style>
+<script>HBR={},HBR.u={},HBR.p={},HBR.fl={},HBR.can={};HBR.time={};HBR.a={};</script>
