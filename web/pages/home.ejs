@@ -1,0 +1,102 @@
+<div id="st-container" class="st-container st-effect-6">
+<div class="st-pusher">
+<% include blocks/menu.ejs %>
+<div class="st-content">
+<div class="st-content-inner">
+<section class="app bmsg" id="WIN_WTC">
+        <section class="hbox stretch">
+            <aside id="wtc_sidemenu" class="aside-lg">
+                <section class="hbox stretch">
+                <section class="vbox">
+                <section class="scrollable w-f">
+                    <div>
+<!--                        -->
+                        <div class="babel list-toggle text-ellipsis"><i class="fa fa-user-secret"></i>Operators <div class="pull-right"><span class="count_operators label label-success"></span></div></div>
+                        <div class="live_operators vis-group"></div>
+<!--                        -->
+                        <div class="babel list-toggle text-ellipsis"><i class="fa fa-heartbeat"></i>Live Sessions <div class="pull-right"><span class="count_users label label-success"></span></div></div>
+                        <table id="live_users" class="vis-group display-table auto list-group-alt no-radius no-borders"></table>
+<!--                        -->
+                        <div class="babel list-toggle text-ellipsis"><i class="fa fa-rss"></i>Channels</div>
+                        <div class="content-block ios-blocks slim">
+                        <div class="list-block">
+                            <ul class="channels_"></ul>
+                        </div>
+                        </div>
+<!--                        -->
+                        <% if(parseInt(session.lv)>0&&session.ids.slack){ %>
+                        <div class="babel list-toggle text-ellipsis"><i class="fa fa-user-secret"></i>Slack Operators <div class="pull-right"><span class="count_operators label label-success"></span></div></div>
+                        <div id="live_slackers"><table class="vis-group"></table></div>
+<!--                        -->
+                        <div class="babel list-toggle text-ellipsis"><i class="fa fa-rss"></i>Slack Channels</div>
+                        <div class="content-block ios-blocks slim">
+                        <div class="list-block">
+                            <ul class="slack_channels_"></ul>
+                        </div>
+                        </div>
+                        <% } %>
+<!--                        -->
+                        <div class="babel list-toggle text-ellipsis"><i class="fa fa-building"></i>Departments <div class="pull-right"><span class="count_operators label label-success"></span></div></div>
+                        <div class="live_departments vis-group"></div>
+                    </div>
+                </section>
+                <footer class="footer bg-default dk text-center" style="padding-top:14px">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <div class="padder-v"><div class="count_users sz">0</div><small class="text-muted">Live</small></div>
+                        </div>
+                        <div class="col-xs-4">
+                            <div class="padder-v"><div class="count_visitors sz">0</div><small class="text-muted">Visitors</small></div>
+                        </div>
+                        <div class="col-xs-4" data-toggle="class:open" data-target="#manager-main">
+                            <div class="padder-v"><div class="count_chat_missed">0</div><small class="text-muted">Missed</small></div>
+                        </div>
+                    </div>
+                </footer>
+                </section>
+                </section>
+            </aside>
+            <aside id="operator_pane" class="b-l aside-lg nav-xs">
+                <section class="vbox">
+                <section id="live_operator_chats"><div href="#operator_pane" data-toggle="class:nav-xs" class="toggler super-center pane-text">
+                        <h1 class="font1"><i class="fa fa-user-secret big-fa"></i><div>No Operator Chats are open</div><small>Click to close this pane</small></h1>
+                    </div></section>
+                </section>
+            </aside>
+            <aside class="lter main-body b-l">
+                <div id="open_chats" class="chrome-tabs-shell"><div class="chrome-tabs"></div><div id="operator_options"><a data-target="#st-container" class="handle btn" data-toggle="class:st-menu-open">&nbsp;<i class="fa fa-bars"></i>&nbsp;</a></div></div>
+                <section class="vbox hbox stretch" style="height:calc(100% - 30px)">
+                    <aside>
+                        <section class="w-f wtc-content bg-light lter animated fadeInUp">
+                            <% include blocks/dash.ejs %>
+                        </section>
+                    </aside>
+                </section>
+                </aside>
+          </section>
+<% include blocks/manager.ejs %>
+    <section id="toollord"></section>
+</section>
+<section class="app" style="height:0">
+<div id="mm-script-drop"></div>
+<div id="mm-emojis" style="display:none"></div>
+<script>
+    <% include ../libs/js/custom.js %>
+</script>
+<% include blocks/files.ejs %>
+<% include blocks/tools.ejs %>
+<% include blocks/translator.ejs %>
+<% include blocks/uniModal.ejs %>
+<% if(sudo()===true){ %>
+    <% include blocks/stats.ejs %>
+    <% include blocks/history.ejs %>
+<% } %>
+<% if(sudo('su')===true){ %>
+    <% include blocks/account.ejs %>
+    <% include blocks/viewer.ejs %>
+<% } %>
+</section>
+    </div>
+    </div>
+</div>
+</div>

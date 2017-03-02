@@ -1261,11 +1261,27 @@ app.get('/:page/:ke', function (req,res){
     res.render(req.params.page,{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')});
 });
 //login
-app.post('/login', function (req,res){
+app.post('/dashboard', function (req,res){
     req.ret={ok:false};
-    res.setHeader('Content-Type', 'application/json');
     function send (x){
-        return res.send(JSON.stringify(x,null,3))
+                    console.log(x)
+
+        if(x.success===true){
+            x.sudo=function(c){
+                switch(c){
+                    case'su':
+                if(x.session['Title']==='Superuser'){return true;}
+                    break;
+                    default:
+                if(x.session['Title']==='Superuser'||x.session['Title']==='Operator'){return true;}
+                    break;
+                }
+                return false;
+            }
+            res.render('home',x)
+        }else{
+            res.render('dashboard',{ke:x.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')})
+        }
     }
     function addtoSession(g,x){
         if(!req.stop){req.stop=1;}else{return}

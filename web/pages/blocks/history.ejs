@@ -1,0 +1,55 @@
+<div class="modal fade" full="1" id="ChatHistory" tabindex="-1" role="dialog" aria-labelledby="ChatHistoryLabel" style="display: none;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+          <div class="pull-right">
+        <button type="button" class="btn btn-ghost btn-xs btn-danger" data-dismiss="modal" aria-label="Close">&nbsp;<i class="fa fa-times"></i>&nbsp;</button>
+          </div>
+        <h4 class="modal-title" id="ChatHistoryLabel" data-dismiss="modal" aria-label="Close">History</h4>
+      </div>
+      <div class="app modal-body">
+        <section class="hbox stretch animated fadeInLeft">
+            <aside class="aside" style="width:40%;box-shadow:inset -7px 0 7px -7px rgba(0,0,0,0.4);">
+        <section class="hbox stretch">
+        <section class="vbox unmSearchParent">
+            <section class="w-f scrollable">
+                <table class="list-group block_tabs unmSearchBody" style="height:auto;width:100%">
+                    <thead><tr><td>Start</td><td>End</td><td>Name</td><td>eMail</td><td>&nbsp;</td></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+            <footer class="footer dk bg-default clearfix"><form id="history_search" class="input-group input-group-sm" style="margin-top:10px"><input type="text" class="unmSearch form-control input-s-sm" placeholder="Search"><div class="input-group-btn"><a class="btn btn-success btn-ghost">&nbsp;<i class="fa fa-paper-plane"></i>&nbsp;</a></div></form></footer>
+        </section>
+        </section>
+            </aside>
+            <aside class="lter bmsg history_chats"></aside>
+            <aside class="aside-lg">
+        <section class="hbox stretch">
+        <section class="vbox">
+        <section class="w-f scrollable history_crumbs">
+        </section>
+        </section>
+        </section>
+            </aside>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="ChatHistory_helper" tabindex="-1" role="dialog" aria-labelledby="ChatHistory_helperLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ChatHistory_helperLabel"><i></i> &nbsp; <span></span></h4>
+      </div>
+      <div class="modal-body">
+          
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-ghost btn-success confirmaction">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>

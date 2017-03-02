@@ -1,0 +1,78 @@
+<nav class="st-menu st-effect-6">
+    <ul>
+        <li style="text-align:left">
+            <table>
+                <tr>
+                    <td style="width:50px"><div class="my_avatar" style="margin:5px"><div class="img" style="background-image:url(//dashboard.unmetered.chat/libs/images/logo.png)"></div></div></td>
+                    <td style="padding-left:5px"><span class="username"></span><?php if($_SESSION['Title']!=='Agent'){echo'<br><small>'.$_SESSION['Title'].'</small>';}?></td>
+                </tr>
+            </table>
+            </li>
+    <li>
+        <a class="auto" data-toggle="modal" data-target="#FileModal">
+        <i class="fa fa-file"></i>&nbsp;<small class="link-title">Files</small>
+        </a>
+    </li>
+    <li>
+        <a toggle="knote" class="auto" title="Key Preview">
+        <i class="fa fa-keyboard-o"></i>&nbsp;<small class="link-title">Key Preview</small> <span class="it"></span>
+        </a>
+    </li>
+    <li>
+        <a toggle="pnotify" class="auto" title="Notifications">
+        <i class="fa fa-wechat"></i>&nbsp;<small class="link-title">Notifications</small>
+        </a>
+    </li>
+    <li>
+        <a toggle="pnoted">
+        <i class="fa fa-desktop"></i>&nbsp;<small class="link-title">Desktop Notifications</small>
+        </a>
+    </li>
+    <li>
+        <a toggle="night">
+        <i class="fa fa-moon-o"></i>&nbsp;<small class="link-title">Night Mode</small>
+        </a>
+    </li>
+    <li>
+        <a toggle="audio0" class="auto" title="Bell Chime" title="Toggle Bell Loop, Beep will not be affected.">
+        <i class="fa fa-bell"></i>&nbsp;<small class="link-title">Bell Chime</small>
+        </a>
+    </li>
+    <li>
+        <a toggle="aclose" class="auto" title="Close Chat Pops when Panel Closes">
+        <i class="fa fa-clone"></i>&nbsp;<small class="link-title">Auto-Close Popouts</small>
+        </a>
+    </li>
+<?php if($_SESSION['Title']==='Superuser'||$_SESSION['Title']==='Operator'){ ?>
+    <li>
+    <a class="auto" title="View Statistics" data-toggle="modal" data-target="#Statistics">
+    <i class="fa fa-signal"></i>&nbsp;<small class="link-title">Statistics</small>
+    </a>
+    </li>
+    <li>
+    <a class="auto" title="View Chat History" data-toggle="modal" data-target="#ChatHistory">
+    <i class="fa fa-history"></i>&nbsp;<small class="link-title">History</small>
+    </a>
+    </li>
+<?php };?>
+<?php if($_SESSION['Title']==='Superuser'){ ?>
+    <li>
+    <a data-toggle="modal" data-target="#AccountModal">
+    <i class="fa fa-user-secret"></i>&nbsp;<small class="link-title">Settings</small>
+    </a>
+    </li>
+<?php }?>
+    <!--
+    <li>
+    <a toggle="fulls" class="auto" title="Full Screen, (Performance issues on some browsers)">
+    <i class="fa fa-compress"></i>
+    </a>
+    </li>
+    <li class="divider-vertical"></li>-->
+    <li>
+    <a class="logout">
+    <i class="fa fa-sign-out"></i>&nbsp;<small class="link-title">Logout</small>
+    </a>
+    </li>
+    </ul>
+</nav>

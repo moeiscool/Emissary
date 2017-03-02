@@ -1,0 +1,100 @@
+<div class="modal fade" full="1" id="Statistics" tabindex="-1" role="dialog" aria-labelledby="StatisticsLabel" style="display:none">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="padding:10px">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="StatisticsLabel" style="display:inline-block">Statistics</h4>
+        <form id="stat_dates" class="pull-right form-inline" style="margin-right:10px">
+            <button type="submit" class="btn btn-ghost btn-sm btn-default">&nbsp;<i class="fa fa-retweet"></i>&nbsp;</button>
+            <div class="input-group input-group-sm" title="Start Date">
+                <input type="text" id="stat_start_date" name="start_date" class="form-control datepicker start">
+                <label for="stat_start_date" class="input-group-addon">
+                    <span class="fa fa-calendar"></span>
+                </label>
+            </div>
+            <div class="input-group input-group-sm" title="End Date">
+                <input type="text" id="stat_end_date" name="end_date" class="form-control datepicker end">
+                <label for="stat_end_date" class="input-group-addon">
+                    <span class="fa fa-calendar"></span>
+                </label>
+            </div>
+        </form>
+      </div>
+      <div class="app modal-body">
+     <section class="hbox stretch">
+         <aside class="aside aside-lg" style="background:#F9F9F9">
+            <section class="vbox">
+            <section class="scrollable text-center">
+                <div class="display-table">
+                    <div class="col-md-6">
+                        <p class="h3 font-bold m-t count_stat_unique_visitors"></p>
+                        <p class="text-muted">Unique Visitors</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="h3 font-bold m-t count_stat_visits"></p>
+                        <p class="text-muted">Footprints</p>
+                    </div>
+                </div>
+                <div class="display-table">
+                    <div class="col-md-6">
+                        <p class="h3 font-bold m-t count_missed_chats"></p>
+                        <p class="text-muted">Missed Chats</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="h3 font-bold m-t count_stat_ratings"></p>
+                        <p class="text-muted">Ratings</p>
+                    </div>
+                </div>
+                <div class="display-table">
+                    <div class="col-md-6">
+                        <p class="h3 font-bold m-t count_stat_A_rank"></p>
+                        <p class="text-muted"><b>A</b> Rated (85% or more)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="h3 font-bold m-t count_stat_F_rank"></p>
+                        <p class="text-muted"><b>F</b> Rated (50% or less)</p>
+                    </div>
+                </div>
+                <div class="display-table">
+                    <div class="col-md-12">
+                        <p class="h3 font-bold m-t count_stat_chats"></p>
+                        <p class="text-muted">Chats</p>
+                    </div>
+                </div>
+            </section>
+            </section>
+         </aside>
+         <aside>
+            <div class="display-table">
+              <div class="col-md-4">
+                  <h3 class="m-b-none">Visitor Frequency</h3> <small>How many pages are visited in a given time span.</small>
+                  <div id="stat_visitor_line" class="line_chart morris_chart"></div></div>
+              <div class="col-md-4">
+                  <h3 class="m-b-none">Chat Frequency</h3> <small>Recently, how many times have visitors come back to chat.</small>
+                  <div id="stat_chat_line" class="line_chart morris_chart"></div></div>
+              <div class="col-md-4">
+                  <h3 class="m-b-none">Rating Scores</h3> <small>How many, how high and how frequently you score.</small>
+                  <div id="stat_rate_line" class="line_chart morris_chart"></div></div>
+            </div>
+            <div class="display-table">
+              <div class="col-md-4">
+            <h3 class="m-b-none">Missed Chats</h3> <small>How many chats missed.</small>
+                  <div id="stat_missed_line" class="line_chart morris_chart"></div></div>
+                <div class="col-md-8">
+            <h3 class="m-b-none">Visitor Flow</h3><small>A visulization of how visitors flow through your website.</small>
+                  <div id="stat_visitor_flow" class="line_chart"></div>
+                </div>
+            </div>
+        </aside>
+      </section>
+        </div>
+    </div>
+  </div>
+</div>
+<script src="/libs/js/raphael.min.js"></script>
+<!--<script src="/libs/js/sankey.js"></script>-->
+<script src="/libs/js/morris.min.js"></script>
+<script src="/libs/js/datepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/libs/css/morris.css">
+<link rel="stylesheet" type="text/css" href="/libs/css/datepicker.css">
+<!--<script src="/libs/js/sankey.js"></script>-->

@@ -1,0 +1,42 @@
+<div class="bmsg animated fadeIn" chat="Dashboard" uid="<?=$_SESSION['ke']?>" flash="1" sound="1" focus="1">
+    <section class="vbox">
+    <section class="hbox stretch">
+        <aside>
+            <section class="vbox">
+                <header class="header dker" id="dash-head">
+                    <div class="btn btn-ghost btn-success propic my_avatar square pull-left m-r" title="Change Status" toggle="status">
+                        <div class="img"></div>
+                    </div>
+                    <div class="pull-right" style="margin-top: -6px;">
+                        <label class="dash-element" title="Turn on Chatbot. Master and Superusers can edit responses only.">
+                            <input class="bootswitch" size="" swTOGGLE="cbt" type="checkbox" id="chatbot_toggle" value="1">
+                        </label>
+                        <?php if(isset($_SESSION['ids']['slack'])){ ?>&nbsp;
+                        <label class="dash-element" title="Save uncaptured chat messages to your slack personal channel">
+                                <input class="bootswitch" swTOGGLE="snu" type="checkbox" id="slack_save_uncap" value="1">
+                        </label>
+                        <?php } ?>&nbsp;
+                            <a class="btn btn-ghost btn-success" toggle="status">&nbsp;<i class="fa fa-user"></i> <span class="it">On</span>line&nbsp;</a>&nbsp; <a class="btn btn-ghost btn-primary" toggle="audio1">&nbsp;<i class="fa fa-volume-up"></i> Sound&nbsp;</a>
+                    </div>
+                    <h3 class="font1 displayname" style="margin:0;"><?=$_SESSION['name']?></h3>
+                </header>
+                <section class="scrollable wrapper">
+<!--            <div class="display-table weather-bar" id="stat_weather"></div>-->
+                    <div class="display-table scroll-style-5" style="overflow:auto">
+                        <div class="col-md-12" style="height:100%;padding-top:15px;">
+                            <section id="live_visitor_panel" style="height:100%;">
+                                <section class="panel-body no-padding">
+                                    <table class="display-table no-bg no-borders vis-group auto" id="live_visitors">
+                                        <thead><td>&nbsp;<span></span></td><td>IP<span></span></td><td>Name<span></span></td><td>Page<span></span></td><td>Landed<span></span></td><td title="Footprints">Footprints<span></span></td><td>First Seen<span></span></td><td>&nbsp;</td></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </section>
+                            </section>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </aside>
+    </section>
+    </section>
+</div>

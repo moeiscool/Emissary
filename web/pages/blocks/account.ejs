@@ -1,0 +1,801 @@
+<div id="AccountModal" class="modal fade" role="dialog" full="1" style="display:none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Settings</h4>
+            </div>
+            <section class="modal-body unmTabs">
+                <section class="vbox">
+                <section class="hbox stretch">
+                    <aside class="aside">
+                        <section class="vbox">
+                        <section class="scrollable" style="background:#fbfbfb">
+                            <ul class="nav nav-list sh-menu">
+                <?php if(isset($_SESSION['M'])){?>
+                            <li class="no-border unmTab active" unmtab="0">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-user"></i></div>
+                            <p class="sh-text">Account</p>
+                            </a>
+                            </li>
+                <?php }?>
+                <?php if($_SESSION['Title']==='Superuser'){?>
+                            <li class="no-border unmTab" unmtab="1">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-user-secret"></i></div>
+                            <p class="sh-text">Sub-Accounts</p>
+                            </a>
+                            </li>
+                            <li class="no-border unmTab" unmtab="11">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-group"></i></div>
+                            <p class="sh-text">Sharing</p>
+                            </a>
+                            </li>
+                <?php }?>
+                <?php if($_SESSION['Title']==='Superuser'&&intval($_SESSION['lv'])>0){?>
+                            <li class="no-border unmTab" unmtab="api">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-key"></i></div>
+                            <p class="sh-text">API</p>
+                            </a>
+                            </li>
+                <?php }?>
+                            <li class="no-border unmTab" unmtab="9">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-plug"></i></div>
+                            <p class="sh-text">Apps &amp; Plugins</p>
+                            </a>
+                            </li>
+                            <li class="unmTab" unmtab="3">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-commenting-o"></i></div>
+                            <p class="sh-text">Canned Responses</p>
+                            </a>
+                            </li>
+                            <li class="no-border unmTab" unmtab="10">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-comment"></i></div>
+                            <p class="sh-text">Chat Bot</p>
+                            </a>
+                            </li>
+                <?php if($_SESSION['Title']==='Superuser'){?>
+                            <li class="unmTab" unmtab="8">
+                                <a>
+                                    <div class="sh-icon"><i class="fa fa-rss"></i></div>
+                                    <p class="sh-text">Channel Manager</p>
+                                </a>
+                            </li>
+                            <li class="unmTab" unmtab="2">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-paint-brush"></i></div>
+                            <p class="sh-text">Customizer</p>
+                            </a>
+                            </li>
+                            <li class="unmTab" unmtab="4">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-building"></i></div>
+                            <p class="sh-text">Departments</p>
+                            </a>
+                            </li>
+                            <li class="unmTab" unmtab="5">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-code"></i></div>
+                            <p class="sh-text">Embed Code</p>
+                            </a>
+                            </li>
+                            <li class="unmTab" unmtab="6">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-pencil-square-o"></i></div>
+                            <p class="sh-text">Rating Form</p>
+                            </a>
+                            </li>
+                <?php }?>
+<!--
+                            <li class="unmTab" unmtab="7">
+                            <a>
+                            <div class="sh-icon"><i class="fa fa-terminal"></i></div>
+                            <p class="sh-text">Auto Tasks</p>
+                            </a>
+                            </li>
+-->
+                            </ul>
+                        </section>
+                        </section>
+                    </aside>
+                    <aside class="b-l">
+                        <section class="vbox">
+                        <section class="scrollable">
+            <div class="display-table sh-container-child">
+                <?php if(isset($_SESSION['M'])){?>
+            <div class="unmFrame" unmtab="0" id="modal_account_info">
+                <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Account Info</h4>
+                    <small>Account changes can be made here. Press Enter while focused on a box to save.</small>
+                </div>
+                <section class="hbox">
+                    <aside class="aside text-center">
+<div class="my_avatar thumb-lg propic" style="margin:5px;border: 1px solid #ddd;border-radius:50%"><div class="img" style="background-image: url('<?=$_SESSION['pp']?>');"></div></div>
+                    </aside>
+                    <aside>
+                        <form class="display-table">
+                            <div class="form-group">
+                                <label for="account_profile_picture">Profile Picture <small>A URL. An external image link.</small></label>
+                                <div><input type="text" class="form-control" name="pp" value="<?=$_SESSION['pp']?>" id="account_profile_picture"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_name_change">Name <small>Your display name for your visitors.</small></label>
+                                <div><input type="text" class="form-control" name="name" value="<?=$_SESSION['name']?>" id="account_name_change"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_mail_change">Email <small>When you are away emails will be forwarded here. Emails about payments are handled through the UNMETERED.IO Client Area login.</small></label>
+                                <div><input type="text" class="form-control" name="mail" value="<?=$_SESSION['mail']?>" id="account_mail_change"></div>
+                            </div>
+                <?php $demo=($_SESSION['ke']!=='DEMO');?>
+                            <div class="form-group">
+                                <label for="account_login_change">Login ID <small>Your login address</small></label>
+                                <div><input type="text" class="form-control"    <?php if($demo){ ?>name="login"<?php }  ?> value="<?=$_SESSION['login']?>" id="account_login_change"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_pass_change">Password <small>Leave blank for no change.</small></label>
+                                <div><input type="password" class="form-control" <?php if($demo){ ?>name="pass"<?php }  ?> id="account_pass_change"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_pass_verify">Verify Password <small>Only fill if you wish to change your password.</small></label>
+                                <div><input type="password" class="form-control" id="account_pass_verify"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_discount">Discount Code <small>If you have forgotten to add yours during sign up please do so here.</small></label>
+                                <div><input type="text" class="form-control" name="ref" value="<?=$_SESSION['ref']?>" id="account_discount"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_banned_ips">Banned IPs <small>To prevent an IP from being able to connect to the chat service.</small></label>
+                                <div><input type="text" class="form-control" name="banned" value="<?=$_SESSION['ids']['banned']?>" id="account_banned_ips"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_banned_ips_function">Banned IP Callback <small>Javascirpt function to run when a banned IP has come online.</small></label>
+                                <div><input type="text" class="form-control" name="bannedf" value="<?=$_SESSION['ids']['bannedf']?>" id="account_banned_ips_function"></div>
+                            </div>
+                        </form>
+                    </aside>
+                    </section>
+                </div>
+                <script>
+                    $.ProfileEdit={e:$('#modal_account_info form')};
+                    $.ProfileEdit.e.submit(function(e){
+                        e.preventDefault();e.e=$(this),e.s=e.e.serializeObject();
+                        if($user.submit!==1){
+                            $('.displayname').text(e.s.name);
+                            $('.usermail').text(e.s.mail);
+                            $('.propic .img').css('background-image','url("'+e.s.pp+'")');
+                            if(e.s.pass!==''&&$('#account_pass_verify').val()!==e.s.pass){
+                                new PNotify({type:'error',title:'Changes not saved',text:'Passwords do not match, please try again or leave the password fields blank to only change other fields.'})
+                                return false;
+                            }
+                            cx({f:'a',ff:'s',fff:'f',ws:'profile',s:e.s});$user.submit=1;
+                        }
+                        return false;
+                    });
+                </script>
+                <?php } ?>
+                
+                <?php if($_SESSION['Title']==='Superuser'){?>
+                <div class="unmFrame" unmtab="api" id="modal_api" tbp style="display:none">
+            <div class="modal-header">
+                <h4 class="modal-title no-margin">API Keys</h4>
+            </div>
+            <div class="spacing">
+                <table class="table table-striped table-bordered" id="modal_api_tb" tb>
+                  <thead>
+                    <tr>
+                      <th data-override="code">API Key</th>
+                      <th>Date Created</th>
+                      <th>Creator</th>
+                      <th>Notes</th>
+                      <th>Origins</th>
+                      <th><a class="btn btn-ghost btn-success btn-xs" tbfn="adr"><i class="fa fa-plus"></i></a></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+            </div>
+                <script>
+                    $.APIEdit={e:$('#modal_api_tb')};
+                    $.APIEdit.e.on('change','.savingonchange',function(e){
+                        e.e=$(this),cx({f:'a',ff:'s',fff:'f',ws:'api',ffff:'u',n:e.e.attr('name'),v:e.e.val(),s:e.e.parents('tr').attr('key')});
+                    });
+                </script>
+                </div>
+                <?php }?>
+            <div class="unmFrame" unmtab="9" id="modal_account_apps" style="display:none">
+                <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Slack Connctions</h4>
+                    <small>You may connect as many slack instances as you want, please be aware performance is based on the computer and browser used.</small>
+                </div>
+                <div class="display-table slackz"></div>
+                <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Firebase Storage</h4>
+                    <small>Use your own storage or use our pay per data storage. Our Firebase comes with 2GB Free.</small>
+                </div>
+                <?php if($_SESSION['M']===1){ ?>
+                <form class="display-table" id="firebase_storage">
+                    <div class="form-group"><label for="firebase_apiKey">Firebase API Key</label><div><input class="form-control" id="firebase_apiKey" name="apiKey" value="<?=$_SESSION['ids']['firebase']['apiKey']?>"></div></div>
+                    <div class="form-group"><label for="firebase_authDomain">Firebase Authentication Domain</label><div><input class="form-control" id="firebase_authDomain" name="authDomain" value="<?=$_SESSION['ids']['firebase']['authDomain']?>"></div></div>
+                    <div class="form-group"><label for="firebase_storageBucket">Firebase Storage Bucket</label><div><input class="form-control" id="firebase_storageBucket" name="storageBucket" value="<?=$_SESSION['ids']['firebase']['storageBucket']?>"></div></div>
+                </form>
+                <?php } ?>
+                </div>
+            <div class="unmFrame" unmtab="1" id="modal_subaccounts" tbp <?php if(isset($_SESSION['M'])){?>style="display:none"<?php } ?>>
+            <div class="modal-header">
+                <h4 class="modal-title no-margin">Sub-Accounts</h4>
+                <small>You can create <a target="_blank" href="//dashboard.unmetered.chat">Sub-Account logins</a> here.</small>
+            </div>
+            <div class="spacing">
+<table class="table table-striped table-bordered" id="modal_subaccounts_tb" tb>
+  <thead>
+    <tr>
+      <th data-override="Id">Id</th>
+      <th data-override="Name">Name</th>
+      <th data-override="Username">Username</th>
+      <th data-override="Password">Password</th>
+      <th data-override="PP">Profile Picture <small>Image URL. Base64 Encoded strings allowed, Max 1MB.</small></th>
+      <th data-override="Title">Title</th>
+      <th><a class="btn btn-ghost btn-success btn-xs" tbfn="adr"><i class="fa fa-plus"></i></a></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+                </div>
+                </div>
+                <div class="unmFrame" unmtab="10" tbp style="display:none">
+            <div class="modal-header">
+                <h4 class="modal-title no-margin">Chat Bot Responses</h4>
+                <small>Edit your chatbot's personality here. Separate <b>Keys</b> and <b>Responses</b> with commas (no spaces). If more than one response is provided a random one will be chosen.</small>
+            </div>
+            <div class="spacing">
+                <div class="display-table">
+                    <div class="col-md-12 display-table m-b">
+                        <div class="form-group">
+                            <label for="chatbot_url">Search Knowledge base URL <small>Your provided URL must return a JSON string. This will post to if your chat bot does not understand the message. See <a href="https://docs.unmetered.chat" target="_blank">docs</a> for details.</small></label>
+                            <div><input type="text" class="form-control" id="chatbot_url" placeholder="http://.."></div>
+                          </div>
+                        <div class="form-group">
+                            <label for="chatbot_post">Post Variable <small>The variable the for user's message.</small></label>
+                            <div><input type="text" class="form-control" id="chatbot_post" placeholder="query"></div>
+                          </div>
+                    </div>
+                    <div class="col-md-12 display-table">
+                <table id="chatbot_responses" class="table table-striped table-bordered"><thead><th>&nbsp;</th><th data-override="keys">When someone says (Keys)</th><th data-override="responses">Your bot responds (Responses)</th><th><a class="btn btn-ghost btn-success btn-xs" tbfn="adr"><i class="fa fa-plus"></i></a></th></thead><tbody></tbody></table>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="unmFrame" unmtab="2" style="display:none">
+            <form id="files_usr" class="no-margin">
+                <div class="display-table">
+                <div class="col-md-12">
+                  <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Embedded Widget</h4>
+                    <small>Text, Color, and Form.. the Styles.</small>
+                  </div>
+                <div class="m-b">
+                <div class="display-table">
+                    <div class="col-md-6">
+                <div class="display-table">
+                        <div class="form-group">
+                            <label for="unm_pg_1">Welcome Page</label>
+                            <div>
+                                <select class="form-control" name="pg_1" id="unm_pg_1">
+                                    <option value="1">Standard</option>
+                                    <option value="2">Quick Message</option>
+                                    <option value="3">Bulletin Board</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="unm_op_poker">Show Chat Heads<small>Operator Poker</small></label>
+                            <div>
+                                <select class="form-control" name="op_po" id="unm_op_poker">
+                                    <option value="">Show</option>
+                                    <option value="none">Hide</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                                        <div class="display-table">
+                      <div class="form-group">
+                        <label for="unm_lang_1">Operator Online Header</label>
+                          <div><input type="text" class="form-control" name="lang_3" id="unm_lang_3" placeholder="Want someone in particular?"></div>
+                      </div>
+                      </div>
+                    </div>
+                </div>
+                </div>
+                <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Main Text and Color</h4>
+                    <small>Text, Color, and Form.. the Styles.</small>
+                  </div>
+                <div class="m-b">
+                <div class="display-table">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="unm_lang_1">Welcome Header</label>
+                            <div><input type="text" class="form-control" name="lang_1" id="unm_lang_1" placeholder="We're Online!"></div>
+                          </div>
+                         <div class="form-group">
+                            <label for="unm_logoi">Logo <small>The image above the Welcome Header.</small></label>
+                             <div><input type="text" class="form-control" name="logoi" id="unm_logoi"></div>
+                          </div>
+                         <div class="form-group">
+                            <label for="unm_lang_2">Sub Welcome Header</label>
+                             <div><input type="text" class="form-control" name="lang_2" id="unm_lang_2" placeholder="Operators are ready to answer your questions!"></div>
+                          </div>
+                          <div class="form-group">
+                            <label for="unm_lang_btn_1">Submit Button</label>
+                              <div><input type="text" class="form-control" name="lang_btn_1" id="unm_lang_btn_1" placeholder="Operators are ready to answer your questions!"></div>
+                          </div>
+                          <div class="form-group">
+                            <label for="unm_poweredby_">Branding Text</label>
+                              <div><input type="text" class="form-control" name="poweredby_" id="unm_poweredby_" placeholder='Powered By <i class="chi-magnet"></i> <b>UNMETERED.Chat </b><i>Beta</i>'></div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="display-table">
+                          <div class="form-group">
+                            <label for="top_bar_shade">Top Bar Color</label>
+                              <div><input type="text" class="form-control" name="top_bar_shade" id="top_bar_shade"></div>
+                          </div>
+                        <div class="form-group">
+                            <label for="top_bar_text">Top Bar Icon Color</label>
+                            <div><input type="text" class="form-control" name="top_bar_text" id="top_bar_text"></div>
+                          </div>
+                        </div>
+                            <div class="m-b widget_styles image_radio text-center"></div>
+                        </div>
+                    </div>
+                    </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Greeting Element</h4>
+                    <small>Enticement Text. To disable enticemnent check box.</small>
+                      </div>
+                      <div class="m-b">
+                            <div class="col-md-6">
+                          <div class="display-table">
+                        <div class="form-group">
+                            <label for="unm_greet_model">Show Chat Heads<small>Operator Poker</small></label>
+                            <div>
+                                <select class="form-control" name="gre_mo" id="unm_greet_model">
+                                    <option value="">Default</option>
+                                    <option value="1">Quick Message</option>
+                                </select>
+                            </div>
+                        </div>
+                         <div class="form-group">
+                            <label for="unm_lang_greet_1">Header</label>
+                             <div><input type="text" class="form-control" name="lang_greet_1" id="unm_lang_greet_1" placeholder="Questions?"></div>
+                          </div>
+                          <div class="form-group">
+                            <label for="unm_lang_greet_2">Body Text</label>
+                              <div><input type="text" class="form-control" name="lang_greet_2" id="unm_lang_greet_2" placeholder="Operators are online!"></div>
+                          </div>
+                          <div class="form-group">
+                            <label for="greet_bg_text">Bubble Color</label>
+                              <div><input type="text" class="form-control" name="greet_bg_text" id="greet_bg_text" placeholder="#0B93F6"></div>
+                          </div>
+                          <div class="form-group">
+                            <label for="greet_ft_text">Bubble Text Color</label>
+                              <div><input type="text" class="form-control" name="greet_ft_text" id="greet_ft_text" placeholder="#FFF"></div>
+                          </div>
+                          </div>
+                          </div>
+                            <div class="col-md-6">
+                                <div class="m-b greet_styles image_radio text-center"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              <div class="col-md-12">
+          <div class="modal-header m-b">
+            <h4 class="modal-title no-margin">Widget Colors</h4>
+            <small>Backgrounds. Further customization can be done with <span style="background:#ededed">CSS</span> tag or <span style="background:#ededed">JavaScript</span>.</small>
+          </div>
+<!--
+                <table class="main_colors m-b" style="width:100%">
+                    <thead><td></td><td title="Background Image">BG Image</td><td title="Background Size (background-size)">Size</td><td title="Background Position (background-position)">Position</td><td title="Background Shade Color (RGBA)">Shade Color</td><td title="Holder Shade Color (RGBA)">Holder Color</td><td title="Text Color (HEX)">Text Color</td></thead>
+                    <tbody></tbody>
+                </table>
+-->
+                  <div class="main_colors m-b"></div>
+                  <div class="display-table cells">
+          <div class="col-md-6">
+          <div class="bubble_colors">
+          <div class="modal-header m-b">
+            <h4 class="modal-title">Message Bubbles</h4>
+            <small>Color of the bubbles on the <span style="background:#ededed">visitor side</style></span>.</small>
+          </div>
+                <table class="m-b display-table">
+                    <thead><tr><td for="ts_text">Timestamp <small>in chat strings</small></td></tr></thead>
+                    <tbody><tr><td><input type="text" class="form-control" id="ts_text" name="ts_text"></td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <td for="fbbg_shade">From</td>
+                                <td for="fb_text">Text Color</td>
+                                <td for="tbbg_shade">To</td>
+                                <td for="tb_text">Text Color</td>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <tr>
+                          <td>
+                            <input type="text" class="form-control" id="fbbg_shade" name="fbbg_shade">
+                          </td>
+                          <td>
+                            <input type="text" class="form-control" id="fb_text" name="fb_text">
+                          </td>
+                          <td>
+                            <input type="text" class="form-control" id="tbbg_shade" name="tbbg_shade">
+                          </td>
+                          <td>
+                            <input type="text" class="form-control" id="tb_text" name="tb_text">
+                          </td>
+                        </tr>
+                    </tbody>
+                </table>
+                      </div>
+                      <div class="launcher_colors">
+          <div class="modal-header m-b">
+          <div class="pull-right"><div id="mm-chat-launch" class="mm-chat-launch online"><span class="faces"><i class="chi-chat-inv"></i></span><div class="bubble"></div><span></span></div><div id="mm-chat-launch" class="mm-chat-launch"><span class="faces"><i class="chi-emo-coffee"></i></span><div class="bubble"></div><span></span></div></div>
+            <h4 class="modal-title">Launcher Icon</h4>
+            <small>Color of the bubble in the <span style="background:#ededed">bottom right corner</style></span>.</small>
+          </div>
+                <table class="m-b display-table">
+                    <thead>
+                        <tr>
+                            <td for="lon_text">Online Background</td>
+                            <td for="lonb_text">Online Border</td>
+                            <td for="loff_text">Offline Background</td>
+                            <td for="loffb_text">Offline Border</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                          <td>
+                            <input type="text" class="form-control" id="lon_text" name="lon_text">
+                          </td>
+                          <td>
+                            <input type="text" class="form-control" id="lonb_text" name="lonb_text">
+                          </td>
+                          <td>
+                            <input type="text" class="form-control" id="loff_text" name="loff_text">
+                          </td>
+                          <td>
+                            <input type="text" class="form-control" id="loffb_text" name="loffb_text">
+                          </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                  <div class="form-group">
+                    <label for="icon_online">Online Icon</label>
+                      <div><input type="text" class="form-control" name="icon_online" id="icon_online"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="icon_offline">Offline Icon</label>
+                      <div><input type="text" class="form-control" name="icon_offline" id="icon_offline"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="icon_online_img">Online Icon Image <small>Fill to override regular icon</small></label>
+                      <div><input type="text" class="form-control" name="icon_online_img" id="icon_online_img"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="icon_online_img_size">Online Icon Image Size<small><b>background-size:</b> CSS property</small></label>
+                      <div><input type="text" class="form-control" name="icon_online_img_size" id="icon_online_img_size"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="icon_offline_img">Offline Icon Image <small>Fill to override regular icon</small></label>
+                      <div><input type="text" class="form-control" name="icon_offline_img" id="icon_offline_img"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="icon_offline_img_size">Offline Icon Image Size<small><b>background-size:</b> CSS property</small></label>
+                      <div><input type="text" class="form-control" name="icon_offline_img_size" id="icon_offline_img_size"></div>
+                  </div>
+                </div>
+                  <div class="col-md-6">
+          <div class="modal-header m-b">
+            <h4 class="modal-title">Custom Style</h4>
+            <small>Custom CSS can be added here. </small>
+          </div>
+            <textarea class="form-control m-b" style="min-width:100%;min-height:90%" name="css"></textarea>
+                  </div>
+                </div>
+                  <div class="modal-header m-b">
+                    <h4 class="modal-title no-margin">Custom Catch Function</h4>
+                    <small>Backgrounds. Further customization can be done with <span style="background:#ededed">CSS</span> tag or <span style="background:#ededed">JavaScript</span>.</small>
+                  </div>
+                <div class="main_colors m-b"></div>
+                <div class="display-table cells">
+                      <div class="col-md-6">
+          <div class="modal-header m-b">
+            <h4 class="modal-title">Custom Style</h4>
+            <small>Custom CSS can be added here. </small>
+          </div>
+            <textarea class="form-control m-b" style="min-width:100%;min-height:90%" name="pusher"></textarea>
+                      </div>
+                </div>
+             </div>
+            </form>
+            </div>
+            <div class="unmFrame" unmtab="3" style="display:none" tbp>
+            <div class="modal-header">
+                <h4 class="modal-title no-margin">Canned Responses</h4>
+                <small>You can create Canned Responses here. Responses can also be created from message windows during conversations or chat history.</small>
+            </div>
+            <div class="spacing">
+<table class="table table-striped table-bordered" id="modal_canned_tb" tb>
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Response</th>
+      <th><a class="btn btn-ghost btn-success btn-xs" tbfn="adr"><i class="fa fa-plus"></i></a></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+            </div>
+            </div>
+            <div class="unmFrame" unmtab="4" style="display:none" id="modal_departments" tbp>
+            <div class="modal-header">
+                <h4 class="modal-title no-margin">Departments</h4>
+                <small>You can create Departments here.</small>
+            </div>
+            <div class="spacing">
+<table class="table table-striped table-bordered" id="modal_departments_tb" tb>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Level</th>
+      <th data-override="Ids">Ids <small>Separate with commas</small></th>
+      <th>Message</th>
+      <th><a class="btn btn-ghost btn-success btn-xs" tbfn="adr"><i class="fa fa-plus"></i></a></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+            </div>
+            </div>
+            <div class="unmFrame" unmtab="5" id="modal_embed_code" style="display:none">
+                <div class="display-table">
+                <div class="modal-header">
+                    <h4 class="modal-title no-margin">Embedding</h4>
+                    <small>Your unique chat key is <span style="background:#ededed"><?=$_SESSION['ke']?></span>. To embed your chat widget you must first add the site to your trusted domains list.</small>
+                </div>
+                </div>
+                <div class="display-table">
+                <div class="col-md-6">
+                <div class="modal-header">
+                    <h4 class="modal-title no-margin">The code</h4>
+                    <small>Loads the Widget and Styles. <b>jQuery must already be included.</b></small>
+                </div>
+                <textarea style="width:100%;height:60px" class="form-control"><script type="text/javascript" async>(function($){$.ls={e:localStorage,n:'CloudChatE_'};$.ls.g=$.ls.e.getItem($.ls.n);if($.ls.g&&$.ls.g.length>10){$("body").append($.ls.g)}else{$.get("//<?=$config['www']['embed']?>/<?=$_SESSION['ke']?>",function(d){$.ls.e.setItem($.ls.n,d);$("body").append(d)})}})(jQuery)</script></textarea>
+                <div class="modal-header">
+                    <h4 class="modal-title no-margin">Getting errors?</h4>
+                    <small>Some jQuery setups leave the variable <span style="background:#ededed">$</span> undefined. Please paste this line just <b>before</b> the chat code.</small>
+                </div>
+                <textarea style="width:100%;height:60px" class="form-control"><script type="text/javascript">$=window.jQuery;</script></textarea>
+                <div class="modal-header">
+                    <h4 class="modal-title no-margin">Button Code</h4>
+                    <small>A callout button for toggling the chat widget.</small>
+                </div>
+                <div class="text-center" style="margin:10px 0">
+                <div class="CloudChat-launcher mmbg-small-2" title="Sorry, Operators are away. Please leave us a message or open a ticket.">
+                        <span class="title">Questions?</span>
+                        <span class="faces">
+                            <i class="chi-emo-coffee"></i>
+                        </span>
+                        <div class="foot">
+                            <span class="status">Leave a <b>Message</b></span>
+                        </div>
+                    </div>
+                <div class="CloudChat-launcher mmbg-small-2 online" title="We're Online!">
+                        <span class="title">Questions?</span>
+                        <span class="faces">
+                            <i class="chi-emo-grin"></i>
+                        </span>
+                        <div class="foot">
+                            <span class="status">Chat with us!</span>
+                        </div>
+                    </div>
+                </div>
+                <textarea style="width:100%;height:60px" class="form-control"><div class="CloudChat-launcher mm-chat-toggle mmbg-small-2"><span class="title">Questions?</span><span class="faces"><i class="chi-emo-coffee"></i></span><div class="foot"><span class="status">Leave a <b>Message</b></span></div></div></textarea>
+            </div>
+                <div class="col-md-6">
+                    <div class="modal-header">
+                        <h4 class="modal-title no-margin">Trusted Domains</h4>
+                        <small>Only these domains will be allowed to use your embed code. Separate by commas.</small>
+                    </div>
+                <textarea style="width:100%;height:60px" id="trusted_domains" class="form-control"><?=$_SESSION['ids']['trusted'];?></textarea>
+                    <small class="col-md-12" style="margin-top:10px"><b>Example 1</b> : unmetered.io, unmetered.ca, unmetered.link <i>Allows only the origins specified.</i><br>
+                    <b>Example 2</b> : unmetered <i>Allows all origins with "unmetered".</i></small>
+                </div>
+            </div>
+            </div>
+            <div class="unmFrame" unmtab="6" id="RateCustomizer" style="display:none">
+        <form>
+            <div id="rate_profile_add">
+          <div class="modal-header">
+              <div class="modal-header-right"><input name="use_default" type="checkbox" value="1"></div>
+            <h4 class="modal-title">1. Add or Edit Set of Question Blocks</h4>
+            <small>Create new set or Add to exsiting set.</small>
+          </div>
+                <div class="display-table">
+                    <div class="col-md-6">
+                        <div class="image_radio f-h modes">
+                            <div class="col-md-3 option"><input checked="checked" type="radio" name="mode" id="rate_mode_new" value="1"><label for="rate_mode_new">&nbsp;<i class="fa fa-plus-square-o"></i>&nbsp;<div class="title">New</div><small>Create a New set</small></label></div>
+                            <div class="col-md-3 option"><input type="radio" name="mode" id="rate_mode_edit" value="2"><label for="rate_mode_edit">&nbsp;<i class="fa fa-pencil-square-o"></i>&nbsp;<div class="title">Add or Edit</div><small>Edit an Existing Set</small></label></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mode_1 mode_options">
+                            <input type="text" name="mode_new" class="form-control" placeholder="Set Name (will add if duplicate)">
+                        </div>
+                        <div class="mode_2 mode_options" style="display:none">
+                            <small class="option_blip">Choose a Set. Drag a set into first position to make it live.</small>
+                            <select name="mode_edit" class="form-control"></select>
+                            <small class="option_blip" style="padding-top:10px">Click an element to edit. Drag to change display order.</small>
+                            <ul class="mode_edit_options list-group"></ul>
+                        </div>
+                    </div>
+                </div>
+
+
+          <div class="modal-header">
+                <h4 class="modal-title">2. Edit Question Element</h4>
+            <small>The type of element that the user will interat with. Points will vary based on element and presets chosen.</small>
+          </div>
+                <div class="display-table add_remove">
+                    <div class="col-md-6">
+                        <div class="image_radio f-h">
+                            <div class="col-md-3 option"><input checked="checked" type="radio" name="type" id="rate_type_star" value="1"><label for="rate_type_star">&nbsp;<i class="fa fa-star"></i>&nbsp;<div class="title">Star Rating</div><small>Standard 1 - 5 Point Score</small></label></div>
+                            <div class="col-md-3 option"><input type="radio" name="type" id="rate_type_text" value="2"><label for="rate_type_text">&nbsp;<i class="fa fa-terminal"></i>&nbsp;<div class="title">Text Answer</div><small>Answered will score set amount of points.</small></label></div>
+                            <div class="col-md-3 option"><input type="radio" name="type" id="rate_type_drop" value="3"><label for="rate_type_drop">&nbsp;<i class="fa fa-bars"></i>&nbsp;<div class="title">Single Selection</div><small>User can select one answer from a list.</small></label></div>
+                            <div class="col-md-3 option"><input type="radio" name="type" id="rate_type_radio" value="4"><label for="rate_type_radio">&nbsp;<i class="fa fa-check-circle-o"></i>&nbsp;<div class="title">Multi Selection</div><small>User can select multiple answers from a list.</small></label></div>
+                            <div class="col-md-3 option"><input type="radio" name="type" id="rate_type_mail" value="5"><label for="rate_type_mail">&nbsp;<i class="fa fa-envelope"></i>&nbsp;<div class="title">Email Transcript</div><small>Customize text to entice user to save a copy.</small></label></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="display-table type_1 type_2 type_3 type_4 type_5 type_options">
+                            <small class="option_blip"><b>Element Key</b> Duplicate name will overwrite existing automatically.</small>
+                            <input class="form-control" name="key_name" placeholder="Element Key Name (will replace if duplicate)">
+                        </div>
+                        <div class="display-table type_1 type_2 type_3 type_4 type_5 type_options">
+<!--                                        <div class="text-left col-md-12"><a class="btn btn-ghost btn-xs btn-warning"><i class="fa fa-clock-o"></i></a><div class="pull-right"><a add class="btn btn-ghost btn-xs btn-success"><i class="fa fa-plus"></i></a><a remove class="btn btn-ghost btn-xs btn-danger"><i class="fa fa-minus"></i></a></div></div>-->
+                            <small class="option_blip"><b>Question or Statement</b> This is the line of text displayed to the user.</small>
+                            <textarea placeholder="Question or Statement" class="form-control" name="type_star_text"></textarea>
+                        </div>
+                        <div class="type_2 type_options" style="display:none;">
+                            <small class="option_blip"><b>Point Value</b> when user answers question. If user doesn't answer then score for this question will be 0 out of the maximum (Point Value).</small>
+                            <input class="form-control" name="type_star_text_val" type="number" placeholder="Point value">
+                        </div>
+                        <div class="type_3 type_4 type_options" style="display:none;">
+                            <small class="option_blip"><b>Selectable Values</b> When rating system evaluates it will use the lowest value and highest value.</small>
+                            <div class="text-left display-table" style="margin-bottom:10px"><a class="btn btn-ghost btn-xs btn-warning"><i class="fa fa-clock-o"></i></a><div class="pull-right"><a add class="btn btn-ghost btn-xs btn-success"><i class="fa fa-plus"></i></a> <a remove class="btn btn-ghost btn-xs btn-danger"><i class="fa fa-minus"></i></a></div></div>
+                            <div class="type_selectables lines  display-table">
+                                <div class="line"><div class="col-md-8"><input class="form-control" name="type_select_name[0]" placeholder="Option Label"></div><div class="col-md-4"><input class="form-control" type="number" name="type_select_val[0]" placeholder="Point value"></div></div>
+                                <div class="line"><div class="col-md-8"><input class="form-control" name="type_select_name[1]" placeholder="Option Label"></div><div class="col-md-4"><input class="form-control" type="number" name="type_select_val[1]" placeholder="Point value"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+            </div>
+            <div class="unmFrame" id="AutoTasker" unmtab="7" style="display:none">
+                <form class="">
+                <div class="modal-header m-b">
+                    <h4 class="modal-title">Auto Tasks</h4>
+                    <small>These functions will run for you when you are logged in.</small>
+                </div>
+                <div class="display-table">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="afunc_name">Rule Name</label>
+                            <div><input class="form-control" id="afunc_name" name="afunc_name"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="afunc_select">Choose a Command</label>
+                            <select class="form-control" id="afunc_select" name="afunc_select">
+                                <option value="ss_on">Set Status Online</option>
+                                <option value="ss_off">Set Status Offline</option>
+                                <option value="so_on">Turn Sound On</option>
+                                <option value="so_off">Turn Sound Off</option>
+                                <option value="sm_all_op">Send Message to all Connected Operators</option>
+                                <option value="sm_all_vis">Send Message to all Connected Visitors</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="afunc_time">What time will it execute</label>
+                            <div><input class="form-control" aid="afunc_time" name="afunc_time"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6"><ul class="saved_list list-group"></ul></div>
+                </div>
+                </form>
+            </div>
+            <div class="unmFrame" unmTab="8" id="ChanMan" style="display:none">
+                <form>
+                    <div class="modal-header m-b">
+                        <h4 class="modal-title">Channel Manager</h4>
+                        <small>Edit Channels. Set Channels to public or private.</small>
+                    </div>
+                    <div class="display-table">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="chaman_name">Channel Name &nbsp; <small>Only letters, numbers, and underscores. No spaces. Do not include #.</small></label>
+                                <div><input class="form-control" id="chaman_name" name="name" placeholder="ChannelName_1234"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chaman_msg">Welcome Message &nbsp; <small>Will be displayed when user connects</small></label>
+                                <div><input class="form-control" id="chaman_msg" name="msg" placeholder="Leave blank for no message."></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="chaman_type">Public &nbsp; <small>Operator or User Channel</small></label>
+                                <div><select class="form-control" id="chaman_type" name="type">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No (Only Operators can join)</option>
+                                    </select></div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="spacing">
+                        <table class="table table-striped table-bordered">
+                            <thead><tr><td>Channel Name</td><td>Public</td><td>Welcome Message</td><td></td></tr></thead>
+                            <tbody class="saved_list"></tbody></table>
+                        </div>
+                </form>
+            </div>
+            <div class="unmFrame" unmTab="11" style="display:none">
+          <div class="modal-header">
+            <h4>Sharing</h4>
+            <p>Share your visitors with other accounts.</p>
+          </div>
+        <form class="display-table" id="ssettings">
+          <div class="form-group">
+            <label for="m">Email Address</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="m">
+                <div class="input-group-btn">
+                    <a share="o" class="btn btn-primary">&nbsp;<i class="fa fa-check"></i>&nbsp;</a>
+                    <a share="r" class="btn btn-danger">&nbsp;<i class="fa fa-times"></i>&nbsp;</a>
+                  </div>
+              </div>
+          </div>
+           <ul id="settings_shared_to" class="list-group"></ul>
+        </form>
+            </div>
+            </div>
+                </section>
+                </section>
+                    </aside>
+                </section>
+                </section>
+            </section>
+            <div class="modal-footer">
+                <div class="pull-left" id="customizer_buttons" style="display:none">
+                <button type="button" tbfn=demo class="btn btn-ghost btn-info">Demo Launch</button>
+                <button type="button" tbfn=demo tbfn2="win" class="btn btn-ghost btn-default">Toggle Widget</button>
+                <button type="button" tbfn=demo tbfn2="greet" class="btn btn-ghost btn-default">Toggle Greet</button>
+                </div>
+                <button type="button" class="btn btn-ghost btn-primary confirmaction">Save Page Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

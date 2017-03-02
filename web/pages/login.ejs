@@ -51,7 +51,7 @@
       <section class="m-b-lg">
           <h3 style="margin: 10px 0 0px 0;color: #4696bf;font-size: 44pt;"><i class="chi-ccio"></i></h3>
           <div class="clearfix"></div>
-        <form id="loginform" method="post" name="loginform" onsubmit="return false">
+        <form id="loginform" action="/dashboard" method="post" name="loginform">
             <header class="wrapper text-center">
               <div id="login_msg"></div>
             </header>
@@ -122,31 +122,7 @@ if (AudioContext) {
 //                    if(o.sub==true){$('#login_input_sub').prop('checked',true).change()};
 //                    setTimeout(function(){$('#loginform').submit()},200)
 //                }
-        $('#loginform').submit(function(e){
-            e.preventDefault();e.e=$(this);
-            e.s=e.e.serialize();e.cf=e.e.find('input,[type=submit]').prop('disabled',true);
-            if(e.s.ke===''){$('#login_msg').text('Please Enter Your Key');return false;}
-            $.post('<%= host %>/login',e.s,function(d){
-                console.log(d)
-                try{d=JSON.parse(d)}catch(er){d={success:false,text:d}}
-                if(!d.msg){d.msg=''}
-                d.p=$('#pkg'),e.ll=$('#login_msg');
-                if(d.success===true){
-                    HBR.loggedIn=true;
-//                    $.get('<%= host %>/pg/block/body',function(w){$('#login-content').remove();$('#MAIN_FRAME').html(w);$user=d.u;HBCd();})
-                }else{
-                    if(d.pkg){d.msg+='<span id="pkg">';
-                        $.each(d.pkg,function(n,v){
-                            d.msg+='<a key="'+v.ke+'">'+v.ke+'</a> ';
-                        })
-                        d.msg+='</span>';
-                    }
-                    e.cf.prop('disabled',false);
-                };
-                e.ll.html(d.msg);
-            })
-            return false;
-        })
+
         $('#loginform [type="submit"]').click(function(e){
             if($(this).hasClass('remember')){Op('login',$('#loginform').serializeObject(),'unmLogin_'+y)}else{Op('login',{},'unmLogin_'+y)}
         })
