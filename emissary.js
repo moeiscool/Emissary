@@ -54,7 +54,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
-app.use('/peer',PeerServer(server));
+app.use('/peerjs',PeerServer(server));
 server.listen(80);
 //log to redis
 s.log=function(x,xx,xxx,tt,ti){
@@ -1276,6 +1276,7 @@ app.post('/dashboard', function (req,res){
                 }
                 return false;
             }
+            x.$user=x.session;
             x.config=config;
             x.host=req.protocol+'://'+req.get('host');
             res.render('home',x)

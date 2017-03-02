@@ -102,6 +102,7 @@ function cx(t,x){
     if(!t.uid){t.uid=$user.ke}
     return HBChat.emit('f',t)
 };
+if($.CloudChat.Peer){
     $.CloudChat.Peer.hs=function(){
     $.CloudChat.Peer.p.off('connection').on('connection',function(conn){
         conn.on('data',function(d) {
@@ -213,4 +214,4 @@ function cx(t,x){
         }
     });
     }
-    
+}

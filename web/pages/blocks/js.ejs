@@ -630,7 +630,7 @@ function tm(x,v,z,k,a){//Draw Some Elements - This is Different in User (app.js)
     }
    return tmp
 }
-if($.CloudChat.Peer.p&&$.CloudChat.Peer.p.disconnected===true){
+if($.CloudChat.Peer&&$.CloudChat.Peer.p&&$.CloudChat.Peer.p.disconnected===true){
     $.CloudChat.audioContext = new AudioContext();
     $.CloudChat.audio=function(f,e){
         if(!e)e={};
@@ -724,11 +724,15 @@ HBR.init=function(e,g,d){
         case 0:
             if($user&&$user.id){
                 HBR.u={},HBR.a={},HBR.c={};
+                if($.CloudChat.Peer){
             $.CloudChat.Peer.id=$user.ke+'_'+$user.id+'_'+gid(5);//$.CloudChat.files();
-            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{host:'<%=host%>/peer',port:9002});
+            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{host:'<%=host%>',port: location.port || (location.protocol === 'https:' ? 443 : 80)});
             $.CloudChat.Peer.hs();
+            }
             HBR.loggedInn=true;$('#live_visitors tbody,#live_users').empty();
-            g={f:'a',bid:$user.id,uid:$user.ke,auth:$user.auth,t:gTk(),peer:$.CloudChat.Peer.id};if(IsNumber($user.id)===false){g.ff='su'};cx(g);
+            g={f:'a',bid:$user.id,uid:$user.ke,auth:$user.auth,t:gTk()};
+                    if(IsNumber($user.id)===false){g.ff='su'};cx(g);
+                    if($.CloudChat.Peer){g.peer=$.CloudChat.Peer.id}
             try{g.ar.shto=JSON.parse($user.shto)}catch(e){};
             try{g.ar.shfr=JSON.parse($user.shfr)}catch(e){};
             try{$user.ops=JSON.parse($user.ops)}catch(e){};
@@ -1573,9 +1577,8 @@ g.WTC=$('#WIN_WTC'),g.WTCm=$('[bid="'+g.bid+'"][uid="'+g.uid+'"],[ctb="'+g.bid+'
     //slack end
 <% } %>
 ///******************************************************************************//
-var $user=<%-JSON.stringify(session)%>;
-var HBChat=io.connect('<%=host%>'),
-HBR.init(0)
+var HBChat=io.connect('<%=host%>');
+HBR.init(0);
 window.addEventListener("beforeunload",function(e) {
     if(Op().aclose===1){
         $.each(HBR.p,function(n,v){
@@ -1583,6 +1586,7 @@ window.addEventListener("beforeunload",function(e) {
         })
     }
 });
+    if($.CloudChat.Peer){
     $.CloudChat.Peer.p.on('connection',function(c,d){
         d=c.metadata;
         if(d&&d.f){
@@ -1602,6 +1606,7 @@ window.addEventListener("beforeunload",function(e) {
             }
         }
     })
+    }
     HBChat.on('connect',function(d){
         if(HBR.loggedIn===true&&HBR.loggedInn===false){
             HBR.init(0)
@@ -2700,7 +2705,7 @@ $('body')
         switch(e.a){
             case"screen_view":
                 if(e.p.hasClass('op_win')){e.uu='a'}else{e.uu='u'}
-    if(!HBR[e.uu][e.u][e.b].peer){
+    if($.CloudChat.Peer&&!HBR[e.uu][e.u][e.b].peer){
         HBR[e.uu][e.u][e.b].peer=$.CloudChat.Peer.p.connect(e.u+'_'+e.b)
         HBR[e.uu][e.u][e.b].peer.on('open', function() {
             HBR[e.uu][e.u][e.b].peer.on('data', function(d) {
@@ -3362,8 +3367,10 @@ e.stopPropagation();e.e=$('#ChatHistory_helper'),e.p=$(this).parents('[time]'),e
         if(t.type.indexOf('image')>-1){e.fi+='<br><img unmFile="img" src="'+URL.createObjectURL($.CloudChat.b64toBlob(t.value))+'">'}
         tm(3,{msg:e.fi,c:'bg-primary',time:moment().format()},'[uid="'+e.key[1]+'"][CHAT="'+e.key[2]+'"] .msg_',1);
         $.each(e.ar,function(n,v){
-            $.CloudChat.Peers[v]=$.CloudChat.Peer.p.connect(v,{metadata:{f:'fi',d:t,uid:e.key[1],bid:e.key[2],$uid:$user.ke,$bid:$user.id}});
-            $.CloudChat.Peers[v].close();
+            if($.CloudChat.Peer){
+                $.CloudChat.Peers[v]=$.CloudChat.Peer.p.connect(v,{metadata:{f:'fi',d:t,uid:e.key[1],bid:e.key[2],$uid:$user.ke,$bid:$user.id}});
+                $.CloudChat.Peers[v].close();
+            }
         })
     };
     $.Filer.mD();
