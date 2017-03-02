@@ -1256,12 +1256,18 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
 app.get('/', function (req,res){
     res.render('index');
 });
-app.get('/:page/:ke', function (req,res){
+//render login
+app.get('/embed/:ke', function (req,res){
     
-    res.render(req.params.page,{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host'),config:config});
+    res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host'),config:config});
 });
-//login
-app.post('/dashboard', function (req,res){
+//render login
+app.get(['/dashboard','/dashboard/:ke'], function (req,res){
+    
+    res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host'),config:config});
+});
+//login and dashboard
+app.post(['/dashboard','/dashboard/:ke'], function (req,res){
     req.ret={ok:false};
     function send (x){
         if(x.success===true){
@@ -1279,9 +1285,9 @@ app.post('/dashboard', function (req,res){
             x.$user=x.session;
             x.config=config;
             x.host=req.protocol+'://'+req.get('host');
-            res.render('home',x)
+            res.render('dashboard',x)
         }else{
-            res.render('dashboard',{ke:x.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')})
+            res.render('login',{ke:x.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')})
         }
     }
     function addtoSession(g,x){
