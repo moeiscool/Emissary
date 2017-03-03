@@ -1273,7 +1273,6 @@ app.get(['/dashboard','/dashboard/:ke'], function (req,res){
 app.post(['/dashboard','/dashboard/:ke'], function (req,res){
     req.ret={ok:false};
     req.proto=req.headers['x-forwarded-proto'];
-    console.log(req.proto)
     function send (x){
         if(x.success===true){
             x.sudo=function(c){
