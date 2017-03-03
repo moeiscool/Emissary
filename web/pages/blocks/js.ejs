@@ -726,7 +726,7 @@ HBR.init=function(e,g,d){
                 HBR.u={},HBR.a={},HBR.c={};
                 if($.CloudChat.Peer){
             $.CloudChat.Peer.id=$user.ke+'_'+$user.id+'_'+gid(5);//$.CloudChat.files();
-            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{host:'<%=host%>',port: location.port || (location.protocol === 'https:' ? 443 : 80)});
+            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{path: '/peerjs',host:'<%=host%>'.split('://')[1],port: location.port || (location.protocol === 'https:' ? 443 : 80)});
             $.CloudChat.Peer.hs();
             }
             HBR.loggedInn=true;$('#live_visitors tbody,#live_users').empty();

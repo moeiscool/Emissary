@@ -16,6 +16,9 @@ var http=require('http'),
     io = require('socket.io')(server),
     config=require('./conf.json'),
     sql;
+
+if(!config.title){config.title='Emissary'}
+
 //connect redis
 s.redis=function(){
     red=redis.createClient();
@@ -1256,19 +1259,21 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
 app.get('/', function (req,res){
     res.render('index');
 });
-//render login
+//login
 app.get('/embed/:ke', function (req,res){
-    
-    res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host'),config:config});
+    req.proto=req.headers['x-forwarded-proto'];
+    res.render('embed',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
 });
-//render login
+//dashboard
 app.get(['/dashboard','/dashboard/:ke'], function (req,res){
-    
-    res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host'),config:config});
+    req.proto=req.headers['x-forwarded-proto'];
+    res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
 });
 //login and dashboard
 app.post(['/dashboard','/dashboard/:ke'], function (req,res){
     req.ret={ok:false};
+    req.proto=req.headers['x-forwarded-proto'];
+    console.log(req.proto)
     function send (x){
         if(x.success===true){
             x.sudo=function(c){
@@ -1284,10 +1289,10 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
             }
             x.$user=x.session;
             x.config=config;
-            x.host=req.protocol+'://'+req.get('host');
+            x.host=req.proto+'://'+req.get('host');
             res.render('dashboard',x)
         }else{
-            res.render('login',{ke:x.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')})
+            res.render('login',{ke:x.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config})
         }
     }
     function addtoSession(g,x){
@@ -1433,6 +1438,7 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
 });
 //
 app.post(['/p/r','/p/c'], function (req,res){
+    req.proto=req.headers['x-forwarded-proto'];
     res.send('Disabled');
 });
 //
