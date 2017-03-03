@@ -1437,17 +1437,30 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
     }
 });
 //get
-app.all(['/get/:stuff','/get/:stuff/:f','/get/:stuff/:f/:ff','/get/:stuff/:f/:ff/:fff'], function (req,res){
+app.all(['/:api/get/:stuff','/:api/get/:stuff/:f','/:api/get/:stuff/:f/:ff','/:api/get/:stuff/:f/:ff/:fff','/:api/get/:stuff/:f/:ff/:fff/:ffff'],function (req,res){
+    res.setHeader('Content-Type','application/json');
+    req.ret={ok:false}
     switch(req.params.stuff){
         case'translation':
             req.url='https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20160311T042953Z.341f2f63f38bdac6.c7e5c01fff7f57160141021ca61b60e36ff4d379&text='+req.body.t+'&lang='+req.body.fr+'-'+req.body.to;
             request({url:req.url,method:'GET',encoding:'utf8'},function(err,data){
-                res.send(JSON.parse(data.body)['text'][0]);
+                req.ret.ok=true;
+                req.ret.text=JSON.parse(data.body)['text'][0];
+                res.send(JSON.stringify(req.ret,null,3));
+            })
+        break;
+        case'missed':
+            req.vals=[req.params.f];
+            req.query='';
+            if(req.params.fff&&req.params.fff!==''){req.query+='AND start=? ';req.vals.push(decodeURIComponent(req.params.fff));}
+            if(req.params.ffff&&req.params.ffff!==''){req.query+='AND end=? ';req.vals.push(decodeURIComponent(req.params.ffff));}
+            sql.query('SELECT * FROM Missed WHERE ke=? '+req.query+'ORDER BY start ASC LIMIT 20',req.vals,function(err,r){
+                req.ret.ok=true;
+                req.ret.missed=r;
+                res.send(JSON.stringify(req.ret,null,3));
             })
         break;
         case'chat':
-            res.setHeader('Content-Type', 'application/json');
-            req.ret={ok:false}
             if(!req.body.limit){req.body.limit='LIMIT 1';}else{req.body.limit='LIMIT '+req.body.limit}
             if(req.params.ff&&req.params.fff){
                 req.vals=[req.params.f,req.params.ff,decodeURIComponent(req.params.fff)];
