@@ -303,7 +303,7 @@ $.each(CCiso.langs,function(n,v){
 });$('#mm-translator [name="fr"],#mm-translator [name="to"]').append(tmp);tmp='';
     $('#mm-translator').unbind('submit').submit(function(e){
         e.preventDefault();e.e=$.CloudChat.base.selected_translate;e.t=e.e.find('.unm-bubble small').text();e.f=$(this);e.fr=e.f.find('[name="fr"]').val(),e.to=e.f.find('[name="to"]').val()
-        $.post('//unmetered.chat/g/t',{t:e.t,fr:e.fr,to:e.to},function(d){
+        $.post('<%= host %>/get/translation',{t:e.t,fr:e.fr,to:e.to},function(d){
             e.e.find('.translated').html('<i>'+d+'</i>');
         });
         e.f.hide();

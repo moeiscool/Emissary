@@ -1,6 +1,7 @@
 s={ver:'Emissary 0.1'},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
 
 var http=require('http'),
+    request = require('request'),
     express = require('express'),
     mysql=require('mysql'),
     moment=require('moment'),
@@ -1433,6 +1434,47 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
                 send(req.ret)
             }
         })
+    }
+});
+//get
+app.all(['/get/:stuff','/get/:stuff/:f','/get/:stuff/:f/:ff','/get/:stuff/:f/:ff/:fff'], function (req,res){
+    switch(req.params.stuff){
+        case'translation':
+            req.url='https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20160311T042953Z.341f2f63f38bdac6.c7e5c01fff7f57160141021ca61b60e36ff4d379&text='+req.body.t+'&lang='+req.body.fr+'-'+req.body.to;
+            request({url:req.url,method:'GET',encoding:'utf8'},function(err,data){
+                res.send(JSON.parse(data.body)['text'][0]);
+            })
+        break;
+        case'chat':
+            res.setHeader('Content-Type', 'application/json');
+            req.ret={ok:false}
+            if(!req.body.limit){req.body.limit='LIMIT 1';}else{req.body.limit='LIMIT '+req.body.limit}
+            if(req.params.ff&&req.params.fff){
+                req.vals=[req.params.f,req.params.ff,decodeURIComponent(req.params.fff)];
+                sql.query('SELECT * FROM Chats WHERE ke=? AND id=? AND start >= DATE(?) ORDER BY start DESC '+req.body.limit,req.vals,function(err,r){
+                    sql.query('SELECT * FROM Crumbs WHERE ke=? AND id=? AND start >= DATE(?) ORDER BY start DESC '+req.body.limit,req.vals,function(err,rr){
+                        req.ret.ok=true,
+                        req.ret.chat=r,
+                        req.ret.crumbs=rr;
+                        res.send(JSON.stringify(req.ret,null,3));
+                    })
+                })
+            }else{
+                req.vals=[req.params.f,req.params.ff];
+                if(req.params.fff&&req.params.fff!==''){
+                    req.body.limit='AND start=? '+req.body.limit;
+                    req.vals.push(decodeURIComponent(req.params.fff));
+                }
+                sql.query('SELECT * FROM Chats WHERE ke=? AND id=? '+req.body.limit,req.vals,function(err,r){
+                    sql.query('SELECT * FROM Crumbs WHERE ke=? AND id=? '+req.body.limit,req.vals,function(err,rr){
+                        req.ret.ok=true,
+                        req.ret.chat=r,
+                        req.ret.crumbs=rr;
+                        res.send(JSON.stringify(req.ret,null,3));
+                    })
+                })
+            }
+        break;
     }
 });
 //
