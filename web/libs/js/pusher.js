@@ -42,7 +42,7 @@ CloudChat.off('connect').on('connect',function(f){
         }})
 });
 CloudChat.off('ret').on('ret',function(d){
-    if(d.trust===0){clearTimeout($.CloudChat.timeOut);$.each($.CloudChat,function(n,v){$.CloudChat[n]=function(){return {};}});localStorage.removeItem('CloudChatP_');CloudChat.disconnect();delete(CloudChat);console.log('Unmetered.Chat : Untrusted Domain')}
+    if(d.trust===0){clearTimeout($.CloudChat.timeOut);$.each($.CloudChat,function(n,v){$.CloudChat[n]=function(){return {};}});localStorage.removeItem('CloudChatP_');CloudChat.disconnect();delete(CloudChat);console.log('<%=config.title%> : Untrusted Domain')}
 //    if(d.bg){
 //        d.bg=JSON.parse(d.bg);
 //        d.bg.pusher;
@@ -64,8 +64,8 @@ CloudChat.off('ret').on('ret',function(d){
     }
     if(d.ver){
         $.CloudChat.op('ver',d.ver);
-        $.get('//embed.unmetered.chat/'+$.CloudChat.ke+'?pusher',function(d){d=d+'';localStorage.setItem('CloudChatP_',d);});
-        console.log('CloudChat Pusher Ver : '+d.ver);return false;
+        $.get('<%=host%>/pusher/'+$.CloudChat.ke,function(d){d=d+'';localStorage.setItem('CloudChatP_',d);});
+        console.log('<%=config.title%> Pusher Ver : '+d.ver);return false;
     }
     if(d.scrollTo){//scroller
         $.CloudChat.scrTo(d.scrollTo)

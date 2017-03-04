@@ -129,7 +129,7 @@
                                 <div><input type="text" class="form-control" name="name" value="<%= $user.name %>" id="account_name_change"></div>
                             </div>
                             <div class="form-group">
-                                <label for="account_mail_change">Email <small>When you are away emails will be forwarded here. Emails about payments are handled through the UNMETERED.IO Client Area login.</small></label>
+                                <label for="account_mail_change">Email <small>When you are away emails will be forwarded here.</small></label>
                                 <div><input type="text" class="form-control" name="mail" value="<%= $user.mail %>" id="account_mail_change"></div>
                             </div>
                             <div class="form-group">
@@ -229,7 +229,7 @@
             <div class="unmFrame" unmtab="1" id="modal_subaccounts" tbp <% if($user.M==1){ %>style="display:none"<% }  %>>
             <div class="modal-header">
                 <h4 class="modal-title no-margin">Sub-Accounts</h4>
-                <small>You can create <a target="_blank" href="//dashboard.unmetered.chat">Sub-Account logins</a> here.</small>
+                <small>You can create <a target="_blank" href="<%=host%>/dashboard">Sub-Account logins</a> here.</small>
             </div>
             <div class="spacing">
 <table class="table table-striped table-bordered" id="modal_subaccounts_tb" tb>
@@ -258,7 +258,7 @@
                 <div class="display-table">
                     <div class="col-md-12 display-table m-b">
                         <div class="form-group">
-                            <label for="chatbot_url">Search Knowledge base URL <small>Your provided URL must return a JSON string. This will post to if your chat bot does not understand the message. See <a href="https://docs.unmetered.chat" target="_blank">docs</a> for details.</small></label>
+                            <label for="chatbot_url">Search Knowledge base URL <small>Your provided URL must return a JSON string. Ther response will get posted if your chat bot does not understand the message. See <a href="<%=host%>/docs" target="_blank">docs</a> for details.</small></label>
                             <div><input type="text" class="form-control" id="chatbot_url" placeholder="http://.."></div>
                           </div>
                         <div class="form-group">
@@ -340,7 +340,7 @@
                           </div>
                           <div class="form-group">
                             <label for="unm_poweredby_">Branding Text</label>
-                              <div><input type="text" class="form-control" name="poweredby_" id="unm_poweredby_" placeholder='Powered By <i class="chi-magnet"></i> <b>UNMETERED.Chat </b><i>Beta</i>'></div>
+                              <div><input type="text" class="form-control" name="poweredby_" id="unm_poweredby_" placeholder='Powered By <i class="chi-magnet"></i> <b><%=config.title%></b>'></div>
                           </div>
                         </div>
                         <div class="col-md-6">

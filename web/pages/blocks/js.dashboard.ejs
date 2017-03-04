@@ -2907,7 +2907,8 @@ $('body')
         e.e=$(this);e.b=e.e.attr('preview'),e.t=e.e.attr('type'),e.p=$('#manager-preview');
         switch(e.t){
             case'get_missed':
-                $.get('/g/m/',function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/missed',function(d){
+                    $('#manager-missed ul').empty()
                     try{d=JSON.parse(d);console.log(d)
                     d.missed=JSON.parse(d.missed);
                     }catch(e){}

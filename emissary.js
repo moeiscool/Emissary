@@ -1436,8 +1436,8 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
         })
     }
 });
-//get
-app.all(['/:api/get/:stuff','/:api/get/:stuff/:f','/:api/get/:stuff/:f/:ff','/:api/get/:stuff/:f/:ff/:fff','/:api/get/:stuff/:f/:ff/:fff/:ffff'],function (req,res){
+//get unsecured
+app.all(['/get/:stuff','/get/:stuff/:f','/get/:stuff/:f/:ff','/get/:stuff/:f/:ff/:fff','/get/:stuff/:f/:ff/:fff/:ffff'],function (req,res){
     res.setHeader('Content-Type','application/json');
     req.ret={ok:false}
     switch(req.params.stuff){
@@ -1449,11 +1449,18 @@ app.all(['/:api/get/:stuff','/:api/get/:stuff/:f','/:api/get/:stuff/:f/:ff','/:a
                 res.send(JSON.stringify(req.ret,null,3));
             })
         break;
+    }
+})
+//get secured
+app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/:f/:ff','/:api/:ke/get/:stuff/:f/:ff/:fff','/:api/:ke/get/:stuff/:f/:ff/:fff/:ffff'],function (req,res){
+    res.setHeader('Content-Type','application/json');
+    req.ret={ok:false}
+    switch(req.params.stuff){
         case'missed':
-            req.vals=[req.params.f];
+            req.vals=[req.params.ke];
             req.query='';
-            if(req.params.fff&&req.params.fff!==''){req.query+='AND start=? ';req.vals.push(decodeURIComponent(req.params.fff));}
-            if(req.params.ffff&&req.params.ffff!==''){req.query+='AND end=? ';req.vals.push(decodeURIComponent(req.params.ffff));}
+            if(req.params.ff&&req.params.ff!==''){req.query+='AND start=? ';req.vals.push(decodeURIComponent(req.params.ff));}
+            if(req.params.fff&&req.params.fff!==''){req.query+='AND end=? ';req.vals.push(decodeURIComponent(req.params.fff));}
             sql.query('SELECT * FROM Missed WHERE ke=? '+req.query+'ORDER BY start ASC LIMIT 20',req.vals,function(err,r){
                 req.ret.ok=true;
                 req.ret.missed=r;
@@ -1486,6 +1493,21 @@ app.all(['/:api/get/:stuff','/:api/get/:stuff/:f','/:api/get/:stuff/:f/:ff','/:a
                         res.send(JSON.stringify(req.ret,null,3));
                     })
                 })
+            }
+        break;
+        case'recs':
+            if(req.params.ff&&req.params.fff){
+               req.file='' $file=__dirname+'/../rec/'+$_SESSION['ke'].DIRECTORY_SEPARATOR.$path[4].DIRECTORY_SEPARATOR.$path[5].'.json';
+                if(file_exists($file)){
+                   echo file_get_contents($file);exit;
+                }else{
+                    $ret['msg']='File Not Found';
+                    $ret['file']=$file;
+                }
+            }else{
+                $db=loadSQL('chat');
+                $db->select('*','Recordings','ke=?',array($_SESSION['ke']));
+                $ret=$db->fetch_assoc_all();
             }
         break;
     }
