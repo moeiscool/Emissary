@@ -1152,7 +1152,7 @@ if(g.missed_chats_chart.length>0){Morris.Line({element:'stat_missed_line',data:g
             if($(g.e).length===0){
                 $('#ChatHistory .history_chats').append('<div chsi="'+g.b+'" chsw="'+g.b+'" uid="'+g.u+'" time="'+g.t+'" focus="1"><div class="ldr_"></div><ul class="list-group list-group-lg no-bg msg_"></ul></div>')
                 $('#ChatHistory .history_crumbs').append('<div chsi="'+g.b+'" chsb="'+g.b+'" uid="'+g.u+'" time="'+g.t+'" focus="1"><div class="ldr_"></div><ul class="list-group list-group-lg no-bg brd_"></ul></div>')
-                $.get('/get/chat/'+g.u+'/'+g.b+'/'+g.t+'?l',function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/chat/'+g.b+'/'+g.t+'?l',function(d){
                     try{d=JSON.parse(d);
                     console.log(d)
                     $.each(d.chat,function(n,v){try{pm(1,JSON.parse(v.history),g.e+' .msg_')}catch(er){console.log(er)}})
@@ -2132,7 +2132,7 @@ pm(13);
                 e.t='';
                 if($.ScrView.checking!==1){
                     $.ScrView.checking=1;
-                $.get('/g/recs',function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/recs',function(d){
                     delete($.ScrView.checking);
                     try{d=JSON.parse(d)}catch(er){d=[]}
                     $.each(d,function(n,v){
@@ -2146,7 +2146,7 @@ pm(13);
             case's':
                 if($('#ViewerModal:visible').length===0){$('#ViewerModal').modal('show')}
                 e.b=e.e.attr('key'),e.a=e.e.attr('file');
-                $.get('/g/recs/'+e.b+'/'+e.a,function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/recs/'+e.b+'/'+e.a,function(d){
                     try{d=JSON.parse(d)}catch(e){d={success:false}}
                     if(d.success!==false){
                       $.ScrView.player = new cimice.Player({
@@ -2923,7 +2923,7 @@ $('body')
                 if(HBR.missed[e.u]&&HBR.missed[e.u][e.b]&&HBR.missed[e.u][e.b].history){
                     pm(1,HBR.missed[e.u][e.b].history,'#manager-preview ul',1);
                 }else{
-                    $.get('/get/chat/'+e.u+'/'+e.b+'/'+encodeURIComponent(e.ti)+'?limit=1',function(d){
+                    $.get('/'+$user.auth+'/'+$user.ke+'/get/chat/'+e.b+'/'+encodeURIComponent(e.ti)+'?limit=1',function(d){
                         try{d=JSON.parse(d);
 //                           d.brd=JSON.parse(d[0].crumbs.brd);
                            d.history=JSON.parse(d.chat[0].history);
@@ -3030,7 +3030,7 @@ e.th=$(this),e.w=e.th.attr('winc'),e.e=e.th.parents('[CHAT]');e.b=e.e.attr('CHAT
             break;
             case'lm':
                 e.t=[e.e.find('.brd_ li:last .livestamp').attr('title'),e.e.find('.msg_ li:first').attr('title')];e.th.removeAttr('winc').addClass('disabled')
-                e.url='/get/chat/'+e.u+'/'+e.b+'/'+e.t[1];
+                e.url='/'+$user.auth+'/'+$user.ke+'/get/chat/'+e.b+'/'+e.t[1];
                 if(e.t[0]){e.url+='/'+e.t[0];}
                 e.url+='?n';
                 $.get(e.url,function(d){

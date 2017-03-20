@@ -1469,8 +1469,8 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
         break;
         case'chat':
             if(!req.body.limit){req.body.limit='LIMIT 1';}else{req.body.limit='LIMIT '+req.body.limit}
-            if(req.params.ff&&req.params.fff){
-                req.vals=[req.params.f,req.params.ff,decodeURIComponent(req.params.fff)];
+            if(req.params.ff){
+                req.vals=[req.params.ke,req.params.f,decodeURIComponent(req.params.ff)];
                 sql.query('SELECT * FROM Chats WHERE ke=? AND id=? AND start >= DATE(?) ORDER BY start DESC '+req.body.limit,req.vals,function(err,r){
                     sql.query('SELECT * FROM Crumbs WHERE ke=? AND id=? AND start >= DATE(?) ORDER BY start DESC '+req.body.limit,req.vals,function(err,rr){
                         req.ret.ok=true,
@@ -1480,10 +1480,10 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                     })
                 })
             }else{
-                req.vals=[req.params.f,req.params.ff];
-                if(req.params.fff&&req.params.fff!==''){
+                req.vals=[req.params.ke,req.params.f];
+                if(req.params.ff&&req.params.ff!==''){
                     req.body.limit='AND start=? '+req.body.limit;
-                    req.vals.push(decodeURIComponent(req.params.fff));
+                    req.vals.push(decodeURIComponent(req.params.ff));
                 }
                 sql.query('SELECT * FROM Chats WHERE ke=? AND id=? '+req.body.limit,req.vals,function(err,r){
                     sql.query('SELECT * FROM Crumbs WHERE ke=? AND id=? '+req.body.limit,req.vals,function(err,rr){
@@ -1496,18 +1496,23 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
             }
         break;
         case'recs':
-            if(req.params.ff&&req.params.fff){
-               req.file='' $file=__dirname+'/../rec/'+$_SESSION['ke'].DIRECTORY_SEPARATOR.$path[4].DIRECTORY_SEPARATOR.$path[5].'.json';
-                if(file_exists($file)){
-                   echo file_get_contents($file);exit;
+            if(req.params.ff){
+               req.ret={ok:false,msg:'File not found'}
+               req.file=__dirname+'/../rec/'+req.params.ke+'/'+req.params.ff+'/'+'.json';
+                if(fs.existSync(req.file)){
+                    res.send(fs.readFileSync(req.file,'UTF8'));
                 }else{
-                    $ret['msg']='File Not Found';
-                    $ret['file']=$file;
+                    res.send(JSON.stringify(req.ret,null,3));
                 }
             }else{
-                $db=loadSQL('chat');
-                $db->select('*','Recordings','ke=?',array($_SESSION['ke']));
-                $ret=$db->fetch_assoc_all();
+                sql.query('SELECT * FROM Recordings WHERE ke=?',[req.params.ke],function(err,r){
+                    if(err){
+                        req.ret=err;
+                    }else{
+                        req.ret=r;
+                    }
+                    res.send(JSON.stringify(req.ret,null,3));
+                })
             }
         break;
     }
