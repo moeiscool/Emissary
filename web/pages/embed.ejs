@@ -1,11 +1,10 @@
 <%
-if(config.ssl&&config.ssl.port&&data.protocol==='https'){
+if(config.ssl&&config.ssl.port&&https===true){
     data.port=config.ssl.port
 }else{
     data.port=config.port
 }
 if(!data.port||data.port===''||data.port==80||data.port==443){data.url=host}else{data.url=host+':'+data.port}
-console.log(data)
 %>
 <meta charset="UTF-8">
 <div id="mm-script-drop" style="display:none"></div>
