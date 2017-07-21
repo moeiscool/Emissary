@@ -3,7 +3,7 @@
   "utcOffset": "-0800",
   "db": {
     "host": "127.0.0.1",
-    "user": "chat",
+    "user": "cloudchat",
     "password": "",
     "database": "chat-unmetered",
     "port":3306

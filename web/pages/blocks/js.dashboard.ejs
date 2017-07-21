@@ -1,6 +1,13 @@
+<script>
 ///******************************************************************************//
 //CUSTOM.VARS.JS
 ///******************************************************************************//
+var AudioContext = window.AudioContext || window.webkitAudioContext || false; 
+if (AudioContext) {
+    var ctx = new AudioContext;
+} else {
+    alert("Sorry, but the Web Audio API is not supported by your browser. Please, consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox");
+}
 function pm(x,v,z,k){
     var tmp='';if(v==null){v=[];}
     switch(x){
@@ -154,7 +161,7 @@ function pm(x,v,z,k){
                 v.ch=(!$user.ids['slack'+v.nn]||(typeof $user.ids['slack'+v.nn] ==='object')==false);
                 if(v.ch){v.st=1;v.t1='Open Slot',v.t2='005480',v.t3='Add Slack',v.t4='slack',v.t5='success';}else{v.t1='Connected',v.t2='00b060',v.t3='Change',v.t4='wrench',v.t5='primary';}
                 v.tmp='<div class="form-group" id="slack_attach'+v.nn+'">';
-                if($user.ids['slack'+v.nn]){v.vin=$user.ids['slack'+v.nn].team_name+' '+$user.ids['slack'+v.nn].team_id<?php if($_SESSION['lv']==0&&isset($_SESSION['ids']['slack'])){ ?>+' <i title="Until a higher tier account is set this feature will not function.">Husky Account Required</i>'<?php } ?>;}else{v.vin='Real Time Messaging.';}
+                if($user.ids['slack'+v.nn]){v.vin=$user.ids['slack'+v.nn].team_name+' '+$user.ids['slack'+v.nn].team_id<% if(session.lv==0&&session.ids.slack){ %>+' <i title="Until a higher tier account is set this feature will not function.">Husky Account Required</i>'<% } %>;}else{v.vin='Real Time Messaging.';}
                 v.tmp+='<label>Slack <b class="plugin_status" style="font-size:80%;color:#'+v.t2+'">'+v.t1+'</b> <small>'+v.vin+'</small></label>';
                 v.tmp+='<div><a class="btn btn-'+v.t5+' btn-ghost" slack_link="'+v.nn+'"><i class="fa fa-'+v.t4+'"></i> &nbsp;'+v.t3+'</a>'
                 if(!v.ch){v.ff.find('.plugin_detach').remove();v.tmp+=' <a class="btn btn-danger btn-ghost plugin_detach" slack_link="'+v.nn+'" slack_link_type="detach"><i class="fa fa-trash-o"></i> &nbsp; Remove Token</a></div>';}
@@ -164,7 +171,7 @@ function pm(x,v,z,k){
             }
             v.fn();
         break;
-<?php if(sudo('su')===true){ ?>
+<% if(sudo('su')===true){ %>
         case'suba':
             if(!$user.det.subs){$user.det.subs={}};
             $.each($user.det.subs,function(m,b){
@@ -172,8 +179,8 @@ function pm(x,v,z,k){
             })
             $('#modal_subaccounts_tb tbody').html(tmp)
         break;
-<?php }?>
-<?php if(sudo()===true){ ?>
+<% }%>
+<% if(sudo()===true){ %>
         case'sett':
             $.each([{v:'si',n:'Sign-In'},{v:'a',n:'Away'},{v:'c',n:'Chat'},{v:'ra',n:'Rating'}],function(m,b){
                 tmp+=tm('sett',b);
@@ -192,7 +199,7 @@ function pm(x,v,z,k){
             })
             $('#files_usr .widget_styles').html(tmp)
         break;
-<?php }?>
+<% }%>
         case'weat':
             if(!z){z='#stat_weather'}
             $(z).empty();
@@ -523,12 +530,12 @@ function tm(x,v,z,k,a){//Draw Some Elements - This is Different in User (app.js)
                 }
                 tmp+='<div class="op_win bmsg animated fadeInUp" chat="'+v.b+'" uid="'+v.u+'" peer="'+v.us.peer+'" '+v.sk+' flash=1 sound=1 focus=0><div title="'+v.us.n+'" class="op_win_head"><span winc="t" class="btn btn-ghost btn-xs btn-success">'+v.us.n+'</span><div class="btn-group btn-group-xs pull-right"><a class="btn btn-ghost btn-inverse" mm-attach="c" title="Send File">&nbsp;<i class="fa fa-paperclip"></i>&nbsp;</a>'
                 if(!v.y){
-                tmp+='<a class="btn btn-ghost btn-inverse" caller="o">&nbsp;<i class="fa fa-video-camera"></i>&nbsp;</a><?php if(sudo()===true){ ?><a class="btn btn-ghost btn-inverse" winc="t" title="User Controls">&nbsp;<i class="fa fa-wrench"></i>&nbsp;</a><?php } ?>'
+                tmp+='<a class="btn btn-ghost btn-inverse" caller="o">&nbsp;<i class="fa fa-video-camera"></i>&nbsp;</a><% if(sudo()===true){ %><a class="btn btn-ghost btn-inverse" winc="t" title="User Controls">&nbsp;<i class="fa fa-wrench"></i>&nbsp;</a><% } %>'
                 }
                 tmp+='<a class="btn btn-ghost btn-inverse" winc="f" title="Toggle Flash">&nbsp;<i class="fa fa-star"></i>&nbsp;</a> <a class="btn btn-ghost btn-primary" winc="v" title="Toggle Mute">&nbsp;<i class="fa fa-volume-up"></i>&nbsp;</a> <a class="btn btn-ghost btn-inverse" winc="cc" title="Close Chat Window">&nbsp;<i class="fa fa-times"></i>&nbsp;</a></div></div><div class="op_win_bod"><video></video><ul class="list-group list-group-lg no-bg auto msg_"></ul>';
                 if(!v.y){
-                    <?php if(sudo()===true){ ?>
-                tmp+='<div class="tools open" style="display:none"><div class="ios-blocks content-block"><div class="content-title">Toggles</div><div class="list-block"><ul>'+tm('ib',{a:'button="status" wt="cd" cd=$(\'[toggle="status"]:first\').click()',n:'Status &nbsp; <small>Online or Offline</small>',f:'user',c:'win_t',s:''})+tm('ib',{a:'wt="cd" cd=$(\'[toggle="knote"]\').click()',n:'Key Preview',f:'keyboard-o',c:'win_t',s:''})+'</ul></div><form class="toolPop"><div class="content-title">Run Javascript</div><div class="form-group row"><div class="input-group input-group-sm"><input class="form-control" name="script" placeholder="location.reload()"><div class="input-group-btn"><button type="submit" class="btn btn-ghost btn-success">&nbsp;<i class="fa fa-paper-plane"></i>&nbsp;&nbsp;</button></div></div></div></form></div><div class="ios-blocks content-block" style="margin-top:10px"><div class="list-block"><ul>'+tm('ib',{a:'wt="cd" cd=location.reload()',n:'Refresh &nbsp; <small>Chat sessions will close.</small>',f:'retweet',c:'win_t',s:''})+'</ul></div></div></div>';<?php } ?>
+                    <% if(sudo()===true){ %>
+                tmp+='<div class="tools open" style="display:none"><div class="ios-blocks content-block"><div class="content-title">Toggles</div><div class="list-block"><ul>'+tm('ib',{a:'button="status" wt="cd" cd=$(\'[toggle="status"]:first\').click()',n:'Status &nbsp; <small>Online or Offline</small>',f:'user',c:'win_t',s:''})+tm('ib',{a:'wt="cd" cd=$(\'[toggle="knote"]\').click()',n:'Key Preview',f:'keyboard-o',c:'win_t',s:''})+'</ul></div><form class="toolPop"><div class="content-title">Run Javascript</div><div class="form-group row"><div class="input-group input-group-sm"><input class="form-control" name="script" placeholder="location.reload()"><div class="input-group-btn"><button type="submit" class="btn btn-ghost btn-success">&nbsp;<i class="fa fa-paper-plane"></i>&nbsp;&nbsp;</button></div></div></div></form></div><div class="ios-blocks content-block" style="margin-top:10px"><div class="list-block"><ul>'+tm('ib',{a:'wt="cd" cd=location.reload()',n:'Refresh &nbsp; <small>Chat sessions will close.</small>',f:'retweet',c:'win_t',s:''})+'</ul></div></div></div>';<% } %>
                 }
                 tmp+='</div><div class="op_win_text"><form class="send_"><div class="input-group input-group-sm"><input send="'+v.b+'" class="form-control" style="height:auto"><div class="input-group-btn"><button type="submit" class="btn btn-ghost btn-success">Send</button></div></div></form></div></div>';
             $('#live_operator_chats').append(tmp);
@@ -543,13 +550,13 @@ function tm(x,v,z,k,a){//Draw Some Elements - This is Different in User (app.js)
             if(v.md!==0){$(v.ee).trigger('mousedown')}
             return $(v.ee);
         break;
-<?php if(sudo('su')===true){ ?>
+<% if(sudo('su')===true){ %>
         case'suba':
             if(!v){v={}};if(!v.Id){v.Id=gid()};if(!v.Name){v.Name='Barry'};if(!v.Password){v.Password=''};if(!v.Username){v.Username=gid()+'@unmetered.io'};if(!v.Title){v.Title='Agent'};if(!v.PP){v.PP=''};
             tmp+='<tr><td><a class="txt">'+v.Id+'</a></td><td><a class="txt">'+v.Name+'</a></td><td><a class="txt">'+v.Username+'</a></td><td><a class="txt">'+v.Password+'</a></td><td><a class="txt">'+v.PP+'</a></td><td><a data-type="select" class="sel1">'+v.Title+'</a></td><td class="del"><a class="btn btn-ghost btn-danger btn-xs" tbfn="rmr"><i class="fa fa-trash-o"></i></a></td></tr>';
         break;
-<?php }?>
-<?php if(sudo()===true){ ?>
+<% }%>
+<% if(sudo()===true){ %>
         case'sett':
             v.fn=function(w,q){return'<div class="form-group"><label>'+w+'</label><div>'+q+'</div></div>';}
             tmp+='<div class="col-md-3"><div class="sett-block"><div class="shade_"><h4 class="modal-title no-margin m-b">'+v.n+'</h4>'
@@ -561,7 +568,7 @@ function tm(x,v,z,k,a){//Draw Some Elements - This is Different in User (app.js)
             tmp+=v.fn('Text Color','<input placeholder="Text Color" name="'+v.v+'bg_text" type="text" class="form-control colo">')
             tmp+='</div></div></div>'
         break;
-<?php }?>
+<% }%>
         case'vid':
             if(v.peer){v.c=v.peer}
         v.e=$('#videoChats')
@@ -629,7 +636,7 @@ function tm(x,v,z,k,a){//Draw Some Elements - This is Different in User (app.js)
     }
    return tmp
 }
-if($.CloudChat.Peer.p&&$.CloudChat.Peer.p.disconnected===true){
+if($.CloudChat.Peer&&$.CloudChat.Peer.p&&$.CloudChat.Peer.p.disconnected===true){
     $.CloudChat.audioContext = new AudioContext();
     $.CloudChat.audio=function(f,e){
         if(!e)e={};
@@ -723,11 +730,15 @@ HBR.init=function(e,g,d){
         case 0:
             if($user&&$user.id){
                 HBR.u={},HBR.a={},HBR.c={};
+                if($.CloudChat.Peer){
             $.CloudChat.Peer.id=$user.ke+'_'+$user.id+'_'+gid(5);//$.CloudChat.files();
-            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{host:'<?=$config['peer']?>',port:9002});
+            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{host:'<%- host %>'.split('://')[1].split(':')[0],port: location.port || (location.protocol === 'https:' ? 443 : 80)});
             $.CloudChat.Peer.hs();
+            }
             HBR.loggedInn=true;$('#live_visitors tbody,#live_users').empty();
-            g={f:'a',bid:$user.id,uid:$user.ke,auth:$user.auth,t:gTk(),peer:$.CloudChat.Peer.id};if(IsNumber($user.id)===false){g.ff='su'};cx(g);
+            g={f:'a',bid:$user.id,uid:$user.ke,auth:$user.auth,t:gTk()};
+                    if(IsNumber($user.id)===false){g.ff='su'};cx(g);
+                    if($.CloudChat.Peer){g.peer=$.CloudChat.Peer.id}
             try{g.ar.shto=JSON.parse($user.shto)}catch(e){};
             try{g.ar.shfr=JSON.parse($user.shfr)}catch(e){};
             try{$user.ops=JSON.parse($user.ops)}catch(e){};
@@ -791,7 +802,7 @@ HBR.init=function(e,g,d){
                 v[0]=$(v[0]);if(v[0].hasClass('sz')==false){if(g[v[1]]<1){g[v[1]]=''}};v[0].text(g[v[1]]);
             })
         break;
-<?php if(sudo('su')===true){ ?>
+<% if(sudo('su')===true){ %>
         case'st':
 $('#stat_dates .datepicker.start').datepicker({format:'yyyy-mm-dd'})
 .datepicker("setDate",moment().subtract(7,'day').format('YYYY-MM-DD'))
@@ -840,8 +851,8 @@ $('.morris_chart').trigger('resize')
                 }
             }
         break;
-<?php } ?>
-<?php if($_SESSION['lv']!=="0"&&sudo()===true){ ?>
+<% } %>
+<% if(session.lv!=="0"&&sudo()===true){ %>
         case'stats':
     g.std=$('#stat_dates'),g.stds=moment(g.std.find('.start').val(),'YYYY-MM-DD'),g.stde=moment(g.std.find('.end').val(),'YYYY-MM-DD'),g.rt={rank_A:0,rank_F:0,rc:[]},g.visitors={datu:{},dat:0,data:{},d:[],chc:{},chco:[],chatu:{}},g.rt.crumbs={nodes:[],links:[],pre:[]};
     $.each(g.chats,function(n,v){
@@ -952,7 +963,7 @@ if(g.missed_chats_chart.length>0){Morris.Line({element:'stat_missed_line',data:g
     $('.count_stat_unique_visitors').text(g.crumbs_unique_visitors);
     $('.count_stat_visits').text(g.crumbs_visits);
         break;
-<?php } ?>
+<% } %>
         case'snd_':
             g.e=$('#WIN_WTC [chat]:visible .messagebar');
             g.i=g.e.find('textarea');g.t=g.i.val();g.i.val(g.t+' '+g.d);
@@ -1147,7 +1158,7 @@ if(g.missed_chats_chart.length>0){Morris.Line({element:'stat_missed_line',data:g
             if($(g.e).length===0){
                 $('#ChatHistory .history_chats').append('<div chsi="'+g.b+'" chsw="'+g.b+'" uid="'+g.u+'" time="'+g.t+'" focus="1"><div class="ldr_"></div><ul class="list-group list-group-lg no-bg msg_"></ul></div>')
                 $('#ChatHistory .history_crumbs').append('<div chsi="'+g.b+'" chsb="'+g.b+'" uid="'+g.u+'" time="'+g.t+'" focus="1"><div class="ldr_"></div><ul class="list-group list-group-lg no-bg brd_"></ul></div>')
-                $.get('/g/c/'+g.u+'/'+g.b+'/'+g.t+'?l',function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/chat/'+g.b+'/'+g.t+'?l',function(d){
                     try{d=JSON.parse(d);
                     console.log(d)
                     $.each(d.chat,function(n,v){try{pm(1,JSON.parse(v.history),g.e+' .msg_')}catch(er){console.log(er)}})
@@ -1383,7 +1394,7 @@ g.WTC=$('#WIN_WTC'),g.WTCm=$('[bid="'+g.bid+'"][uid="'+g.uid+'"],[ctb="'+g.bid+'
         }
         return tmp;
     }
-<?php if(intval($_SESSION['lv'])>0&&isset($_SESSION['ids']['slack'])){ ?>
+<% if(parseInt(session.lv)>0&&session.ids.slack){ %>
 ///**********************************Slack***********************************//
     //slack start
     $.Slack={selected:'',api:'https://slack.com/api/'};
@@ -1570,15 +1581,10 @@ g.WTC=$('#WIN_WTC'),g.WTCm=$('[bid="'+g.bid+'"][uid="'+g.uid+'"],[ctb="'+g.bid+'
         return tmp;
     }
     //slack end
-<?php } ?>
+<% } %>
 ///******************************************************************************//
-var HBChat=io.connect('<?=$config['socket']?>'),HBCd=function(){
-    if(HBR.loggedIn===true){
-    HBR.init(0)
-    HBCc()
-    }
-},HBCc=function(){
-    if(HBR.loggedIn===true){
+var HBChat=io.connect('<%- host %>');
+HBR.init(0);
 window.addEventListener("beforeunload",function(e) {
     if(Op().aclose===1){
         $.each(HBR.p,function(n,v){
@@ -1586,6 +1592,7 @@ window.addEventListener("beforeunload",function(e) {
         })
     }
 });
+    if($.CloudChat.Peer){
     $.CloudChat.Peer.p.on('connection',function(c,d){
         d=c.metadata;
         if(d&&d.f){
@@ -1605,6 +1612,7 @@ window.addEventListener("beforeunload",function(e) {
             }
         }
     })
+    }
     HBChat.on('connect',function(d){
         if(HBR.loggedIn===true&&HBR.loggedInn===false){
             HBR.init(0)
@@ -1994,7 +2002,6 @@ window.addEventListener("beforeunload",function(e) {
         if(d.remove){
             $(d.remove.join(',')).remove()
         }
-        <?php if(strpos($_SERVER['HTTP_HOST'],'m03.ca')!==false){ ?>console.log(d)<?php } ?>
     });
 $.RateC={r:$('#RateCustomizer')};$.RateC.f=$.RateC.r.find('form');
 $.ScrView={e:$('#viewer-pane'),m:$('#ViewerModal')};$.ScrView.i=$('#wtc_sidemenu .recordings'),$.ScrView.v=$.ScrView.e.find('.viewer')
@@ -2111,7 +2118,7 @@ $.contextMenu({
         }
     }
 });
-<?php if(sudo()===true){ ?>
+<% if(sudo()===true){ %>
 //Stat init
 HBR.init('st');
 $('#Statistics').on('show.bs.modal',function(){
@@ -2131,7 +2138,7 @@ pm(13);
                 e.t='';
                 if($.ScrView.checking!==1){
                     $.ScrView.checking=1;
-                $.get('/g/recs',function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/recs',function(d){
                     delete($.ScrView.checking);
                     try{d=JSON.parse(d)}catch(er){d=[]}
                     $.each(d,function(n,v){
@@ -2145,7 +2152,7 @@ pm(13);
             case's':
                 if($('#ViewerModal:visible').length===0){$('#ViewerModal').modal('show')}
                 e.b=e.e.attr('key'),e.a=e.e.attr('file');
-                $.get('/g/recs/'+e.b+'/'+e.a,function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/recs/'+e.b+'/'+e.a,function(d){
                     try{d=JSON.parse(d)}catch(e){d={success:false}}
                     if(d.success!==false){
                       $.ScrView.player = new cimice.Player({
@@ -2160,8 +2167,8 @@ pm(13);
             break;
         }
     })
-<?php }?>
-<?php if(sudo('su')===true){ ?>
+<% }%>
+<% if(sudo('su')===true){ %>
 pm('api');pm('suba');$.ChatBot.init(1);pm(14);$.each([1,3,4],function(n,v){HBR.init('settings',{sw:'t',ws:v})})
 $('#AccountModal .confirmaction').click(function(e){
     e.a=$('#AccountModal .unmFrame:visible').attr('unmtab');
@@ -2396,7 +2403,7 @@ $('#ssettings').on('click','[share]',function(e){
         $.ChaMa.tm(0,e.tm,e.s.name);$.ChaMa.tm(1,e.tm,e.s.name);
         return false;
     })
-<?php } ?>
+<% } %>
 //Auto Tasks
     $.AutTa={e:$('#AutoTasker'),to:{}};$.AutTa.f=$.AutTa.e.find('form');
     $.AutTa.jj=function(tmp){
@@ -2534,7 +2541,7 @@ $.each(CCiso.langs,function(n,v){
 });$('#mm-translator [name="fr"],#mm-translator [name="to"]').append(tmp);tmp='';
     $('#mm-translator').submit(function(e){
         e.preventDefault();e.e=$.CloudChat.base.selected_translate;e.t=e.e.find('.unm-bubble small').text();e.f=$(this);e.fr=e.f.find('[name="fr"]').val(),e.to=e.f.find('[name="to"]').val()
-        $.post('/g/t',{t:e.t,fr:e.fr,to:e.to},function(d){
+        $.post('/get/translation',{t:e.t,fr:e.fr,to:e.to},function(d){
             e.e.find('.translated').html('<i>'+d+'</i>');
         });
         e.f.hide();
@@ -2704,7 +2711,7 @@ $('body')
         switch(e.a){
             case"screen_view":
                 if(e.p.hasClass('op_win')){e.uu='a'}else{e.uu='u'}
-    if(!HBR[e.uu][e.u][e.b].peer){
+    if($.CloudChat.Peer&&!HBR[e.uu][e.u][e.b].peer){
         HBR[e.uu][e.u][e.b].peer=$.CloudChat.Peer.p.connect(e.u+'_'+e.b)
         HBR[e.uu][e.u][e.b].peer.on('open', function() {
             HBR[e.uu][e.u][e.b].peer.on('data', function(d) {
@@ -2906,7 +2913,8 @@ $('body')
         e.e=$(this);e.b=e.e.attr('preview'),e.t=e.e.attr('type'),e.p=$('#manager-preview');
         switch(e.t){
             case'get_missed':
-                $.get('/g/m/',function(d){
+                $.get('/'+$user.auth+'/'+$user.ke+'/get/missed',function(d){
+                    $('#manager-missed ul').empty()
                     try{d=JSON.parse(d);console.log(d)
                     d.missed=JSON.parse(d.missed);
                     }catch(e){}
@@ -2921,7 +2929,7 @@ $('body')
                 if(HBR.missed[e.u]&&HBR.missed[e.u][e.b]&&HBR.missed[e.u][e.b].history){
                     pm(1,HBR.missed[e.u][e.b].history,'#manager-preview ul',1);
                 }else{
-                    $.get('/g/c/'+e.u+'/'+e.b+'/'+encodeURIComponent(e.ti)+'?l',function(d){
+                    $.get('/'+$user.auth+'/'+$user.ke+'/get/chat/'+e.b+'/'+encodeURIComponent(e.ti)+'?limit=1',function(d){
                         try{d=JSON.parse(d);
 //                           d.brd=JSON.parse(d[0].crumbs.brd);
                            d.history=JSON.parse(d.chat[0].history);
@@ -3028,7 +3036,10 @@ e.th=$(this),e.w=e.th.attr('winc'),e.e=e.th.parents('[CHAT]');e.b=e.e.attr('CHAT
             break;
             case'lm':
                 e.t=[e.e.find('.brd_ li:last .livestamp').attr('title'),e.e.find('.msg_ li:first').attr('title')];e.th.removeAttr('winc').addClass('disabled')
-                $.get('/g/c/'+e.u+'/'+e.b+'/'+e.t[1]+'/'+e.t[0]+'?n',function(d){
+                e.url='/'+$user.auth+'/'+$user.ke+'/get/chat/'+e.b+'/'+e.t[1];
+                if(e.t[0]){e.url+='/'+e.t[0];}
+                e.url+='?n';
+                $.get(e.url,function(d){
                     try{d=JSON.parse(d);
                         try{d.brd=JSON.parse(d[0].crumbs.brd);}catch(e){d.brd=[]}
                         try{d.history=JSON.parse(d[0].chat.history);}catch(e){}
@@ -3154,7 +3165,7 @@ e.stopPropagation();e.e=$('#ChatHistory_helper'),e.p=$(this).parents('[time]'),e
                 location.href=location.protocol+'//'+location.host+'/p/slack/detach';
             break;
             default:
-                location.href='https://slack.com/oauth/authorize?scope=client&client_id=<?=$config['slack']['client_id']?>';
+                location.href='https://slack.com/oauth/authorize?scope=client&client_id=<%= config.slack_client_id %>';
             break;
         }
     })
@@ -3278,7 +3289,7 @@ e.stopPropagation();e.e=$('#ChatHistory_helper'),e.p=$(this).parents('[time]'),e
                 v=$(v);e.cx.bid=v.attr('ctb'),e.cx.uid=v.attr('uid');
                 if(e.v==0){
                     e.cx.x=0;
-                };<?php if(isset($_SESSION['ids']['slack1'])){?>if(e.v==0){$.Slack.init('status',{f:0})}else{$.Slack.init('status')};<?php } ?>
+                };<% if(session.ids.slack1){%>if(e.v==0){$.Slack.init('status',{f:0})}else{$.Slack.init('status')};<% } %>
                 cx(e.cx);
             })                 
         }
@@ -3366,21 +3377,23 @@ e.stopPropagation();e.e=$('#ChatHistory_helper'),e.p=$(this).parents('[time]'),e
         if(t.type.indexOf('image')>-1){e.fi+='<br><img unmFile="img" src="'+URL.createObjectURL($.CloudChat.b64toBlob(t.value))+'">'}
         tm(3,{msg:e.fi,c:'bg-primary',time:moment().format()},'[uid="'+e.key[1]+'"][CHAT="'+e.key[2]+'"] .msg_',1);
         $.each(e.ar,function(n,v){
-            $.CloudChat.Peers[v]=$.CloudChat.Peer.p.connect(v,{metadata:{f:'fi',d:t,uid:e.key[1],bid:e.key[2],$uid:$user.ke,$bid:$user.id}});
-            $.CloudChat.Peers[v].close();
+            if($.CloudChat.Peer){
+                $.CloudChat.Peers[v]=$.CloudChat.Peer.p.connect(v,{metadata:{f:'fi',d:t,uid:e.key[1],bid:e.key[2],$uid:$user.ke,$bid:$user.id}});
+                $.CloudChat.Peers[v].close();
+            }
         })
     };
     $.Filer.mD();
 ///**********************************FIREBASE***********************************//
-<?php if(intval($_SESSION['lv'])>0&&isset($_SESSION['ids']['firebase'])&&$_SESSION['ids']['firebase']['apiKey']!==''){ ?>
-  var FireBaseConfig = <?= json_encode($_SESSION['ids']['firebase'])?>;
-<?php }else{ ?>
+<% if(parseInt(session.lv)>0&&session.ids.firebase&&session.ids.firebase.apiKey!==''){ %>
+  var FireBaseConfig = <%- JSON.stringify(session.ids.firebase)%>;
+<% }else{ %>
   var FireBaseConfig = {
     apiKey: "AIzaSyBZ68U1anJHhKLLt30f66BwmB7ED1ipht0",
     authDomain: "cloudchat-5bb80.firebaseapp.com",
     storageBucket: "cloudchat-5bb80.appspot.com",
   };
-<?php } ?>
+<% } %>
 firebase.initializeApp(FireBaseConfig);firebase.initializeApp=function(){}
 $.FireBs={a:firebase.storage()};$.FireBs.buck='CloudChat.Online/'+$user.ke+'/';
 $.FireBs.ref=$.FireBs.a.ref();
@@ -3393,5 +3406,4 @@ $.FireBs.ref=$.FireBs.a.ref();
     }
 //    $.FireBs.drawFiles();
 });
-}
-}
+</script>

@@ -1,6 +1,8 @@
 s={ver:'Emissary 0.1'},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
 
 var http=require('http'),
+    https=require('https'),
+    request = require('request'),
     express = require('express'),
     mysql=require('mysql'),
     moment=require('moment'),
@@ -15,7 +17,12 @@ var http=require('http'),
     server = http.createServer(app),
     io = require('socket.io')(server),
     config=require('./conf.json'),
-    conn;
+    sql;
+
+if(config.title===undefined){config.title='Emissary'}
+if(config.port===undefined){config.port=80}
+if(config.peerJS===undefined){config.peerJS=true}
+console.log(config)
 //connect redis
 s.redis=function(){
     red=redis.createClient();
@@ -24,10 +31,19 @@ s.redis=function(){
     })
 }
 s.redis();
+//check relative path
+s.checkRelativePath=function(x){
+    if(x.charAt(0)!=='/'){
+        x=__dirname+'/'+x
+    }
+    return x
+}
 //json parse
 s.jp=function(d,x){if(!d||d==""||d=="null"){if(x){d=x}else{d={}}};try{d=JSON.parse(d)}catch(er){if(x){d=x}else{d={}}};return d;}
 //json string
 s.js=function(d){d=JSON.stringify(d);if(d=="null"){d=null;};return d;}
+//md5 tag
+s.md5=function(x){return crypto.createHash('md5').update(x).digest("hex");}
 //random tag
 s.gid=function(x){
     if(!x){x=10};var t = "";var p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -43,17 +59,42 @@ s.isJson=function(x){
 s.stt=function(x,y){if(!y||y=="null"){return false;};red.set(x,y)};
 //sql config
 s.disc=function(){
-    conn = mysql.createConnection(config.db); 
-    conn.connect(function(err) {if(err){console.log('Error Connecting : DB',err);setTimeout(s.disc, 2000);}});
-    conn.on('error',function(err) {console.log('DB Lost.. Retrying..');console.log(err);s.disc();return;});
+    sql = mysql.createConnection(config.db); 
+    sql.connect(function(err) {if(err){console.log('Error Connecting : DB',err);setTimeout(s.disc, 2000);}});
+    sql.on('error',function(err) {console.log('DB Lost.. Retrying..');console.log(err);s.disc();return;});
 }
 s.disc();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
-app.use('/peer',PeerServer(server));
-server.listen(80);
+app.use('/libs',express.static(__dirname + '/web/libs'));
+app.use('/peerjs',PeerServer(server));
+server.listen(config.port,function(){
+    console.log('Emissary - PORT : '+config.port);
+});
+//SSL options
+if(config.ssl&&config.ssl.key&&config.ssl.cert){
+    config.ssl.key=fs.readFileSync(s.checkRelativePath(config.ssl.key),'utf8')
+    config.ssl.cert=fs.readFileSync(s.checkRelativePath(config.ssl.cert),'utf8')
+    if(config.ssl.port===undefined){
+        config.ssl.port=443
+    }
+    if(config.ssl.bindip===undefined){
+        config.ssl.bindip=config.bindip
+    }
+    if(config.ssl.ca&&config.ssl.ca instanceof Array){
+        config.ssl.ca.forEach(function(v,n){
+            config.ssl.ca[n]=fs.readFileSync(s.checkRelativePath(v),'utf8')
+        })
+    }
+    var serverHTTPS = https.createServer(config.ssl,app);
+    serverHTTPS.listen(config.ssl.port,config.bindip,function(){
+        console.log('SSL Emissary - SSL PORT : '+config.ssl.port);
+    });
+    io.attach(serverHTTPS);
+    app.use('/peerjs',PeerServer(serverHTTPS));
+}
 //log to redis
 s.log=function(x,xx,xxx,tt,ti){
     if(!xxx){tt="LOG_"+x}else{tt="LOG_"+x+"_"+xxx};ti=s.moment();
@@ -139,8 +180,8 @@ s.stf=function(x,y,z,srun){
                         red.get("DEP_K_"+x,function(err,key2){//department
                             red.get("STY_K_"+x,function(err,key3){//style
                                 if(!key||key!==y.ry||!key2||key2!==y.dp||!key3||key3!==y.sc){//check all
-                                    conn.query('SELECT ids,ops FROM Ops WHERE ke=?',[x],function(er,r){
-                                    conn.query('SELECT rates,depts FROM Details WHERE ke=?',[x],function(er,rr){
+                                    sql.query('SELECT ids,ops FROM Ops WHERE ke=?',[x],function(er,r){
+                                    sql.query('SELECT rates,depts FROM Details WHERE ke=?',[x],function(er,rr){
                                             if(r&&r[0]&&rr&&rr[0]){
                                                 r=r[0];try{r.ids=JSON.parse(r.ids);}catch(er){r.ids=y.default};
                                                 s.stt("RAT_K_"+x,r.ids.ry),s.stt("DEP_K_"+x,r.ids.dp),s.stt("STY_K_"+x,r.ids.sc);
@@ -158,7 +199,7 @@ s.stf=function(x,y,z,srun){
             }
             red.get("TRUST_"+x,function(err,rd){
                 if(!rd){
-                    conn.query('SELECT ids FROM Ops WHERE ke=?',[x],function(er,r){
+                    sql.query('SELECT ids FROM Ops WHERE ke=?',[x],function(er,r){
                         if(r&&r[0]){r=s.jp(r[0].ids).trusted;s.stt("TRUST_"+x,r);srun(r);}
                     });
                 }else{
@@ -170,7 +211,7 @@ s.stf=function(x,y,z,srun){
     }
     red.get("BANNED_"+x,function(err,rd){
         if(!rd){
-            conn.query('SELECT ids FROM Ops WHERE ke=?',[x],function(er,r){
+            sql.query('SELECT ids FROM Ops WHERE ke=?',[x],function(er,r){
                 if(r&&r[0]){r=s.jp(r[0].ids);er=r.bannedf;r=r.banned;if(!r||r=="null"){r='';};srun([r,er]);}
                 s.stt("BANNED_"+x,JSON.stringify([r,er]));
             });
@@ -194,13 +235,13 @@ s.channels.ch=function(d){
         }
         d.le=s.chats.fM(s.c[d.uid][d.bid]);d.lo=JSON.stringify(d.le);
         if(s.c[d.uid][d.bid].length>30){
-            conn.query('SELECT id FROM Chats WHERE ke=? AND id=? AND start=?',[d.uid,d.bid,s.y[d.uid][d.bid].s],function(er,r){
+            sql.query('SELECT id FROM Chats WHERE ke=? AND id=? AND start=?',[d.uid,d.bid,s.y[d.uid][d.bid].s],function(er,r){
                 if(r&&r[0]){
-                    conn.query("UPDATE Chats SET history=? WHERE ke=? AND id=? AND start=?",[d.lo,d.uid,d.bid,s.y[d.uid][d.bid].s],function(){
+                    sql.query("UPDATE Chats SET history=? WHERE ke=? AND id=? AND start=?",[d.lo,d.uid,d.bid,s.y[d.uid][d.bid].s],function(){
                          d.fn();
                     });
                 }else{
-                    conn.query("INSERT INTO Chats (start,history,id,ke,co) VALUES (?,?,?,?,?)",[s.y[d.uid][d.bid].s,d.lo,d.bid,d.uid,0],function(){
+                    sql.query("INSERT INTO Chats (start,history,id,ke,co) VALUES (?,?,?,?,?)",[s.y[d.uid][d.bid].s,d.lo,d.bid,d.uid,0],function(){
                          d.fn();
                     });
                 }
@@ -221,11 +262,11 @@ function tx(z){//Connection Sender
 //                    case's'://save recording
 //                            
 //                            d.start=s.r[cn.uid][cn.bid].fti;
-//                            conn.query("SELECT * from Recordings WHERE ke=? AND id=? AND start=?",[cn.uid,cn.bid,d.start],function(er,r,g){
+//                            sql.query("SELECT * from Recordings WHERE ke=? AND id=? AND start=?",[cn.uid,cn.bid,d.start],function(er,r,g){
 //                                if(r&&r[0]){
-//                                    conn.query("UPDATE Recordings SET data=? WHERE ke=? AND id=? AND start=?",[d.d,cn.uid,cn.bid,d.start])
+//                                    sql.query("UPDATE Recordings SET data=? WHERE ke=? AND id=? AND start=?",[d.d,cn.uid,cn.bid,d.start])
 //                                }else{
-//                                    conn.query("INSERT INTO Recordings SET ?",{id:cn.bid,ke:cn.uid,start:d.start,data:d.d});
+//                                    sql.query("INSERT INTO Recordings SET ?",{id:cn.bid,ke:cn.uid,start:d.start,data:d.d});
 //                                }
 //                            })
 //                        })
@@ -350,7 +391,7 @@ function tx(z){//Connection Sender
                             if(!d.s){d.bi=d.bid}else{d.bi=d.s;}
                             red.get("CHAT_"+d.u+"_"+d.bi,function(err,rd){
                                 if(rd==='{}'){rd='[]'};rd=s.jp(rd,[]);if(!rd){if(!d.y&&(!s.r[d.u]||!s.r[d.u][d.bi])){
-//                                    conn.query("SELECT history,user FROM Chats where ke=? AND id=? DESC LIMIT 1",[d.u,d.bi],function(er,r,g){
+//                                    sql.query("SELECT history,user FROM Chats where ke=? AND id=? DESC LIMIT 1",[d.u,d.bi],function(er,r,g){
 //                                        r=JSON.parse(r[0].user);
 //                                        if(r.mail&&s.vmail(r.mail)){
 //                                            d.mailOptions = {
@@ -420,11 +461,11 @@ function tx(z){//Connection Sender
                         switch(d.fff){
                             case'o':case'r':
                                 if(d.m&&d.m!==''){
-                                    conn.query("SELECT ke from Ops where mail=?",[d.m],function(er,r,g){
+                                    sql.query("SELECT ke from Ops where mail=?",[d.m],function(er,r,g){
                                         if(r&&r[0]){
                                             d.uid=r[0].ke
                                 if(d.uid!==cn.uid){
-                                    conn.query("SELECT shto,perm from Ops where ke='"+cn.uid+"'",function(er,r,g){
+                                    sql.query("SELECT shto,perm from Ops where ke='"+cn.uid+"'",function(er,r,g){
                                         if(r&&r[0]){r=r[0];
                                             try{r.shto=JSON.parse(r.shto)}catch(e){r.shto=[]}
                                             d.i=r.shto.indexOf(d.uid)
@@ -432,7 +473,7 @@ function tx(z){//Connection Sender
                                                 case'o':
                                                     if(d.i===-1){
                                                             r.shto.push(d.uid)
-                                    conn.query("SELECT name,mail from Ops where ke='"+d.uid+"'",function(er,rr,g){rr=rr[0];
+                                    sql.query("SELECT name,mail from Ops where ke='"+d.uid+"'",function(er,rr,g){rr=rr[0];
                                                             tx({pnote:'lg',pnotm:1,name:rr.name,mail:rr.mail,ke:d.uid})
                                     })
                                                             d.lr=s.lr('1AA_A_'+d.uid)
@@ -474,8 +515,8 @@ function tx(z){//Connection Sender
                                                 break;
                                             }
                                             s.a[cn.uid][cn.id].shto=r.shto;
-                                            conn.query("UPDATE Ops SET shto=? WHERE ke=?",[JSON.stringify(r.shto),cn.uid],function(){
-                                            conn.query("SELECT shfr from Ops where ke='"+d.uid+"'",function(er,rr,g){
+                                            sql.query("UPDATE Ops SET shto=? WHERE ke=?",[JSON.stringify(r.shto),cn.uid],function(){
+                                            sql.query("SELECT shfr from Ops where ke='"+d.uid+"'",function(er,rr,g){
                                         if(rr&&rr[0]){rr=rr[0];
                                             try{rr.shfr=JSON.parse(rr.shfr)}catch(e){rr.shfr=[]}
                                             d.i=rr.shfr.indexOf(cn.uid)
@@ -491,7 +532,7 @@ function tx(z){//Connection Sender
                                                     }
                                                 break;
                                             }
-                                                      conn.query("UPDATE Ops SET shfr=? WHERE ke=?",[JSON.stringify(rr.shfr),d.uid])
+                                                      sql.query("UPDATE Ops SET shfr=? WHERE ke=?",[JSON.stringify(rr.shfr),d.uid])
                                                    }
                                             })
                                             })
@@ -613,15 +654,15 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         switch(d.fff){
                             case'r':
                                 if(['rates',''].indexOf(d.ws)>-1){
-        conn.query("UPDATE Details SET "+d.ws+"=? WHERE ke=?",[d.s,cn.uid]);
+        sql.query("UPDATE Details SET "+d.ws+"=? WHERE ke=?",[d.s,cn.uid]);
                                 }
                             break;
                             case's'://stats
                                 if(s.a[cn.uid]&&s.a[cn.uid][cn.id]){
-                                conn.query("SELECT * from Crumbs where ke=? AND DATE(`start`) > '"+d.d.start_date+"' and DATE(`end`) < '"+d.d.end_date+"'",[cn.uid],function(er,rr,g){if(er){return;}
-                                conn.query("SELECT end,user,id from Chats where ke=? AND DATE(`start`) > '"+d.d.start_date+"' and DATE(`end`) < '"+d.d.end_date+"'",[cn.uid],function(er,rrr,g){if(er){return;}
-                                conn.query("SELECT * from Ratings where ke=? AND DATE(time) between '"+d.d.start_date+"' and '"+d.d.end_date+"'",[cn.uid],function(er,rrrr,g){if(er){return;}
-                                conn.query("SELECT * from Missed where ke=? AND DATE(`start`) > '"+d.d.start_date+"' and DATE(`end`) < '"+d.d.end_date+"'",[cn.uid],function(er,rrrrr,g){if(er){return;}
+                                sql.query("SELECT * from Crumbs where ke=? AND DATE(`start`) > '"+d.d.start_date+"' and DATE(`end`) < '"+d.d.end_date+"'",[cn.uid],function(er,rr,g){if(er){return;}
+                                sql.query("SELECT end,user,id from Chats where ke=? AND DATE(`start`) > '"+d.d.start_date+"' and DATE(`end`) < '"+d.d.end_date+"'",[cn.uid],function(er,rrr,g){if(er){return;}
+                                sql.query("SELECT * from Ratings where ke=? AND DATE(time) between '"+d.d.start_date+"' and '"+d.d.end_date+"'",[cn.uid],function(er,rrrr,g){if(er){return;}
+                                sql.query("SELECT * from Missed where ke=? AND DATE(`start`) > '"+d.d.start_date+"' and DATE(`end`) < '"+d.d.end_date+"'",[cn.uid],function(er,rrrrr,g){if(er){return;}
                                     tx({stats:{crumbs:rr,chats:rrr,rates:rrrr,miss:rrrrr}});
                                 });
                                 });
@@ -645,7 +686,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                             d.fn=function(){
                                 if((!rd)||(rd&&rd.length===0)){
                                     rd=[]
-                                    conn.query("SELECT history from Chats where id=? AND ke=? ORDER BY `start` DESC LIMIT 1",[d.tbid,d.uid],function(er,r,g){
+                                    sql.query("SELECT history from Chats where id=? AND ke=? ORDER BY `start` DESC LIMIT 1",[d.tbid,d.uid],function(er,r,g){
                                         if(r&&r[0]){
                                             d.arr.history=JSON.parse(r[0].history);
                                         }else{
@@ -660,7 +701,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                             }
                             rlog=s.jp(rlog,[]);
                             if(rlog.length===0){
-                                conn.query("SELECT * from Logs where id=? AND ke=? ORDER BY `start` DESC LIMIT 1",[d.tbid,d.uid],function(er,rr,g){
+                                sql.query("SELECT * from Logs where id=? AND ke=? ORDER BY `start` DESC LIMIT 1",[d.tbid,d.uid],function(er,rr,g){
                                     if(er){return;}
                                     if(rr&&rr[0]){
                                         try{rr=JSON.parse(rr[0].history)}catch(e){rr=[]};//rd=r
@@ -698,17 +739,17 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                     red.del('FB_'+cn.uid);
                                                 }
 //                                                if(cn.mas===1){
-                                                  conn.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){ 
+                                                  sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){ 
                                                     d.ar=JSON.parse(r[0].ids);d.fn();
-                                                    conn.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(d.ar),cn.uid],function(er){
+                                                    sql.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(d.ar),cn.uid],function(er){
                                                         tx({pnote:'ust'});
                                                     })
                                                   })
 //                                                }else{
-//                                                  conn.query("SELECT subs FROM Details WHERE ke=?",[cn.uid],function(er,r){
+//                                                  sql.query("SELECT subs FROM Details WHERE ke=?",[cn.uid],function(er,r){
 //                                                      r=JSON.parse(r[0].subs),d.ar=r[cn.bid];d.fn();
 //                                                    r[cn.bid]=d.ar;
-//                                                    conn.query("UPDATE Details SET subs=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){ 
+//                                                    sql.query("UPDATE Details SET subs=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){ 
 //                                                        tx({pnote:'ust'});
 //                                                    })
 //                                                  })
@@ -717,21 +758,21 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                             case'api':
                                                 switch(d.ffff){
                                                     case'i':
-                                              conn.query("INSERT INTO API (ke,code,detail) VALUES (?,?,?)",[cn.uid,d.s,JSON.stringify({ip:s.a[cn.uid][cn.id].ip,name:s.a[cn.uid][cn.id].n,bid:cn.bid})],function(er,r){
+                                              sql.query("INSERT INTO API (ke,code,detail) VALUES (?,?,?)",[cn.uid,d.s,JSON.stringify({ip:s.a[cn.uid][cn.id].ip,name:s.a[cn.uid][cn.id].n,bid:cn.bid})],function(er,r){
                                                tx({pnote:'ust'});   
                                               });
                                                     break;
                                                     case'd':
-                                              conn.query("DELETE FROM API WHERE ke=? AND code=?",[cn.uid,d.s],function(er,r){
+                                              sql.query("DELETE FROM API WHERE ke=? AND code=?",[cn.uid,d.s],function(er,r){
                                                tx({pnote:'ust'});   
                                               });
                                                     break;
                                                     case'u':
-                                                      conn.query("SELECT * FROM API WHERE ke=? AND code=?",[cn.uid,d.s],function(er,r){
+                                                      sql.query("SELECT * FROM API WHERE ke=? AND code=?",[cn.uid,d.s],function(er,r){
                                                           if(r&&r[0]){
                                                               r=r[0];r.detail=JSON.parse(r.detail);
                                                               r.detail[d.n]=d.v;
-                                                          conn.query("UPDATE API SET detail=? WHERE ke=? AND code=?",[JSON.stringify(r.detail),cn.uid,d.s],function(){
+                                                          sql.query("UPDATE API SET detail=? WHERE ke=? AND code=?",[JSON.stringify(r.detail),cn.uid,d.s],function(){
                                                               tx({pnote:'ust'});
                                                           });
                                                           }
@@ -740,7 +781,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 }
                                             break;
                                             case'profile':
-                                              conn.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                              sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
                                                 if(r&&r[0]){
                                                     d.vv=s.obk(d.s);d.ar=[];d.arr=[];
                                                     d.vv.forEach(function(v){
@@ -761,7 +802,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                         d.ar.push('ids=?');d.arr.push(JSON.stringify(d.ops));
                                                     }
                                                     d.arr.push(cn.uid);
-                                                    conn.query("UPDATE Ops SET "+d.ar.join(',')+" WHERE ke=?",d.arr,function(er){
+                                                    sql.query("UPDATE Ops SET "+d.ar.join(',')+" WHERE ke=?",d.arr,function(er){
                                                         tx({pnote:'ust'});
                                                     })
                                                 }
@@ -771,7 +812,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 if(d.idx){
                                                     if(d.idx!=='name'||d.idx!=='mail'){return false;}
                                                     if(isNaN(parseInt(''+cn.bid))==false){
-                                                        conn.query("UPDATE Ops SET "+d.idx+"=? WHERE ke=?",[d.s,cn.uid],function(er){
+                                                        sql.query("UPDATE Ops SET "+d.idx+"=? WHERE ke=?",[d.s,cn.uid],function(er){
                                                             tx({pnote:'ust'});
                                                         })
                                                     }
@@ -779,11 +820,11 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                             break;
                                             case 5://dynamic Ops.ids saver
                                                 if(d.idx){
-                                                conn.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                                sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
                                                     if(r&&r[0]){
                                                         r=JSON.parse(r[0].ids);r[d.idx]=d.s;
                                                         if(d.idx==='trusted'){s.stt('TRUST_'+cn.uid,d.s)}
-                                                        conn.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){
+                                                        sql.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){
                                                         tx({pnote:'ust'});
                                                         })
                                                     }
@@ -791,7 +832,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 }
                                             break;
                                             case 1:case 3:case 4:case 6:case 8://save function for most of the settings pages
-                                                conn.query("SELECT ids,type FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                                sql.query("SELECT ids,type FROM Ops WHERE ke=?",[cn.uid],function(er,r){
                                                     if(r&&r[0]){r=r[0];
                                                         //check
                                                         switch(d.ws){
@@ -814,23 +855,23 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                             break;
                                                         }
                                                         //submit
-                                                        conn.query("SELECT ke FROM Details WHERE ke=?",[cn.uid],function(er,rr){
+                                                        sql.query("SELECT ke FROM Details WHERE ke=?",[cn.uid],function(er,rr){
                                                             if(rr&&rr[0]){
                                                                 switch(d.ws){case 8:d.ws='chans';break;case 1:d.ws='subs';break;case 3:d.ws='resp';break;
                                                                     case 6:case 4:
                                                                         if(d.ws===6){d.ws='rates',d.wss='ry';s.stt('RAT_K_'+cn.uid,d.sc)}else{d.ws='depts',d.wss='dp';s.stt('DEP_K_'+cn.uid,d.sc)}
                                                                                 r=JSON.parse(r.ids);r[d.wss]=d.sc;s[d.wss][cn.uid]=d.sc;
-                                                                                conn.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){d.wss={sc:d.sc};d.wss[d.ws]=d.s;
+                                                                                sql.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){d.wss={sc:d.sc};d.wss[d.ws]=d.s;
                                                                                     s.tx(d.wss,cn.uid);
                                                                                 })
                                                                     break;
                                                                 }
-                                                                conn.query("UPDATE Details SET "+d.ws+"=? WHERE ke=?",[d.s,cn.uid]);
+                                                                sql.query("UPDATE Details SET "+d.ws+"=? WHERE ke=?",[d.s,cn.uid]);
                                                             }else{
                                                                 ['resp','depts','subs','rates','chans'].forEach(function(v){
                                                                     if(!d.s[v]){d.s[v]='{}'}
                                                                 });
-                                                                conn.query("INSERT INTO Details SET ?",d.s);
+                                                                sql.query("INSERT INTO Details SET ?",d.s);
                                                             }
                                                             tx({pnote:'ust'});
                                                             //send new settings to other accepted superusers
@@ -839,11 +880,11 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 })
                                             break;
                                             case 2:
-                                                conn.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                                sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
                                                     if(r&&r[0]){
                                                         r=JSON.parse(r[0].ids);r.sc=d.gid;
                                                         s.stt('STY_K_',r.sc),s.stt('STY_',d.s);
-                                                        conn.query("UPDATE Ops SET ops=?,ids=? WHERE ke=?",[d.s,JSON.stringify(r),cn.uid],function(er){
+                                                        sql.query("UPDATE Ops SET ops=?,ids=? WHERE ke=?",[d.s,JSON.stringify(r),cn.uid],function(er){
                                                         tx({pnote:'ust'});s.tx({bg:d.s,sc:d.gid},cn.uid);
                                                         })
                                                     }
@@ -875,11 +916,11 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                 }else{
                         switch(d.ff){
                     case'su':default://init admin
-                            conn.query("SELECT * from Auth where ke=? AND id=? AND auth=?",[d.uid,d.bid,d.auth],function(er,rr,z){
+                            sql.query("SELECT * from Auth where ke=? AND id=? AND auth=?",[d.uid,d.bid,d.auth],function(er,rr,z){
                                 if(er){cn.disconnect();return}
                                 if(rr&&rr[0]){rr=rr[0];
                                     cn.bid=d.bid,cn.uid=d.uid;cn.mas=rr.mas;
-                                    conn.query("SELECT perm,ids,name,type,shto,shfr from Ops where ke='"+d.uid+"' ",function(err,r){
+                                    sql.query("SELECT perm,ids,name,type,shto,shfr from Ops where ke='"+d.uid+"' ",function(err,r){
                                         if(err){cn.disconnect();return}
                                         if(r&&r[0]){
                                             r=r[0];d.qs=[];
@@ -888,7 +929,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                         r.shto.forEach(function(v){
                                             d.qs.push("ke='"+v+"'");
                                         })
-                                        conn.query("SELECT ke,perm,name,type,mail from Ops where "+(d.qs.join(' OR ')),function(er,g){
+                                        sql.query("SELECT ke,perm,name,type,mail from Ops where "+(d.qs.join(' OR ')),function(er,g){
                                             tx({shto:g})
                                         })
                                             err=function(xx,r){
@@ -917,7 +958,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                     }else{z();}
                                                 }
                                                if(cn.mas!==1){
-                                                    conn.query("SELECT subs from Details where ke='"+xx+"' ",function(errr,rrr){
+                                                    sql.query("SELECT subs from Details where ke='"+xx+"' ",function(errr,rrr){
                                                        if(errr){return} rrr=JSON.parse(rrr[0].subs);r.ids.pp=rrr[d.bid].PP;r.name=rrr[d.bid].Name;er();
                                                     })
                                                 }else{
@@ -930,7 +971,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                             r.shfr.forEach(function(v){
                                                 d.qs.push("ke='"+v+"'");
                                             })
-                                    conn.query("SELECT ke,perm,name,type,mail from Ops where "+(d.qs.join(' OR ')),function(er,g){
+                                    sql.query("SELECT ke,perm,name,type,mail from Ops where "+(d.qs.join(' OR ')),function(er,g){
                                         g.forEach(function(v){
                                             err(v.ke,v);
                                         })
@@ -977,7 +1018,6 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                     })
                     break;
                     case'x'://user init
-                        if(d.ver!==s.ver){tx({ver:s.ver});return false;}//check embed version
                         cn.ip=cn.request.connection.remoteAddress;
                         if(d.u.push!==1){s.stf(d.uid,{ip:cn.ip,trust:d.trust,sc:d.sc,ry:d.ry,dp:d.dp,cn:cn.disconnect},tx);}
                         cn.join(d.uid+'_'+d.bid),cn.join(d.uid);
@@ -1024,13 +1064,13 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         if(q.rr.cap==0&&rd&&rd[0]&&rd.length>1){
                             q.qu="INSERT INTO Missed (start,id,ke,user) VALUES (?,?,?,?)";
                             q.qa=[q.time,cn.bid,cn.uid,q.user];atx({mhistory:rd,uid:cn.uid,bid:cn.bid,d:q.qa},cn.uid);
-                            conn.query(q.qu,q.qa)
+                            sql.query(q.qu,q.qa)
                         }
                         q.qu="SELECT * FROM Chats WHERE id=? AND ke=? AND `start`=?";
                         q.qa=[cn.bid,cn.uid,q.time];
                             q.ar=s.js(rd);
                             if(q.ar!=='[]'&&q.ar!=='{}'){
-                                conn.query(q.qu,q.qa,function(err,r){
+                                sql.query(q.qu,q.qa,function(err,r){
                                     if(!q.rr.co){q.rr.co=1};q.co=q.rr.co;
                                     if(r&&r[0]){
                                         q.qu="UPDATE Chats SET history=?,user=? WHERE `start`=? AND id=? AND ke=?";
@@ -1039,7 +1079,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                         q.qu="INSERT INTO Chats (start,history,id,ke,co,user) VALUES (?,?,?,?,?,?)";
                                         q.qa=[q.time,q.ar,cn.bid,cn.uid,q.co,q.user];
                                     }
-                                    conn.query(q.qu,q.qa,function(er){})
+                                    sql.query(q.qu,q.qa,function(er){})
                                 })
                             }
                             s.stt("CHAT_"+cn.uid+"_"+cn.bid,s.js(rd))
@@ -1089,7 +1129,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                         red.get("CHAT_"+d.uid+"_"+d.bid,function(err,rd){rd=s.jp(rd);
                         if(!rd||(rd&&rd.length===0)){
                             rd=[];
-                                    conn.query("SELECT * from Chats where id=? AND ke=? ORDER BY `start` DESC LIMIT 1",[d.bid,d.uid],function(er,r,g){if(er){return;}
+                                    sql.query("SELECT * from Chats where id=? AND ke=? ORDER BY `start` DESC LIMIT 1",[d.bid,d.uid],function(er,r,g){if(er){return;}
                                         if(r&&r[0]){
                                             try{r=JSON.parse(r[0].history)}catch(e){r=[]};//rd=r
                                             ex({f:'x',ff:1,history:r},d.k)
@@ -1154,7 +1194,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                     //s.log(xx,{id:cn.bid,ip:cn.ip,status:2});
                 }
                 d.fn(cn.uid);
-                conn.query("SELECT shfr from Ops where ke='"+cn.uid+"'",function(er,r,g){
+                sql.query("SELECT shfr from Ops where ke='"+cn.uid+"'",function(er,r,g){
                     if(er){return;}
                     r=JSON.parse(r[0].shfr);
                     if(r.length>0){
@@ -1176,7 +1216,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                     //Breadcrumbs
                         q={rr:s.r[cn.uid][cn.bid]};if(rd){q.ch=rd}
                         q.time=q.rr.brd[0].time,q.qu="SELECT id FROM Crumbs WHERE id=? AND ke=? AND `start`=?",q.qa=[cn.bid,cn.uid,q.time];
-                        conn.query(q.qu,q.qa,function(err,r){
+                        sql.query(q.qu,q.qa,function(err,r){
                         q.j=q.rr.brd;if((q.j instanceof Array)===false){q.j=[]};q.j=JSON.stringify(q.j);
                         if(r&&r[0]){
                             q.qu="UPDATE Crumbs SET brd=? WHERE `start`=? AND id=? AND ke=?";
@@ -1185,20 +1225,20 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                             q.qu="INSERT INTO Crumbs (id,ke,ip,brd,start) VALUES (?,?,?,?,?)";
                             q.qa=[cn.bid,cn.uid,cn.ip,q.j,q.time]
                         }
-                        conn.query(q.qu,q.qa,function(){
+                        sql.query(q.qu,q.qa,function(){
                         if(q.ch&&q.ch[0]){q.time=q.ch[0].time}else{q.time=moment().utcOffset('-0800').format();}
                         q.user=JSON.stringify({name:q.rr.name,mail:q.rr.mail,ip:cn.ip,pj:q.rr.pj});
                         if(q.rr.cap==0&&q.rr.chat===1&&rd&&rd[0]&&rd.length>0){
                             q.qu="INSERT INTO Missed (start,id,ke,user) VALUES (?,?,?,?)";
                             q.qa=[q.time,cn.bid,cn.uid,q.user];atx({mhistory:rd,uid:cn.uid,bid:cn.bid,d:q.qa},cn.uid);
-                            conn.query(q.qu,q.qa)
+                            sql.query(q.qu,q.qa)
                         }
                         //Chats
                         q.qu="SELECT id FROM Chats WHERE id=? AND ke=? AND `start`=?";
                         q.qa=[cn.bid,cn.uid,q.time];
                             try{q.ar=JSON.stringify(q.ch)}catch(errr){q.ar='[]'}
                             if(q.ar&&q.ar!=='[]'&&q.ar!=='{}'){
-                                conn.query(q.qu,q.qa,function(err,r){
+                                sql.query(q.qu,q.qa,function(err,r){
                                     if(!q.rr.co){q.rr.co=1};q.co=q.rr.co;
                                     if(r&&r[0]){
                                         q.qu="UPDATE Chats SET history=?,user=? WHERE `start`=? AND id=? AND ke=?";
@@ -1207,7 +1247,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                                         q.qu="INSERT INTO Chats (start,history,id,ke,co,user) VALUES (?,?,?,?,?,?)";
                                         q.qa=[q.time,q.ar,cn.bid,cn.uid,q.co,q.user];
                                     }
-                                    conn.query(q.qu,q.qa,function(){
+                                    sql.query(q.qu,q.qa,function(){
                                         if(rlog.length>0){
                                     //Logs
                                         q.time=rlog[0].t;
@@ -1215,7 +1255,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                                         q.qa=[cn.bid,cn.uid,q.time];
                                         try{q.ar=JSON.stringify(rlog)}catch(errr){q.ar='[]'}
                                         if(q.ar&&q.ar!=='[]'&&q.ar!=='{}'){
-                                            conn.query(q.qu,q.qa,function(err,r){
+                                            sql.query(q.qu,q.qa,function(err,r){
                                                 if(r&&r[0]){
                                                     q.qu="UPDATE Logs SET history=? WHERE `start`=? AND id=? AND ke=?";
                                                     q.qa=[q.ar,q.time,cn.bid,cn.uid];
@@ -1223,7 +1263,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                                                     q.qu="INSERT INTO Logs (start,history,id,ke) VALUES (?,?,?,?)";
                                                     q.qa=[q.time,q.ar,cn.bid,cn.uid];
                                                 }
-                                                conn.query(q.qu,q.qa)
+                                                sql.query(q.qu,q.qa)
                                             })
                                         }
                                         red.del("LOG_"+cn.uid+"_"+cn.bid)
@@ -1254,113 +1294,267 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
 app.get('/', function (req,res){
     res.render('index');
 });
-app.get('/:page/:ke', function (req,res){
-    
-    res.render(req.params.page,{ke:req.params.ke,$_GET:req.query,https:(req.protocol==='https'),host:req.protocol+'://'+req.get('host')});
-});
 //login
-app.post(['/login'], function (req,res){
-    req.body.user=req.body.user.toLowerCase()
-    if (empty(req.body.user)) {
-        $ret['msg'] = "Username field was empty.";
-    } elseif (empty(req.body.pass)) {
-        $ret['msg'] = "Password field was empty.";
-    } elseif (!empty(req.body.user) && !empty(req.body.pass)) {
-        $db=loadSQL('chat');
-        $k='';$ka=array(req.body.user,md5(req.body.pass));if(isset($_POST['ke'])&&$_POST['ke']!==''){$k=' AND ke = ?';$ka[]=$_POST['ke'];}
-        $db->select('id,ke,mail,login,ref,name,shto,shfr,ops,ids,type','Ops','login = ? AND pass = ?'.$k,$ka);$sq=$db->fetch_assoc_all();
-        if(count($sq)>1&&count($sq)!=1){$ret['msg'] = "Please choose one of your Keys";$ret['pkg']=$sq;}
-        if(count($sq)===1){//found master
-            $sq=$sq[0];
-            $db->select('*','API','ke = ?',array($sq['ke']));$api=$db->fetch_assoc_all();
-            $db->select('*','Details','ke=?',array($sq['ke']));
-            $ret['u']=array();$ret['success']=true;
-            $sq['ids']=json_decode($sq['ids'],true);
-            if(isset($sq['ids']['pp'])){
-                $ret['u']['pp'] = $sq['ids']['pp'];
+app.get('/embed/:ke', function (req,res){
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
+    res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
+});
+//dashboard
+app.get(['/dashboard','/dashboard/:ke'], function (req,res){
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
+    res.render('login',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
+});
+//login and dashboard
+app.post(['/dashboard','/dashboard/:ke'], function (req,res){
+    req.ret={ok:false};
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
+    function send (x){
+        if(x.success===true){
+            x.sudo=function(c){
+                switch(c){
+                    case'su':
+                if(x.session['Title']==='Superuser'){return true;}
+                    break;
+                    default:
+                if(x.session['Title']==='Superuser'||x.session['Title']==='Operator'){return true;}
+                    break;
+                }
+                return false;
             }
-            $ret['u']['M'] = 1;
-            $ret['u']['auth'] = gid(24);
-            $ret['u']['api'] = $api;
-            $ret['u']['lv'] = $sq['type'];
-            $ret['u']['id'] = $sq['id'];
-            $ret['u']['ke'] = $sq['ke'];
-            $ret['u']['ref'] = $sq['ref'];
-            $ret['u']['mail'] = $sq['mail'];
-            $ret['u']['login'] = $sq['login'];
-            $ret['u']['name'] = $sq['name'];
-            $ret['u']['Title']='Superuser';
-            $ret['u']['shto'] = $sq['shto'];
-            $ret['u']['shfr'] = $sq['shfr'];
-            $ret['u']['ops']= json_decode($sq['ops'],true);
-            $ret['u']['det']=$db->fetch_assoc();
-            $ret['u']['ids']=$sq['ids'];
-            if(!isset($ret['u']['det'])){$ret['u']['det']='{}';}
-            addtoSession($ret['u']);
+            x.data={};
+            x.$user=x.session;
+            x.config=config;
+            x.host=req.protocol+'://'+req.hostname;
+            res.render('dashboard',x)
+        }else{
+            res.render('login',{data:{ke:x.ke},$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config})
         }
-        if(count($sq)===0){//no master
-            if(isset($_POST['ke'])&&$_POST['ke']!==''){//key is set
-                $db->select('*','Details','ke = ? AND subs LIKE ? AND subs LIKE ?',array($db->escape($_POST['ke']),'%"Username":"'.$db->escape(req.body.user).'"%','%"Password":"'.$db->escape(req.body.pass).'"%'));
-                $row = $db->fetch_assoc();
-                if(isset($row['ke'])){//found one
-                    $row['subs']=json_decode($row['subs'],true);$r=null;
-                    foreach($row['subs'] as $s){//sift sub accounts
-                        if($s['Username']===req.body.user&&$s['Password']===req.body.pass){
-                            $r=$s;
+    }
+    function addtoSession(g,x){
+        if(!req.stop){req.stop=1;}else{return}
+        x={
+            arr:{
+                mas:g.M,
+                id:g.id,
+                ke:g.ke,
+                auth:g.auth,
+                uni:g.ke+g.id
+            }
+        }
+        sql.query('SELECT * FROM Auth WHERE uni = ?',[x.arr.uni],function(err,r){
+            if(r&&r[0]){
+                sql.query('UPDATE Auth SET auth=? WHERE uni=?',[g.auth,x.arr.uni])
+            }else{
+                x.keys=Object.keys(x.arr);
+                x.ques=[];
+                x.vals=[];
+                x.keys.forEach(function(v,n){
+                    x.ques.push('?');
+                    x.vals.push(x.arr[v]);
+                });
+                sql.query('INSERT INTO Auth ('+x.keys.join(',')+') VALUES ('+x.ques.join(',')+')',x.vals)
+            }
+            send(req.ret)
+        })
+    }
+    req.body.user=req.body.user.toLowerCase().trim()
+    if (req.body.user==='') {
+        req.ret.msg = "Username field was empty.";
+    } else if (req.body.pass==='') {
+        req.ret.msg = "Password field was empty.";
+    } else if (req.body.user!=='' && req.body.pass!=='') {
+        req.where='';
+        req.vals=[req.body.user,s.md5(req.body.pass)];
+        if(req.body.ke&&req.body.ke!==''){
+            req.where=' AND ke = ?';
+            req.vals.push(req.body.ke);
+        }
+        sql.query('SELECT id,ke,mail,login,ref,name,shto,shfr,ops,ids,type FROM Ops WHERE login = ? AND pass = ?'+req.where,req.vals,function(err,r){
+            if(r&&r[0]){
+                if(r.length>1){
+                    req.ret.msg = "Please choose one of your Keys";
+                    req.ret.pkg=r;
+                    send(req.ret);
+                }else if(r.length===1){//found master
+                    r=r[0];
+                    sql.query('SELECT * FROM API WHERE ke = ?',[r.ke],function(err,api){
+                        sql.query('SELECT * FROM Details WHERE ke = ?',[r.ke],function(err,det){
+                            req.ret.session={};
+                            req.ret.success=true;
+                            r.ids=JSON.parse(r.ids,true);
+                            if(r.ids.pp){
+                                req.ret.session.pp = r.ids.pp;
+                            }
+                            req.ret.session.M = 1;
+                            req.ret.session.auth = s.gid(24);
+                            req.ret.session.api = api;
+                            req.ret.session.lv = r.type;
+                            req.ret.session.id = r.id;
+                            req.ret.session.ke = r.ke;
+                            req.ret.session.ref = r.ref;
+                            req.ret.session.mail = r.mail;
+                            req.ret.session.login = r.login;
+                            req.ret.session.name = r.name;
+                            req.ret.session.Title='Superuser';
+                            req.ret.session.shto = r.shto;
+                            req.ret.session.shfr = r.shfr;
+                            req.ret.session.ops= JSON.parse(r.ops,true);
+                            req.ret.session.det=det;
+                            req.ret.session.ids=r.ids;
+                            if(!req.ret.session.det){req.ret.session.det='{}';}
+                            addtoSession(req.ret.session);
+                        })
+                    })
+                }else if(r.length===0){//no master
+                    if(req.body.ke&&req.body.ke!==''){//key is set
+                    sql.query('SELECT * FROM Details WHERE ke = ? AND subs LIKE ? AND subs LIKE ?',[req.body.ke,'%"Username":"'+req.body.user+'"%','%"Password":"'+req.body.pass+'"%'],function(err,row){
+                        if(r&&r[0]){
+                            r=r[0];
+                            r.subs=JSON.parse(r.subs,true);
+                            Object.keys(r.subs).forEach(function(v,n){//sift sub accounts
+                                if(v.Username.toLowerCase()===req.body.user&&v.Password===req.body.pass){
+                                    r=v;
+                                }
+                            })
+                            sql.query('SELECT * FROM Ops WHERE ke = ?',[r.ke],function(err,ops){
+                                ops=ops[0];
+                                req.ret.session={};
+                                req.ret.ret.success=true;
+                                req.ret.session.M = 0;
+                                req.ret.session.lv = ops.type;
+                                req.ret.session.pp = r.PP;
+                                req.ret.session.id = r.Id;
+                                req.ret.session.auth = s.gid(24);
+                                req.ret.session.ke = req.body.ke;
+                                req.ret.session.name = r.Name;
+                                req.ret.session.mail = r.Username;
+                                req.ret.session.Title = r.Title;
+                                req.ret.session.shto = '[]';
+                                req.ret.session.shfr = '[]';
+                                req.ret.session.ops = '{}';
+                                req.ret.session.det = r;
+
+                                if(!req.ret.session.ids){
+                                    req.ret.session.ids={};
+                                }
+                                Object.keys(r).forEach(function(v,n){
+                                    if(v.indexOf('slack')>-1){
+                                        req.ret.session.ids[v]=r[n];
+                                    }
+                                })                        
+                                if(r.Title==='Superuser'){
+                                    sql.query('SELECT * FROM API WHERE ke = ?',[r.ke],function(err,api){
+                                        req.ret.session.ids=JSON.parse(ops.ids,true);
+                                        req.ret.session.api = api;
+                                        addtoSession(req.ret.session);
+                                    })
+                                }else if(r.Title==='Operator'||r.Title==='Superuser'){
+                                    req.ret.session.ops = JSON.parse(ops.ops,true);
+                                    addtoSession(req.ret.session);
+                                }
+                            })
+                        }else{
+                            req.ret.msg = "Credentials Incorrect.";
+                            send(req.ret)
                         }
-                    }
-                    if($r!==null){
-                        $db->select('*','Ops','ke = ?',array($db->escape($_POST['ke'])));$sq=$db->fetch_assoc();
-                        if(!isset($r['Id'])){$r['Id']=req.body.user;}
-                        $ret['u']=array();$ret['success']=true;
-                        $ret['u']['lv'] = $sq['type'];
-                        $ret['u']['pp'] = $r['PP'];
-                        $ret['u']['id'] = $r['Id'];
-                        $ret['u']['auth'] = gid(24);
-                        $ret['u']['ke'] = $_POST['ke'];
-                        $ret['u']['name'] = $r['Name'];
-                        $ret['u']['mail'] = $r['Username'];
-                        $ret['u']['Title'] = $r['Title'];
-                        $ret['u']['shto'] = '[]';
-                        $ret['u']['shfr'] = '[]';
-                        $ret['u']['ops'] = '{}';
-                        $ret['u']['det'] = '{}';
-                        //first layer permissions functions
-                        if($r['Title']==='Superuser'){
-                            $ret['u']['det']=$row;
-                            $ret['u']['ids']=json_decode($sq['ids'],true);
-                            $db->select('*','API','ke = ?',array($sq['ke']));
-                            $ret['u']['api'] = $db->fetch_assoc_all();
-                        }
-                        if($r['Title']==='Operator'){
-                            $ret['u']['det']=$row;
-                        }
-                        if($r['Title']==='Agent'){
-    //                        unset($row['roles']);
-                            $ret['u']['det']=$row;
-                        }
-                        if($r['Title']==='Operator'||$r['Title']==='Superuser'){// third functions if operator or super
-                            $ret['u']['ops'] = json_decode($sq['ops'],true);
-                        }
-                        if(!isset($ret['u']['ids'])){$ret['u']['ids']=array();}
-                        foreach($r as $k=>$v){
-                            if(strpos($k,'slack')!== false){$ret['u']['ids'][$k]=$v;}
-                        }
-                        addtoSession($ret['u']);
+                    })
                     }else{
-                        $ret['msg'] = "Password incorrect, or Account does not exist. Check your key.";
+                        req.ret.msg = "Password incorrect, or Account does not exist.";
+                        send(req.ret)
                     }
-                } else {
-                      $ret['msg'] = "Check your key.";
                 }
             }else{
-                $ret['msg'] = "Password incorrect, or Account does not exist.";
+                req.ret.test = req.body;
+                req.ret.msg = "Password incorrect, or Account does not exist.";
+                send(req.ret)
             }
-        }
+        })
+    }
+});
+//get unsecured
+app.all(['/get/:stuff','/get/:stuff/:f','/get/:stuff/:f/:ff','/get/:stuff/:f/:ff/:fff','/get/:stuff/:f/:ff/:fff/:ffff'],function (req,res){
+    res.setHeader('Content-Type','application/json');
+    req.ret={ok:false}
+    switch(req.params.stuff){
+        case'translation':
+            req.url='https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20160311T042953Z.341f2f63f38bdac6.c7e5c01fff7f57160141021ca61b60e36ff4d379&text='+req.body.t+'&lang='+req.body.fr+'-'+req.body.to;
+            request({url:req.url,method:'GET',encoding:'utf8'},function(err,data){
+                req.ret.ok=true;
+                req.ret.text=JSON.parse(data.body)['text'][0];
+                res.send(JSON.stringify(req.ret,null,3));
+            })
+        break;
+    }
+})
+//get secured
+app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/:f/:ff','/:api/:ke/get/:stuff/:f/:ff/:fff','/:api/:ke/get/:stuff/:f/:ff/:fff/:ffff'],function (req,res){
+    res.setHeader('Content-Type','application/json');
+    req.ret={ok:false}
+    switch(req.params.stuff){
+        case'missed':
+            req.vals=[req.params.ke];
+            req.query='';
+            if(req.params.ff&&req.params.ff!==''){req.query+='AND start=? ';req.vals.push(decodeURIComponent(req.params.ff));}
+            if(req.params.fff&&req.params.fff!==''){req.query+='AND end=? ';req.vals.push(decodeURIComponent(req.params.fff));}
+            sql.query('SELECT * FROM Missed WHERE ke=? '+req.query+'ORDER BY start ASC LIMIT 20',req.vals,function(err,r){
+                req.ret.ok=true;
+                req.ret.missed=r;
+                res.send(JSON.stringify(req.ret,null,3));
+            })
+        break;
+        case'chat':
+            if(!req.body.limit){req.body.limit='LIMIT 1';}else{req.body.limit='LIMIT '+req.body.limit}
+            if(req.params.ff){
+                req.vals=[req.params.ke,req.params.f,decodeURIComponent(req.params.ff)];
+                sql.query('SELECT * FROM Chats WHERE ke=? AND id=? AND start >= DATE(?) ORDER BY start DESC '+req.body.limit,req.vals,function(err,r){
+                    sql.query('SELECT * FROM Crumbs WHERE ke=? AND id=? AND start >= DATE(?) ORDER BY start DESC '+req.body.limit,req.vals,function(err,rr){
+                        req.ret.ok=true,
+                        req.ret.chat=r,
+                        req.ret.crumbs=rr;
+                        res.send(JSON.stringify(req.ret,null,3));
+                    })
+                })
+            }else{
+                req.vals=[req.params.ke,req.params.f];
+                if(req.params.ff&&req.params.ff!==''){
+                    req.body.limit='AND start=? '+req.body.limit;
+                    req.vals.push(decodeURIComponent(req.params.ff));
+                }
+                sql.query('SELECT * FROM Chats WHERE ke=? AND id=? '+req.body.limit,req.vals,function(err,r){
+                    sql.query('SELECT * FROM Crumbs WHERE ke=? AND id=? '+req.body.limit,req.vals,function(err,rr){
+                        req.ret.ok=true,
+                        req.ret.chat=r,
+                        req.ret.crumbs=rr;
+                        res.send(JSON.stringify(req.ret,null,3));
+                    })
+                })
+            }
+        break;
+        case'recs':
+            if(req.params.ff){
+               req.ret={ok:false,msg:'File not found'}
+               req.file=__dirname+'/../rec/'+req.params.ke+'/'+req.params.ff+'/'+'.json';
+                if(fs.existSync(req.file)){
+                    res.send(fs.readFileSync(req.file,'UTF8'));
+                }else{
+                    res.send(JSON.stringify(req.ret,null,3));
+                }
+            }else{
+                sql.query('SELECT * FROM Recordings WHERE ke=?',[req.params.ke],function(err,r){
+                    if(err){
+                        req.ret=err;
+                    }else{
+                        req.ret=r;
+                    }
+                    res.send(JSON.stringify(req.ret,null,3));
+                })
+            }
+        break;
     }
 });
 //
 app.post(['/p/r','/p/c'], function (req,res){
+    req.proto=req.headers['x-forwarded-proto'];
     res.send('Disabled');
 });
 //
@@ -1382,7 +1576,7 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
     e.origin = req.headers.origin;
     res.header("Access-Control-Allow-Origin",e.origin);
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
-    conn.query('SELECT ke,detail FROM API WHERE code=?',[req.params.id],function(err,r){
+    sql.query('SELECT ke,detail FROM API WHERE code=?',[req.params.id],function(err,r){
         if(r&&r[0]){
             r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.headers['x-forwarded-for'] || req.connection.remoteAddress)};
             if(req.body.data){req.body=JSON.parse(req.body.data)}

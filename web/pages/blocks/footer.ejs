@@ -1,0 +1,43 @@
+<script>var $user=<%-JSON.stringify(session)%>;</script>
+<%
+   var data=[  
+   'modernizr.custom',
+   'firebase',
+   'jquery.simpleWeather.min',
+   'jquery.autoresize.min',
+   'twitterFetcher_min',
+   'bootstrap-switch.min',
+   'bootstrap-select.min',
+   'jquery.tabletojson.min',
+   'cimice.min',
+   'html2canvas',
+   'bootstrap-editable.min3',
+   'jquery.bootstrap.wizard.min',
+   'jquery.serializejson.min',
+   'langs',
+   'socket',
+   'peer.min',
+   'jquery.minicolors.min',
+   'livestamp.min',
+   'tooltipster.min',
+   'emoticons',
+   'chrome-tabs',
+   'jquery.form.min',
+   'jquery.minicolors.min',
+   'jquery.ui.position.min',
+   'jquery.contextMenu.min',
+   'moment',
+   'bootstrap-datetimepicker.min',
+   'pnotify.custom.min',
+   'vis',
+   'global',
+   'custom.vars'
+];
+   for(var i=0; i < data.length; i++) { %>
+<script src="/libs/js/<%=data[i]%>.js" sync></script>
+<% } %>
+<audio id="AUDIO_BEEP" src="/libs/audio/pop.mp3" preload="auto"></audio>
+<audio id="AUDIO_LOOP" src="/libs/audio/bell.mp3" loop preload="auto"></audio>
+<!--<audio id="AUDIO_CALL" src="/libs/audio/call.mp3" loop preload="auto"></audio>-->
+<div id="videoChats"></div>
+<% include js.dashboard.ejs %>

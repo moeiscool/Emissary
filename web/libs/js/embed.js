@@ -101,10 +101,10 @@ $.CloudChat.fc=function(e){
       $.CloudChat.init(1);$.CloudChat.init(0)
   });
   CloudChat.off('ret').on('ret',function(d){
-      if(d.trust===0){clearTimeout($.CloudChat.timeOut);$.each($.CloudChat,function(n,v){$.CloudChat[n]=function(){return {};}});$('.CloudChat,.CloudChat-launcher').remove();localStorage.removeItem('CloudChatE_');CloudChat.disconnect();delete(CloudChat);console.log('Unmetered.Chat : Untrusted Domain')}
+      if(d.trust===0){clearTimeout($.CloudChat.timeOut);$.each($.CloudChat,function(n,v){$.CloudChat[n]=function(){return {};}});$('.CloudChat,.CloudChat-launcher').remove();CloudChat.disconnect();delete(CloudChat);console.log('Unmetered.Chat : Untrusted Domain')}
     if(d.ver){
         $.CloudChat.op('ver',d.ver);
-        $.get('<%= host %>/embed/'+$.CloudChat.ke,function(d){d=d+'';localStorage.setItem('CloudChatE_',d);$('.CloudChat').remove();$('body').append(d);});
+        $.get('<%- host %>/embed/'+$.CloudChat.ke,function(d){d=d+'';$('.CloudChat').remove();$('body').append(d);});
         console.log('Unmetered.Chat : '+d.ver);return false;
     }
     if(d.firebase){
@@ -303,7 +303,7 @@ $.each(CCiso.langs,function(n,v){
 });$('#mm-translator [name="fr"],#mm-translator [name="to"]').append(tmp);tmp='';
     $('#mm-translator').unbind('submit').submit(function(e){
         e.preventDefault();e.e=$.CloudChat.base.selected_translate;e.t=e.e.find('.unm-bubble small').text();e.f=$(this);e.fr=e.f.find('[name="fr"]').val(),e.to=e.f.find('[name="to"]').val()
-        $.post('//unmetered.chat/g/t',{t:e.t,fr:e.fr,to:e.to},function(d){
+        $.post('<%- host %>/get/translation',{t:e.t,fr:e.fr,to:e.to},function(d){
             e.e.find('.translated').html('<i>'+d+'</i>');
         });
         e.f.hide();
@@ -398,7 +398,7 @@ $('body').addClass('CloudChat-Translator')
    $.CloudChat.base.lm.unbind('submit').submit(function(e){//send offline operator message
        e.preventDefault();
        e.arr=$(this).serializeObject();e.arr.ke=$.CloudChat.ke,e.arr.id=$.CloudChat.op().bid;
-       $.post("<%= host %>/p/c/"+$.CloudChat.ke,e.arr,function(da){
+       $.post("<%- host %>/p/c/"+$.CloudChat.ke,e.arr,function(da){
            //da=JSON.parse(da);$.CloudChat.cx({f:'s',ff:'l',a:e.arr,time:new Date()});$.CloudChat.fc(2)
        })
        $(this).find('input,textarea').val('')
@@ -416,7 +416,7 @@ $('body').addClass('CloudChat-Translator')
            delete(v.e);
            e.arr.chat[v.time]=v
        });
-       $.post("<%= host %>/p/r/",e.arr,function(da){
+       $.post("<%- host %>/p/r/",e.arr,function(da){
            try{da=JSON.parse(da);if(da.success!==false){$.CloudChat.fc(1)}else{$.CloudChat.fc(1)}}catch(e){$('body').append(da)}
        })
        return

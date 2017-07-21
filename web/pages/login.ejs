@@ -1,0 +1,125 @@
+<% include blocks/header.ejs %>
+
+<body style="position:relative">
+
+<!--LOGIN START-->
+<section id="login-content" class="m-t-lg wrapper-md animated fadeInUp">    
+    <div class="container aside-xl text-center">
+      <section class="m-b-lg">
+          <h3 style="margin: 10px 0 0px 0;color: #4696bf;font-size: 44pt;"><i class="chi-ccio"></i></h3>
+          <div class="clearfix"></div>
+        <form id="loginform" action="/dashboard" method="post" name="loginform">
+            <header class="wrapper text-center">
+              <div id="login_msg"></div>
+            </header>
+            <div style="padding:0 15px;">
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <a title="Email Address / Login ID" class="btn btn-ghost btn-default">&nbsp;<i class="fa fa-user"></i>&nbsp;</a>
+                        </div>
+                  <input id="login_input_name" type="username" placeholder="Email" name="user" class="form-control no-border">
+                    </div>
+                </div>
+                <div class="list-group-item">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <a title="Password" class="btn btn-ghost btn-default">&nbsp;<i class="fa fa-lock"></i>&nbsp;</a>
+                        </div>
+                  <input id="login_input_password" type="password" placeholder="Password" name="pass" class="form-control no-border">
+                    </div>
+                </div>
+                <div class="list-group-item">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <a title="Key for Account" class="btn btn-ghost btn-default">&nbsp;<i class="fa fa-key"></i>&nbsp;</a>
+                        </div>
+                  <input id="login_input_key" type="text" placeholder="Account Key" name="ke" value="<%- data.ke %>" class="form-control no-border">
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group btn-group-justified">
+                <button type="submit" name="login" disabled class="btn btn-ghost btn-lg btn-success"><i class="fa fa-check"></i></button>
+                <button type="submit" name="login" disabled title="Login and Remember" class="btn btn-ghost btn-lg btn-primary remember"><i class="fa fa-check-circle-o"></i></button>
+            </div>
+<!--                <button type="submit" name="login" disabled title="Login Sub Account" class="btn btn-ghost btn-lg btn-primary remember"><i class="fa fa-check-circle-o"></i></button>-->
+            </div>
+        </form>
+          <p style="font-size:0.8em"></p>
+      </section>
+    </div>
+  </section>
+<script>
+function Op(r,rr,rrr){
+    if(!rrr){rrr={};};if(typeof rrr === 'string'){rrr={n:rrr}};if(!rrr.n){rrr.n='HBChatOps_'+$user.ke+'_'+$user.id}
+    ii={o:localStorage.getItem(rrr.n)};try{ii.o=JSON.parse(ii.o)}catch(e){ii.o={}}
+    if(!ii.o){ii.o={}}
+    if(r&&rr&&!rrr.x){
+        ii.o[r]=rr;
+    }
+    switch(rrr.x){
+        case 0:
+            delete(ii.o[r])
+        break;
+        case 1:
+            delete(ii.o[r][rr])
+        break;
+    }
+    localStorage.setItem(rrr.n,JSON.stringify(ii.o))
+    return ii.o
+}
+    //
+    $('#loginform [type=submit]').prop('disabled',false);
+    $(document).ready(function(o,y){
+        y=location.hostname+location.pathname;HBR.loggedIn=false;
+        $('#login_input_sub').change(function(e){
+            e.f=$('[for="login_input_sub"] i');e.l=Op(null,null,'unmLogin_'+y).login;e.c=$(this).is(':checked'),e.cc=$('[for="login_input_sub"]');
+            if(e.c){
+                e.m='Sub';e.cc.addClass('checked');
+            }else{
+                e.m='Master';e.cc.removeClass('checked');
+            }
+            if(!e.l){e.l={}};e.l.sub=e.c;
+            Op('login',e.l,'unmLogin_'+y)
+            $('#login_type span').html(e.m)
+        }).change();
+            o=Op(null,null,'unmLogin_'+y).login;
+                if(!o){o={}};
+//                if(o&&o.user&&o.pass){
+//                    $('#login_input_name').val(o.user),$('#login_input_password').val(o.pass),$('#login_input_key').val(o.ke);
+//                    if(o.sub==true){$('#login_input_sub').prop('checked',true).change()};
+//                    setTimeout(function(){$('#loginform').submit()},200)
+//                }
+
+        $('#loginform [type="submit"]').click(function(e){
+            if($(this).hasClass('remember')){Op('login',$('#loginform').serializeObject(),'unmLogin_'+y)}else{Op('login',{},'unmLogin_'+y)}
+        })
+        $('body').on('click','[key]',function(e){
+            $('[name="ke"]').val($(this).attr('key'));$('#loginform').submit();
+        })
+    })
+</script>
+<style>
+    #login-content [type=submit]{width:75%}
+    #login-content [type=submit]:not(:first-child){width:25%}
+    #login-content {position:fixed;width:100%;height:100%;left:0;top:0;z-index:10000;background:#fff}
+    #login-content .m-b-lg{max-width:400px;width:100%;display:inline-block;background: #FFF;border-radius:5px;box-shadow:0 0 10px #EAEAEA;margin-top:80px}
+    #login-content .list-group{margin:0 0 10px 0}
+    #login-content .list-group-item{border:0;padding:10px 0}
+    #login-content .bmsg{background:rgba(255,255,255,0.9)!important}
+    #login_msg:not(:empty){padding:15px;}
+    #pkg{display:block}
+</style>    
+<!--LOGIN END-->
+</body>
+<%
+   var data=[  
+   'bootstrap-switch.min',
+   'bootstrap-select.min',
+   'jquery.form.min',
+   'pnotify.custom.min'
+];
+   for(var i=0; i < data.length; i++) { %>
+<script src="/libs/js/<%=data[i]%>.js" sync></script>
+<% } %>
