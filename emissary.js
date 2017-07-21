@@ -18,7 +18,8 @@ var http=require('http'),
     config=require('./conf.json'),
     sql;
 
-if(!config.title){config.title='Emissary'}
+if(config.title===undefined){config.title='Emissary'}
+if(config.port===undefined){config.port=80}
 
 //connect redis
 s.redis=function(){
@@ -59,7 +60,30 @@ app.use(bodyParser.json());
 app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
 app.use('/peerjs',PeerServer(server));
-server.listen(80);
+server.listen(config.port,function(){
+    console.log('Emissary - SSL PORT : '+config.ssl.port);
+});
+//SSL options
+if(config.ssl&&config.ssl.key&&config.ssl.cert){
+    config.ssl.key=fs.readFileSync(s.checkRelativePath(config.ssl.key),'utf8')
+    config.ssl.cert=fs.readFileSync(s.checkRelativePath(config.ssl.cert),'utf8')
+    if(config.ssl.port===undefined){
+        config.ssl.port=443
+    }
+    if(config.ssl.bindip===undefined){
+        config.ssl.bindip=config.bindip
+    }
+    if(config.ssl.ca&&config.ssl.ca instanceof Array){
+        config.ssl.ca.forEach(function(v,n){
+            config.ssl.ca[n]=fs.readFileSync(s.checkRelativePath(v),'utf8')
+        })
+    }
+    var serverHTTPS = https.createServer(config.ssl,app);
+    serverHTTPS.listen(config.ssl.port,config.bindip,function(){
+        console.log('SSL Emissary - SSL PORT : '+config.ssl.port);
+    });
+    io.attach(serverHTTPS);
+}
 //log to redis
 s.log=function(x,xx,xxx,tt,ti){
     if(!xxx){tt="LOG_"+x}else{tt="LOG_"+x+"_"+xxx};ti=s.moment();
@@ -406,6 +430,7 @@ function tx(z){//Connection Sender
                 }
             break;
             case'a'://ADMIN STUFF
+                console.log(d)
                 if(s.a[cn.uid]&&s.a[cn.uid][cn.id]){
                 switch(d.ff){
                     case'l'://Log functions
@@ -983,7 +1008,6 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                     })
                     break;
                     case'x'://user init
-                        if(d.ver!==s.ver){tx({ver:s.ver});return false;}//check embed version
                         cn.ip=cn.request.connection.remoteAddress;
                         if(d.u.push!==1){s.stf(d.uid,{ip:cn.ip,trust:d.trust,sc:d.sc,ry:d.ry,dp:d.dp,cn:cn.disconnect},tx);}
                         cn.join(d.uid+'_'+d.bid),cn.join(d.uid);
@@ -1263,7 +1287,7 @@ app.get('/', function (req,res){
 //login
 app.get('/embed/:ke', function (req,res){
     req.proto=req.headers['x-forwarded-proto']||req.protocol;
-    res.render('embed',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.get('host'),config:config});
+    res.render('embed',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
 });
 //dashboard
 app.get(['/dashboard','/dashboard/:ke'], function (req,res){
@@ -1273,7 +1297,7 @@ app.get(['/dashboard','/dashboard/:ke'], function (req,res){
 //login and dashboard
 app.post(['/dashboard','/dashboard/:ke'], function (req,res){
     req.ret={ok:false};
-    req.proto=req.headers['x-forwarded-proto'];
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
     function send (x){
         if(x.success===true){
             x.sudo=function(c){
