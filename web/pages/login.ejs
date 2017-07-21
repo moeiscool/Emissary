@@ -1,4 +1,3 @@
-<% var ke %>
 <% include blocks/header.ejs %>
 
 <body style="position:relative">
@@ -36,7 +35,7 @@
                         <div class="input-group-btn">
                             <a title="Key for Account" class="btn btn-ghost btn-default">&nbsp;<i class="fa fa-key"></i>&nbsp;</a>
                         </div>
-                  <input id="login_input_key" type="text" placeholder="Account Key" name="ke" value="<%= ke %>" class="form-control no-border">
+                  <input id="login_input_key" type="text" placeholder="Account Key" name="ke" value="<%- data.ke %>" class="form-control no-border">
                     </div>
                 </div>
             </div>
@@ -52,13 +51,25 @@
     </div>
   </section>
 <script>
-var AudioContext = window.AudioContext || window.webkitAudioContext || false; 
-if (AudioContext) {
-    var ctx = new AudioContext;
-} else {
-    alert("Sorry, but the Web Audio API is not supported by your browser. Please, consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox");
+function Op(r,rr,rrr){
+    if(!rrr){rrr={};};if(typeof rrr === 'string'){rrr={n:rrr}};if(!rrr.n){rrr.n='HBChatOps_'+$user.ke+'_'+$user.id}
+    ii={o:localStorage.getItem(rrr.n)};try{ii.o=JSON.parse(ii.o)}catch(e){ii.o={}}
+    if(!ii.o){ii.o={}}
+    if(r&&rr&&!rrr.x){
+        ii.o[r]=rr;
+    }
+    switch(rrr.x){
+        case 0:
+            delete(ii.o[r])
+        break;
+        case 1:
+            delete(ii.o[r][rr])
+        break;
+    }
+    localStorage.setItem(rrr.n,JSON.stringify(ii.o))
+    return ii.o
 }
-//
+    //
     $('#loginform [type=submit]').prop('disabled',false);
     $(document).ready(function(o,y){
         y=location.hostname+location.pathname;HBR.loggedIn=false;

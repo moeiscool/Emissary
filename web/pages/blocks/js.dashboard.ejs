@@ -2,6 +2,12 @@
 ///******************************************************************************//
 //CUSTOM.VARS.JS
 ///******************************************************************************//
+var AudioContext = window.AudioContext || window.webkitAudioContext || false; 
+if (AudioContext) {
+    var ctx = new AudioContext;
+} else {
+    alert("Sorry, but the Web Audio API is not supported by your browser. Please, consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox");
+}
 function pm(x,v,z,k){
     var tmp='';if(v==null){v=[];}
     switch(x){
@@ -726,7 +732,7 @@ HBR.init=function(e,g,d){
                 HBR.u={},HBR.a={},HBR.c={};
                 if($.CloudChat.Peer){
             $.CloudChat.Peer.id=$user.ke+'_'+$user.id+'_'+gid(5);//$.CloudChat.files();
-            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{path: '/peerjs',host:'<%=host%>'.split('://')[1],port: location.port || (location.protocol === 'https:' ? 443 : 80)});
+            $.CloudChat.Peer.p=new Peer($.CloudChat.Peer.id,{host:'<%- host %>'.split('://')[1].split(':')[0],port: location.port || (location.protocol === 'https:' ? 443 : 80)});
             $.CloudChat.Peer.hs();
             }
             HBR.loggedInn=true;$('#live_visitors tbody,#live_users').empty();
@@ -1577,7 +1583,7 @@ g.WTC=$('#WIN_WTC'),g.WTCm=$('[bid="'+g.bid+'"][uid="'+g.uid+'"],[ctb="'+g.bid+'
     //slack end
 <% } %>
 ///******************************************************************************//
-var HBChat=io.connect('<%=host%>');
+var HBChat=io.connect('<%- host %>');
 HBR.init(0);
 window.addEventListener("beforeunload",function(e) {
     if(Op().aclose===1){

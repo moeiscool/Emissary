@@ -1,6 +1,7 @@
 s={ver:'Emissary 0.1'},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
 
 var http=require('http'),
+    https=require('https'),
     request = require('request'),
     express = require('express'),
     mysql=require('mysql'),
@@ -29,6 +30,13 @@ s.redis=function(){
     })
 }
 s.redis();
+//check relative path
+s.checkRelativePath=function(x){
+    if(x.charAt(0)!=='/'){
+        x=__dirname+'/'+x
+    }
+    return x
+}
 //json parse
 s.jp=function(d,x){if(!d||d==""||d=="null"){if(x){d=x}else{d={}}};try{d=JSON.parse(d)}catch(er){if(x){d=x}else{d={}}};return d;}
 //json string
@@ -59,9 +67,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
-app.use('/peerjs',PeerServer(server));
+app.use('/libs',express.static(__dirname + '/web/libs'));
+app.use('/',PeerServer(server));
 server.listen(config.port,function(){
-    console.log('Emissary - SSL PORT : '+config.ssl.port);
+    console.log('Emissary - PORT : '+config.port);
 });
 //SSL options
 if(config.ssl&&config.ssl.key&&config.ssl.cert){
@@ -83,6 +92,7 @@ if(config.ssl&&config.ssl.key&&config.ssl.cert){
         console.log('SSL Emissary - SSL PORT : '+config.ssl.port);
     });
     io.attach(serverHTTPS);
+    app.use('/peerjs',PeerServer(serverHTTPS));
 }
 //log to redis
 s.log=function(x,xx,xxx,tt,ti){
@@ -430,7 +440,6 @@ function tx(z){//Connection Sender
                 }
             break;
             case'a'://ADMIN STUFF
-                console.log(d)
                 if(s.a[cn.uid]&&s.a[cn.uid][cn.id]){
                 switch(d.ff){
                     case'l'://Log functions
@@ -1287,12 +1296,12 @@ app.get('/', function (req,res){
 //login
 app.get('/embed/:ke', function (req,res){
     req.proto=req.headers['x-forwarded-proto']||req.protocol;
-    res.render('embed',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
+    res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
 });
 //dashboard
 app.get(['/dashboard','/dashboard/:ke'], function (req,res){
     req.proto=req.headers['x-forwarded-proto']||req.protocol;
-    res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
+    res.render('login',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
 });
 //login and dashboard
 app.post(['/dashboard','/dashboard/:ke'], function (req,res){
@@ -1311,12 +1320,13 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
                 }
                 return false;
             }
+            x.data={};
             x.$user=x.session;
             x.config=config;
-            x.host=req.proto+'://'+req.get('host');
+            x.host=req.protocol+'://'+req.hostname;
             res.render('dashboard',x)
         }else{
-            res.render('login',{ke:x.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config})
+            res.render('login',{data:{ke:x.ke},$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config})
         }
     }
     function addtoSession(g,x){
