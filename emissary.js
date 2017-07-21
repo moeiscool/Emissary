@@ -1262,12 +1262,12 @@ app.get('/', function (req,res){
 });
 //login
 app.get('/embed/:ke', function (req,res){
-    req.proto=req.headers['x-forwarded-proto'];
-    res.render('embed',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
+    res.render('embed',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.get('host'),config:config});
 });
 //dashboard
 app.get(['/dashboard','/dashboard/:ke'], function (req,res){
-    req.proto=req.headers['x-forwarded-proto'];
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
     res.render('login',{ke:req.params.ke,$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config});
 });
 //login and dashboard
