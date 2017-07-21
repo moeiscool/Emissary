@@ -1,7 +1,8 @@
-s={ver:'Emissary 0.1'},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
+s={ver:'Emissary 0.1',s:JSON.stringify},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
 
 var http=require('http'),
     https=require('https'),
+    nodemailer = require('nodemailer'),
     request = require('request'),
     express = require('express'),
     mysql=require('mysql'),
@@ -18,11 +19,12 @@ var http=require('http'),
     io = require('socket.io')(server),
     config=require('./conf.json'),
     sql;
-
+if(config.mail){
+    var nodemailer = require('nodemailer').createTransport(config.mail);
+}
 if(config.title===undefined){config.title='Emissary'}
 if(config.port===undefined){config.port=80}
 if(config.peerJS===undefined){config.peerJS=true}
-console.log(config)
 //connect redis
 s.redis=function(){
     red=redis.createClient();
@@ -180,7 +182,7 @@ s.stf=function(x,y,z,srun){
                         red.get("DEP_K_"+x,function(err,key2){//department
                             red.get("STY_K_"+x,function(err,key3){//style
                                 if(!key||key!==y.ry||!key2||key2!==y.dp||!key3||key3!==y.sc){//check all
-                                    sql.query('SELECT ids,ops FROM Ops WHERE ke=?',[x],function(er,r){
+                                    sql.query('SELECT ids,ops FROM Users WHERE ke=?',[x],function(er,r){
                                     sql.query('SELECT rates,depts FROM Details WHERE ke=?',[x],function(er,rr){
                                             if(r&&r[0]&&rr&&rr[0]){
                                                 r=r[0];try{r.ids=JSON.parse(r.ids);}catch(er){r.ids=y.default};
@@ -199,7 +201,7 @@ s.stf=function(x,y,z,srun){
             }
             red.get("TRUST_"+x,function(err,rd){
                 if(!rd){
-                    sql.query('SELECT ids FROM Ops WHERE ke=?',[x],function(er,r){
+                    sql.query('SELECT ids FROM Users WHERE ke=?',[x],function(er,r){
                         if(r&&r[0]){r=s.jp(r[0].ids).trusted;s.stt("TRUST_"+x,r);srun(r);}
                     });
                 }else{
@@ -211,7 +213,7 @@ s.stf=function(x,y,z,srun){
     }
     red.get("BANNED_"+x,function(err,rd){
         if(!rd){
-            sql.query('SELECT ids FROM Ops WHERE ke=?',[x],function(er,r){
+            sql.query('SELECT ids FROM Users WHERE ke=?',[x],function(er,r){
                 if(r&&r[0]){r=s.jp(r[0].ids);er=r.bannedf;r=r.banned;if(!r||r=="null"){r='';};srun([r,er]);}
                 s.stt("BANNED_"+x,JSON.stringify([r,er]));
             });
@@ -461,11 +463,11 @@ function tx(z){//Connection Sender
                         switch(d.fff){
                             case'o':case'r':
                                 if(d.m&&d.m!==''){
-                                    sql.query("SELECT ke from Ops where mail=?",[d.m],function(er,r,g){
+                                    sql.query("SELECT ke from Users where mail=?",[d.m],function(er,r,g){
                                         if(r&&r[0]){
                                             d.uid=r[0].ke
                                 if(d.uid!==cn.uid){
-                                    sql.query("SELECT shto,perm from Ops where ke='"+cn.uid+"'",function(er,r,g){
+                                    sql.query("SELECT shto,perm from Users where ke='"+cn.uid+"'",function(er,r,g){
                                         if(r&&r[0]){r=r[0];
                                             try{r.shto=JSON.parse(r.shto)}catch(e){r.shto=[]}
                                             d.i=r.shto.indexOf(d.uid)
@@ -473,7 +475,7 @@ function tx(z){//Connection Sender
                                                 case'o':
                                                     if(d.i===-1){
                                                             r.shto.push(d.uid)
-                                    sql.query("SELECT name,mail from Ops where ke='"+d.uid+"'",function(er,rr,g){rr=rr[0];
+                                    sql.query("SELECT name,mail from Users where ke='"+d.uid+"'",function(er,rr,g){rr=rr[0];
                                                             tx({pnote:'lg',pnotm:1,name:rr.name,mail:rr.mail,ke:d.uid})
                                     })
                                                             d.lr=s.lr('1AA_A_'+d.uid)
@@ -515,8 +517,8 @@ function tx(z){//Connection Sender
                                                 break;
                                             }
                                             s.a[cn.uid][cn.id].shto=r.shto;
-                                            sql.query("UPDATE Ops SET shto=? WHERE ke=?",[JSON.stringify(r.shto),cn.uid],function(){
-                                            sql.query("SELECT shfr from Ops where ke='"+d.uid+"'",function(er,rr,g){
+                                            sql.query("UPDATE Users SET shto=? WHERE ke=?",[JSON.stringify(r.shto),cn.uid],function(){
+                                            sql.query("SELECT shfr from Users where ke='"+d.uid+"'",function(er,rr,g){
                                         if(rr&&rr[0]){rr=rr[0];
                                             try{rr.shfr=JSON.parse(rr.shfr)}catch(e){rr.shfr=[]}
                                             d.i=rr.shfr.indexOf(cn.uid)
@@ -532,7 +534,7 @@ function tx(z){//Connection Sender
                                                     }
                                                 break;
                                             }
-                                                      sql.query("UPDATE Ops SET shfr=? WHERE ke=?",[JSON.stringify(rr.shfr),d.uid])
+                                                      sql.query("UPDATE Users SET shfr=? WHERE ke=?",[JSON.stringify(rr.shfr),d.uid])
                                                    }
                                             })
                                             })
@@ -739,9 +741,9 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                     red.del('FB_'+cn.uid);
                                                 }
 //                                                if(cn.mas===1){
-                                                  sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){ 
+                                                  sql.query("SELECT ids FROM Users WHERE ke=?",[cn.uid],function(er,r){ 
                                                     d.ar=JSON.parse(r[0].ids);d.fn();
-                                                    sql.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(d.ar),cn.uid],function(er){
+                                                    sql.query("UPDATE Users SET ids=? WHERE ke=?",[JSON.stringify(d.ar),cn.uid],function(er){
                                                         tx({pnote:'ust'});
                                                     })
                                                   })
@@ -781,7 +783,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 }
                                             break;
                                             case'profile':
-                                              sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                              sql.query("SELECT ids FROM Users WHERE ke=?",[cn.uid],function(er,r){
                                                 if(r&&r[0]){
                                                     d.vv=s.obk(d.s);d.ar=[];d.arr=[];
                                                     d.vv.forEach(function(v){
@@ -802,29 +804,29 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                         d.ar.push('ids=?');d.arr.push(JSON.stringify(d.ops));
                                                     }
                                                     d.arr.push(cn.uid);
-                                                    sql.query("UPDATE Ops SET "+d.ar.join(',')+" WHERE ke=?",d.arr,function(er){
+                                                    sql.query("UPDATE Users SET "+d.ar.join(',')+" WHERE ke=?",d.arr,function(er){
                                                         tx({pnote:'ust'});
                                                     })
                                                 }
                                                })
                                             break;
-                                            case 0://dynamic Ops saver
+                                            case 0://dynamic Users saver
                                                 if(d.idx){
                                                     if(d.idx!=='name'||d.idx!=='mail'){return false;}
                                                     if(isNaN(parseInt(''+cn.bid))==false){
-                                                        sql.query("UPDATE Ops SET "+d.idx+"=? WHERE ke=?",[d.s,cn.uid],function(er){
+                                                        sql.query("UPDATE Users SET "+d.idx+"=? WHERE ke=?",[d.s,cn.uid],function(er){
                                                             tx({pnote:'ust'});
                                                         })
                                                     }
                                                 }
                                             break;
-                                            case 5://dynamic Ops.ids saver
+                                            case 5://dynamic Users.ids saver
                                                 if(d.idx){
-                                                sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                                sql.query("SELECT ids FROM Users WHERE ke=?",[cn.uid],function(er,r){
                                                     if(r&&r[0]){
                                                         r=JSON.parse(r[0].ids);r[d.idx]=d.s;
                                                         if(d.idx==='trusted'){s.stt('TRUST_'+cn.uid,d.s)}
-                                                        sql.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){
+                                                        sql.query("UPDATE Users SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){
                                                         tx({pnote:'ust'});
                                                         })
                                                     }
@@ -832,7 +834,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 }
                                             break;
                                             case 1:case 3:case 4:case 6:case 8://save function for most of the settings pages
-                                                sql.query("SELECT ids,type FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                                sql.query("SELECT ids,type FROM Users WHERE ke=?",[cn.uid],function(er,r){
                                                     if(r&&r[0]){r=r[0];
                                                         //check
                                                         switch(d.ws){
@@ -861,7 +863,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                                     case 6:case 4:
                                                                         if(d.ws===6){d.ws='rates',d.wss='ry';s.stt('RAT_K_'+cn.uid,d.sc)}else{d.ws='depts',d.wss='dp';s.stt('DEP_K_'+cn.uid,d.sc)}
                                                                                 r=JSON.parse(r.ids);r[d.wss]=d.sc;s[d.wss][cn.uid]=d.sc;
-                                                                                sql.query("UPDATE Ops SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){d.wss={sc:d.sc};d.wss[d.ws]=d.s;
+                                                                                sql.query("UPDATE Users SET ids=? WHERE ke=?",[JSON.stringify(r),cn.uid],function(er){d.wss={sc:d.sc};d.wss[d.ws]=d.s;
                                                                                     s.tx(d.wss,cn.uid);
                                                                                 })
                                                                     break;
@@ -880,11 +882,11 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                 })
                                             break;
                                             case 2:
-                                                sql.query("SELECT ids FROM Ops WHERE ke=?",[cn.uid],function(er,r){
+                                                sql.query("SELECT ids FROM Users WHERE ke=?",[cn.uid],function(er,r){
                                                     if(r&&r[0]){
                                                         r=JSON.parse(r[0].ids);r.sc=d.gid;
                                                         s.stt('STY_K_',r.sc),s.stt('STY_',d.s);
-                                                        sql.query("UPDATE Ops SET ops=?,ids=? WHERE ke=?",[d.s,JSON.stringify(r),cn.uid],function(er){
+                                                        sql.query("UPDATE Users SET ops=?,ids=? WHERE ke=?",[d.s,JSON.stringify(r),cn.uid],function(er){
                                                         tx({pnote:'ust'});s.tx({bg:d.s,sc:d.gid},cn.uid);
                                                         })
                                                     }
@@ -920,7 +922,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                 if(er){cn.disconnect();return}
                                 if(rr&&rr[0]){rr=rr[0];
                                     cn.bid=d.bid,cn.uid=d.uid;cn.mas=rr.mas;
-                                    sql.query("SELECT perm,ids,name,type,shto,shfr from Ops where ke='"+d.uid+"' ",function(err,r){
+                                    sql.query("SELECT perm,ids,name,type,shto,shfr from Users where ke='"+d.uid+"' ",function(err,r){
                                         if(err){cn.disconnect();return}
                                         if(r&&r[0]){
                                             r=r[0];d.qs=[];
@@ -929,7 +931,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                         r.shto.forEach(function(v){
                                             d.qs.push("ke='"+v+"'");
                                         })
-                                        sql.query("SELECT ke,perm,name,type,mail from Ops where "+(d.qs.join(' OR ')),function(er,g){
+                                        sql.query("SELECT ke,perm,name,type,mail from Users where "+(d.qs.join(' OR ')),function(er,g){
                                             tx({shto:g})
                                         })
                                             err=function(xx,r){
@@ -971,7 +973,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                             r.shfr.forEach(function(v){
                                                 d.qs.push("ke='"+v+"'");
                                             })
-                                    sql.query("SELECT ke,perm,name,type,mail from Ops where "+(d.qs.join(' OR ')),function(er,g){
+                                    sql.query("SELECT ke,perm,name,type,mail from Users where "+(d.qs.join(' OR ')),function(er,g){
                                         g.forEach(function(v){
                                             err(v.ke,v);
                                         })
@@ -1194,7 +1196,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                     //s.log(xx,{id:cn.bid,ip:cn.ip,status:2});
                 }
                 d.fn(cn.uid);
-                sql.query("SELECT shfr from Ops where ke='"+cn.uid+"'",function(er,r,g){
+                sql.query("SELECT shfr from Users where ke='"+cn.uid+"'",function(er,r,g){
                     if(er){return;}
                     r=JSON.parse(r[0].shfr);
                     if(r.length>0){
@@ -1297,6 +1299,7 @@ app.get('/', function (req,res){
 //login
 app.get('/embed/:ke', function (req,res){
     req.proto=req.headers['x-forwarded-proto']||req.protocol;
+    res.header("Access-Control-Allow-Origin",req.headers.origin);
     res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
 });
 //dashboard
@@ -1369,7 +1372,7 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
             req.where=' AND ke = ?';
             req.vals.push(req.body.ke);
         }
-        sql.query('SELECT id,ke,mail,login,ref,name,shto,shfr,ops,ids,type FROM Ops WHERE login = ? AND pass = ?'+req.where,req.vals,function(err,r){
+        sql.query('SELECT id,ke,mail,login,ref,name,shto,shfr,ops,ids,type FROM Users WHERE login = ? AND pass = ?'+req.where,req.vals,function(err,r){
             if(r&&r[0]){
                 if(r.length>1){
                     req.ret.msg = "Please choose one of your Keys";
@@ -1416,7 +1419,7 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
                                     r=v;
                                 }
                             })
-                            sql.query('SELECT * FROM Ops WHERE ke = ?',[r.ke],function(err,ops){
+                            sql.query('SELECT * FROM Users WHERE ke = ?',[r.ke],function(err,ops){
                                 ops=ops[0];
                                 req.ret.session={};
                                 req.ret.ret.success=true;
@@ -1557,20 +1560,51 @@ app.post(['/p/r','/p/c'], function (req,res){
     req.proto=req.headers['x-forwarded-proto'];
     res.send('Disabled');
 });
+//contact
+app.post('/contact/:ke', function (req,res){
+    res.header("Access-Control-Allow-Origin",req.headers.origin);
+    res.setHeader('Content-Type', 'application/json');
+    req.complete=function(data){
+        res.send(s.s(data, null, 3))
+    }
+    sql.query('SELECT ke,mail FROM Users WHERE ke=?',[req.params.ke],function(err,r){
+        if(r&&r[0]){
+            r=r[0]
+            req.mailOptions = {
+                from: '"Emissary" <no-reply@emissary.chat>',
+                to: r.mail,
+                subject: "New Message - Unmetered.Chat",
+                html: '',
+            };
+            req.mailOptions.html +='<table cellspacing="0" cellpadding="0" border="0" style="background-color:#3598dc" bgcolor="#3598dc" width="100%"><tbody><tr><td valign="top" align="center">';
+            req.mailOptions.html += "<table cellspacing='0' cellpadding='0' border='0' style='border-radius:5px;margin-top:30px;margin-bottom:50px;overflow: hidden;' width='650'>";
+            req.mailOptions.html +="<tbody><tr><td style='font-family:&quot;Myriad Pro&quot;,Arial,Helvetica,sans-serif;line-height:1.6;font-size:14px;color:#4a4a4a;background-color:#f6f6f6;border-bottom:1px solid #f0f0f0' align='center' bgcolor='#f6f6f6' height='64' valign='middle'><img src='https://unmetered.chat/logos/title.png'></td></tr><tr>";
+            req.mailOptions.html +='<td style="background:#fff;padding:30px;">';
+            req.mailOptions.html +="<p>While you were away from <b>Unmetered.Chat</b> you recieved this message.</p>";
+            req.mailOptions.html +='<div style="display:block;border-radius:4px;word-break:break-all;word-wrap:break-word;padding:9.5px;margin:0 0 10px;font-size:12px;line-height:1.42857143;background-color:#f5f5f5;border:1px solid #ccc;color:grey" bgcolor="#f5f5f5">';
+            req.mailOptions.html +=req.body.msg;
+            req.mailOptions.html +='</div><small style="display:block;margin-bottom:10px">'+req.body.name+" - <a href='mailto:"+req.body.mail+"'>"+req.body.mail+'</a></small><br><a href="mailto:'+req.body.mail+'" style="display: inline-block;border-radius:5px;word-break:break-all;word-wrap:break-word;padding:9.5px;margin:0 0 10px;font-size:12px;line-height:1.42857143;text-decoration: none;background-color: #3598DC;border: 1px solid #3598DC;color: white;">Reply</a></td>';
+            req.mailOptions.html +="</tr>";
+            req.mailOptions.html +="</tbody></table>";
+            req.mailOptions.html +="</td></tr>";
+            req.mailOptions.html +="</tbody>";
+            nodemailer.sendMail(req.mailOptions, (error, info) => {
+                if (error) {
+                    req.complete({ok:false,msg:error})
+                    console.log(error)
+                    return ;
+                }
+                req.complete({ok:true})
+            });
+        }else{
+            req.complete({ok:false,msg:'Key does not exist'})
+        }
+    })
+});
 //
 app.post(['/mail'], function(req,res,e) {
     res.render('mail');
 })
-// Get lib files
-app.get(['/libs/:f/:f2','/libs/:f/:f2/:f3'], function (req,res){
-    req.dir=__dirname+'/web/libs/'+req.params.f+'/'+req.params.f2;
-    if(req.params.f3){req.dir=req.dir+'/'+req.params.f3}
-    if (fs.existsSync(req.dir)){
-        fs.createReadStream(req.dir).pipe(res);
-    }else{
-        res.send('File Not Found')
-    }
-});
 //
 app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
     e.origin = req.headers.origin;
