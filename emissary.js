@@ -21,7 +21,8 @@ var http=require('http'),
 
 if(config.title===undefined){config.title='Emissary'}
 if(config.port===undefined){config.port=80}
-
+if(config.peerJS===undefined){config.peerJS=true}
+console.log(config)
 //connect redis
 s.redis=function(){
     red=redis.createClient();
@@ -68,7 +69,7 @@ app.use(bodyParser.json());
 app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
 app.use('/libs',express.static(__dirname + '/web/libs'));
-app.use('/',PeerServer(server));
+app.use('/peerjs',PeerServer(server));
 server.listen(config.port,function(){
     console.log('Emissary - PORT : '+config.port);
 });

@@ -1,4 +1,4 @@
-$.CloudChat.Peer=new Peer($.CloudChat.ke+'_'+$.CloudChat.op().bid,{path: '/peerjs',host:'<%=host%>'.split('://')[1],port: location.port || (location.protocol === 'https:' ? 443 : 80)});
+$.CloudChat.Peer=new Peer($.CloudChat.ke+'_'+$.CloudChat.op().bid,{host:'<%- data.url %>'.split('://')[1].split(':')[0],port:<%- data.port %>});
 $('[mm-videochat="s"]').show();
 //$.CloudChat.Peer.on('call',function(call){
 //    call.e=$('#mm-VideoBlock')

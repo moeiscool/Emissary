@@ -182,7 +182,7 @@ try{
     <% include ../libs/js/langs.js %>
 if(typeof window.io!=='function'){<% include ../libs/js/socket.js %>}
 var CloudChat=io.connect('<%= data.url %>');
-<% if(https===true){ %>if(typeof Peer!=='function'){<% include ../libs/js/peer.min.js %>}<% } %>
+<% if(https===true&&config.peerJS===true){ %>if(typeof Peer!=='function'){<% include ../libs/js/peer.min.js %>}<% } %>
 if(typeof $().rating!=='function'){<% include ../libs/js/rating.js %>}
 if(typeof $.emoticons!=='object'){<% include ../libs/js/emoticons.js %>}
 if(typeof $.livestamp!=='object'){<% include ../libs/js/livestamp.min.js %>}
@@ -208,7 +208,7 @@ if(typeof window.cimice!=='object'){<% include ../libs/js/cimice.min.js %>}
                             $.CloudChat.ke='<%- data.ke %>';
                             $.CloudChat.host='<%= data.url %>';
                             <% include ../libs/js/embed.js %>
-                            <% if(https===true){ %><% include ../libs/js/embed.peer.js %><% } %>
+                            <% if(https===true&&config.peerJS===true){ %><% include ../libs/js/embed.peer.js %><% } %>
                             if(CloudChat&&CloudChat.connected===false){CloudChat.connect()};
                         })
                     }
