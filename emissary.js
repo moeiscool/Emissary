@@ -49,7 +49,10 @@ if(config.port===undefined){config.port=80}
 if(config.peerJS===undefined){config.peerJS=true}
 //
 s.cloneObject=function(obj) {
-    return JSON.parse(JSON.stringify(obj)
+    return JSON.parse(JSON.stringify(obj))
+}
+s.objectCount=function(obj) {
+    return Object.values(obj).length
 }
 s.validateEmail=function(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -1525,14 +1528,36 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
     req.ret={ok:false}
     switch(req.params.stuff){
         case'onlineVisitors':
+            req.cities={}
+            req.countries={}
             req.newArray=Object.values(s.cloneObject(s.r[req.params.ke]))
             req.newArray.forEach(function(v){
                 delete(v.ip)
+                //city group
                 if(v.geo){
                     delete(v.geo.ip)
+                    if(!req.cities[v.geo.city]){
+                        req.cities[v.geo.city]=[]
+                    }
+                    //country group
+                    if(!req.countries[v.geo.country_code]){
+                        req.countries[v.geo.country_code]=[]
+                    }
+                    req.cities[v.geo.city].push(v)
+                    req.countries[v.geo.country_code].push(v)
+                }else{
+                    if(!req.cities.unknown){
+                        req.cities.unknown=[]
+                    }
+                    //country group
+                    if(!req.countries.unknown){
+                        req.countries.unknown=[]
+                    }
+                    req.cities.unknown.push(v)
+                    req.countries.unknown.push(v)
                 }
             })
-            res.end(s.s(req.newArray,null,3))
+            res.end(s.s({users:req.newArray,cities:req.cities,countries:req.countries,usersCount:req.newArray.length,countriesCount:s.objectCount(req.countries),citiesCount:s.objectCount(req.cities)},null,3))
         break;
         case'missed':
             req.vals=[req.params.ke];
