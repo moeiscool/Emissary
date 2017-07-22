@@ -12,6 +12,7 @@
     "redis": "^2.6.5",
     "request": "^2.79.0",
     "express": "^4.14.0",
+    "nodemailer": "^4.0.1",
     "node-freegeoip":"^0.0.1"
   },
   "scripts": {

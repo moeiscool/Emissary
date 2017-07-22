@@ -133,10 +133,9 @@ CREATE TABLE IF NOT EXISTS `Missed` (
 -- Data exporting was unselected.
 
 
--- Dumping structure for table chat-unmetered.Ops
-CREATE TABLE IF NOT EXISTS `Ops` (
+-- Dumping structure for table chat-unmetered.Users
+CREATE TABLE IF NOT EXISTS `Users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `hbid` int(11) DEFAULT NULL,
   `ke` varchar(50) NOT NULL,
   `name` varchar(50) NOT NULL,
   `mail` varchar(50) NOT NULL,

@@ -104,7 +104,7 @@ $.CloudChat.fc=function(e){
       if(d.trust===0){clearTimeout($.CloudChat.timeOut);$.each($.CloudChat,function(n,v){$.CloudChat[n]=function(){return {};}});$('.CloudChat,.CloudChat-launcher').remove();CloudChat.disconnect();delete(CloudChat);console.log('Unmetered.Chat : Untrusted Domain')}
     if(d.ver){
         $.CloudChat.op('ver',d.ver);
-        $.get('<%- host %>/embed/'+$.CloudChat.ke,function(d){d=d+'';$('.CloudChat').remove();$('body').append(d);});
+        $.get('<%- data.url%>/embed/'+$.CloudChat.ke,function(d){d=d+'';$('.CloudChat').remove();$('body').append(d);});
         console.log('Unmetered.Chat : '+d.ver);return false;
     }
     if(d.firebase){
@@ -303,7 +303,7 @@ $.each(CCiso.langs,function(n,v){
 });$('#mm-translator [name="fr"],#mm-translator [name="to"]').append(tmp);tmp='';
     $('#mm-translator').unbind('submit').submit(function(e){
         e.preventDefault();e.e=$.CloudChat.base.selected_translate;e.t=e.e.find('.unm-bubble small').text();e.f=$(this);e.fr=e.f.find('[name="fr"]').val(),e.to=e.f.find('[name="to"]').val()
-        $.post('<%- host %>/get/translation',{t:e.t,fr:e.fr,to:e.to},function(d){
+        $.post('<%- data.url%>/get/translation',{t:e.t,fr:e.fr,to:e.to},function(d){
             e.e.find('.translated').html('<i>'+d+'</i>');
         });
         e.f.hide();
@@ -398,8 +398,8 @@ $('body').addClass('CloudChat-Translator')
    $.CloudChat.base.lm.unbind('submit').submit(function(e){//send offline operator message
        e.preventDefault();
        e.arr=$(this).serializeObject();e.arr.ke=$.CloudChat.ke,e.arr.id=$.CloudChat.op().bid;
-       $.post("<%- host %>/p/c/"+$.CloudChat.ke,e.arr,function(da){
-           //da=JSON.parse(da);$.CloudChat.cx({f:'s',ff:'l',a:e.arr,time:new Date()});$.CloudChat.fc(2)
+       $.post("<%- data.url%>/contact/"+$.CloudChat.ke,e.arr,function(da){
+           $.CloudChat.fc(2)
        })
        $(this).find('input,textarea').val('')
        return
@@ -408,15 +408,17 @@ $('body').addClass('CloudChat-Translator')
        e.preventDefault();e={o:$.CloudChat.op()};$.CloudChat.base.mcw.removeClass('rate_us');
        e.json=$(this).serializeObject();
        if(e.json.wylac&&e.json.wylac===''){delete(e.json.wylac);}
-       e.arr={ke:$.CloudChat.ke,rate:JSON.stringify(e.json),id:e.o.bid,page:location.href,time:$.CloudChat.base.init('t',new Date),chat:{},user:{}};
+       e.arr={ke:$.CloudChat.ke,rate:JSON.stringify(e.json),id:e.o.bid,page:location.href,time:$.CloudChat.base.init('t',new Date),chat:[],user:{}};
        $('#mm-chat-messages li').each(function(n,v){
            v={e:$(v)};v.time=v.e.attr('title'),v.text=v.e.find('small:first').text(),v.name=v.e.find('b.text-right');
            if(!v.time){return false}
            if(v.name&&v.name.length==0){v.name=e.o.name}else{v.name=v.name.text()}
            delete(v.e);
-           e.arr.chat[v.time]=v
+           e.arr.chat.push(v)
        });
-       $.post("<%- host %>/p/r/",e.arr,function(da){
+       e.arr.chat=JSON.stringify(e.arr.chat)
+       e.arr.user=JSON.stringify(e.arr.user)
+       $.post("<%- data.url%>/rating/"+$.CloudChat.ke,e.arr,function(da){
            try{da=JSON.parse(da);if(da.success!==false){$.CloudChat.fc(1)}else{$.CloudChat.fc(1)}}catch(e){$('body').append(da)}
        })
        return
