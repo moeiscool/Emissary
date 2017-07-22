@@ -408,15 +408,17 @@ $('body').addClass('CloudChat-Translator')
        e.preventDefault();e={o:$.CloudChat.op()};$.CloudChat.base.mcw.removeClass('rate_us');
        e.json=$(this).serializeObject();
        if(e.json.wylac&&e.json.wylac===''){delete(e.json.wylac);}
-       e.arr={ke:$.CloudChat.ke,rate:JSON.stringify(e.json),id:e.o.bid,page:location.href,time:$.CloudChat.base.init('t',new Date),chat:{},user:{}};
+       e.arr={ke:$.CloudChat.ke,rate:JSON.stringify(e.json),id:e.o.bid,page:location.href,time:$.CloudChat.base.init('t',new Date),chat:[],user:{}};
        $('#mm-chat-messages li').each(function(n,v){
            v={e:$(v)};v.time=v.e.attr('title'),v.text=v.e.find('small:first').text(),v.name=v.e.find('b.text-right');
            if(!v.time){return false}
            if(v.name&&v.name.length==0){v.name=e.o.name}else{v.name=v.name.text()}
            delete(v.e);
-           e.arr.chat[v.time]=v
+           e.arr.chat.push(v)
        });
-       $.post("<%- data.url%>/p/r/",e.arr,function(da){
+       e.arr.chat=JSON.stringify(e.arr.chat)
+       e.arr.user=JSON.stringify(e.arr.user)
+       $.post("<%- data.url%>/rating/"+$.CloudChat.ke,e.arr,function(da){
            try{da=JSON.parse(da);if(da.success!==false){$.CloudChat.fc(1)}else{$.CloudChat.fc(1)}}catch(e){$('body').append(da)}
        })
        return

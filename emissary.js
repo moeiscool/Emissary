@@ -1,3 +1,25 @@
+//
+// Emissary
+// Copyright (C) 2015 Moe Alam, moeiscool
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// # Donate
+//
+// If you like what I am doing here and want me to continue please consider donating :)
+// PayPal : paypal@m03.ca
+//
+process.on('uncaughtException', function (err) {
+    console.error('uncaughtException',err);
+});
 s={ver:'Emissary 0.1',s:JSON.stringify},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
 
 var http=require('http'),
@@ -25,6 +47,11 @@ if(config.mail){
 if(config.title===undefined){config.title='Emissary'}
 if(config.port===undefined){config.port=80}
 if(config.peerJS===undefined){config.peerJS=true}
+//
+s.validateEmail=function(email) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
 //connect redis
 s.redis=function(){
     red=redis.createClient();
@@ -1560,12 +1587,12 @@ app.post(['/p/r','/p/c'], function (req,res){
     req.proto=req.headers['x-forwarded-proto'];
     res.send('Disabled');
 });
-//contact
+//contact form
 app.post('/contact/:ke', function (req,res){
     res.header("Access-Control-Allow-Origin",req.headers.origin);
     res.setHeader('Content-Type', 'application/json');
     req.complete=function(data){
-        res.send(s.s(data, null, 3))
+        res.end(s.s(data, null, 3))
     }
     sql.query('SELECT ke,mail FROM Users WHERE ke=?',[req.params.ke],function(err,r){
         if(r&&r[0]){
@@ -1596,6 +1623,81 @@ app.post('/contact/:ke', function (req,res){
                 }
                 req.complete({ok:true})
             });
+        }else{
+            req.complete({ok:false,msg:'Key does not exist'})
+        }
+    })
+});
+//rating operator chat form
+app.post('/rating/:ke', function (req,res){
+    res.header("Access-Control-Allow-Origin",req.headers.origin);
+    res.setHeader('Content-Type', 'application/json');
+    req.complete=function(data){
+        res.end(s.s(data, null, 3))
+    }
+    sql.query('SELECT ke,mail,ids FROM Users WHERE ke=?',[req.params.ke],function(err,r){
+        if(r&&r[0]){
+            r=r[0]
+            req.ry=JSON.stringify(r['ids'])['ry'];
+            req.body.user=JSON.parse(req.body.user)
+            req.next=function(){
+                req.mail=JSON.parse(req.body.rate).wylac
+                req.chat=JSON.parse(req.body.chat)
+                if(req.mail!==''&&s.validateEmail(req.mail)&&req.chat.length>0){
+                    req.mailOptions = {
+                        from: '"Emissary" <no-reply@emissary.chat>',
+                        to: req.mail,
+                        subject: "Chat History - Unmetered.Chat",
+                        html: '',
+                    };
+                    req.mailOptions.html +='<table cellspacing="0" cellpadding="0" border="0" style="background-color:#3598dc" bgcolor="#3598dc" width="100%"><tbody><tr><td valign="top" align="center">';
+                    req.mailOptions.html += "<table cellspacing='0' cellpadding='0' border='0' style='border-radius:5px;margin-top:30px;margin-bottom:30px;overflow: hidden;' width='650'>";
+                    req.mailOptions.html +="<thead><tr style='font-weight:bold;color:#fff'><td style='padding:6px'>Time</td><td style='padding:6px'>Name</td><td style='padding:6px'>Message</td></tr></thead><tbody>";
+                    req.chat.forEach(function(v){
+                        req.mailOptions.html +="<tr style='color:#fff;border-bottom:1px solid #fff'><td style='padding:6px'>"+v.time+"</td><td style='padding:6px'>"+v.name+"</td><td style='padding:6px'>"+v.text+"</td></tr>";
+                    })
+                    req.mailOptions.html +="</tbody></table>";
+                    req.mailOptions.html +="</table>";
+                    nodemailer.sendMail(req.mailOptions, (error, info) => {
+                        if (error) {
+                            req.complete({ok:false,msg:error})
+                            console.log(error)
+                            return ;
+                        }
+
+                    });
+                }
+                delete(req.body.chat);
+                req.body.ke=req.params.ke;
+                req.body.ip=req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                req.body.user=JSON.stringify(req.body.user);
+                req.InsertKeys=Object.keys(req.body)
+                req.questions=[]
+                req.InsertKeys.forEach(function(){
+                    req.questions.push('?')
+                })
+                sql.query('INSERT INTO Ratings ('+req.InsertKeys.join(',')+') VALUES ('+req.questions.join(',')+')',Object.values(req.body))
+                req.complete({ok:true})
+            }
+            if(req.ry&&req.ry!=='d'){
+                sql.query('SELECT rates FROM Details WHERE ke=?',[req.params.ke],function(err,rr){
+                    if(rr&&rr[0]){
+                        rr=rr[0]
+                        req.ry=JSON.parse(rr['rates']).shift();
+                        req.yr={}
+                        req.ry.forEach(function(v,n){
+                            delete(v.d);
+                            delete(v.fa);
+                            req.yr[n]=v;
+                        })
+                        delete(req.yr['wylac']);
+                        req.body.user.rule=req.yr;
+                        req.next()
+                    }
+                })
+            }else{
+                req.next()
+            }
         }else{
             req.complete({ok:false,msg:'Key does not exist'})
         }
