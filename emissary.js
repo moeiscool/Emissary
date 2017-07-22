@@ -46,6 +46,7 @@ if(config.mail){
 }
 if(config.title===undefined){config.title='Emissary'}
 if(config.port===undefined){config.port=80}
+if(config.ip===undefined||config.ip===''||config.ip.indexOf('0.0.0.0')>-1){config.ip='localhost'}else{config.bindip=config.ip};
 if(config.peerJS===undefined){config.peerJS=true}
 //
 s.cloneObject=function(obj) {
@@ -105,7 +106,7 @@ app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
 app.use('/libs',express.static(__dirname + '/web/libs'));
 app.use('/peerjs',PeerServer(server));
-server.listen(config.port,function(){
+server.listen(config.port,config.bindip,function(){
     console.log('Emissary - PORT : '+config.port);
 });
 //SSL options
@@ -1360,7 +1361,7 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
             x.data={};
             x.$user=x.session;
             x.config=config;
-            x.host=req.protocol+'://'+req.hostname;
+            x.host=req.proto+'://'+req.hostname;
             res.render('dashboard',x)
         }else{
             res.render('login',{data:{ke:x.ke},$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config})
@@ -1702,7 +1703,7 @@ app.post('/rating/:ke', function (req,res){
                 }
                 delete(req.body.chat);
                 req.body.ke=req.params.ke;
-                req.body.ip=req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                req.body.ip=req.connection.remoteAddress;
                 req.body.user=JSON.stringify(req.body.user);
                 req.InsertKeys=Object.keys(req.body)
                 req.questions=[]
@@ -1747,7 +1748,7 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
     sql.query('SELECT ke,detail FROM API WHERE code=?',[req.params.id],function(err,r){
         if(r&&r[0]){
-            r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.headers['x-forwarded-for'] || req.connection.remoteAddress)};
+            r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.connection.remoteAddress)};
             if(req.body.data){req.body=JSON.parse(req.body.data)}
             
 //            if(r.detail.origins&&r.detail.origins.length>3){
