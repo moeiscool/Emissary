@@ -49,12 +49,7 @@ if(config.port===undefined){config.port=80}
 if(config.peerJS===undefined){config.peerJS=true}
 //
 s.cloneObject=function(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-    }
-    return copy;
+    return JSON.parse(JSON.stringify(obj)
 }
 s.validateEmail=function(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -1530,7 +1525,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
     req.ret={ok:false}
     switch(req.params.stuff){
         case'onlineVisitors':
-            req.newArray=Object.values(JSON.parse(JSON.stringify(s.r[req.params.ke])))
+            req.newArray=Object.values(s.cloneObject(s.r[req.params.ke]))
             req.newArray.forEach(function(v){
                 delete(v.ip)
                 if(v.geo){
