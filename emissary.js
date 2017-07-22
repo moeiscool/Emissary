@@ -46,8 +46,15 @@ if(config.mail){
 }
 if(config.title===undefined){config.title='Emissary'}
 if(config.port===undefined){config.port=80}
+if(config.ip===undefined||config.ip===''||config.ip.indexOf('0.0.0.0')>-1){config.ip='localhost'}else{config.bindip=config.ip};
 if(config.peerJS===undefined){config.peerJS=true}
 //
+s.cloneObject=function(obj) {
+    return JSON.parse(JSON.stringify(obj))
+}
+s.objectCount=function(obj) {
+    return Object.values(obj).length
+}
 s.validateEmail=function(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
@@ -99,7 +106,7 @@ app.set('views', __dirname + '/web/pages');
 app.set('view engine','ejs');
 app.use('/libs',express.static(__dirname + '/web/libs'));
 app.use('/peerjs',PeerServer(server));
-server.listen(config.port,function(){
+server.listen(config.port,config.bindip,function(){
     console.log('Emissary - PORT : '+config.port);
 });
 //SSL options
@@ -1354,7 +1361,7 @@ app.post(['/dashboard','/dashboard/:ke'], function (req,res){
             x.data={};
             x.$user=x.session;
             x.config=config;
-            x.host=req.protocol+'://'+req.hostname;
+            x.host=req.proto+'://'+req.hostname;
             res.render('dashboard',x)
         }else{
             res.render('login',{data:{ke:x.ke},$_GET:req.query,https:(req.proto==='https'),host:req.proto+'://'+req.get('host'),config:config})
@@ -1511,7 +1518,7 @@ app.all(['/get/:stuff','/get/:stuff/:f','/get/:stuff/:f/:ff','/get/:stuff/:f/:ff
             request({url:req.url,method:'GET',encoding:'utf8'},function(err,data){
                 req.ret.ok=true;
                 req.ret.text=JSON.parse(data.body)['text'][0];
-                res.send(JSON.stringify(req.ret,null,3));
+                res.end(JSON.stringify(req.ret,null,3));
             })
         break;
     }
@@ -1521,6 +1528,38 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
     res.setHeader('Content-Type','application/json');
     req.ret={ok:false}
     switch(req.params.stuff){
+        case'onlineVisitors':
+            req.cities={}
+            req.countries={}
+            req.newArray=Object.values(s.cloneObject(s.r[req.params.ke]))
+            req.newArray.forEach(function(v){
+                delete(v.ip)
+                //city group
+                if(v.geo){
+                    delete(v.geo.ip)
+                    if(!req.cities[v.geo.city]){
+                        req.cities[v.geo.city]=[]
+                    }
+                    //country group
+                    if(!req.countries[v.geo.country_code]){
+                        req.countries[v.geo.country_code]=[]
+                    }
+                    req.cities[v.geo.city].push(v)
+                    req.countries[v.geo.country_code].push(v)
+                }else{
+                    if(!req.cities.unknown){
+                        req.cities.unknown=[]
+                    }
+                    //country group
+                    if(!req.countries.unknown){
+                        req.countries.unknown=[]
+                    }
+                    req.cities.unknown.push(v)
+                    req.countries.unknown.push(v)
+                }
+            })
+            res.end(s.s({users:req.newArray,cities:req.cities,countries:req.countries,usersCount:req.newArray.length,countriesCount:s.objectCount(req.countries),citiesCount:s.objectCount(req.cities)},null,3))
+        break;
         case'missed':
             req.vals=[req.params.ke];
             req.query='';
@@ -1529,7 +1568,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
             sql.query('SELECT * FROM Missed WHERE ke=? '+req.query+'ORDER BY start ASC LIMIT 20',req.vals,function(err,r){
                 req.ret.ok=true;
                 req.ret.missed=r;
-                res.send(JSON.stringify(req.ret,null,3));
+                res.end(JSON.stringify(req.ret,null,3));
             })
         break;
         case'chat':
@@ -1541,7 +1580,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                         req.ret.ok=true,
                         req.ret.chat=r,
                         req.ret.crumbs=rr;
-                        res.send(JSON.stringify(req.ret,null,3));
+                        res.end(JSON.stringify(req.ret,null,3));
                     })
                 })
             }else{
@@ -1555,7 +1594,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                         req.ret.ok=true,
                         req.ret.chat=r,
                         req.ret.crumbs=rr;
-                        res.send(JSON.stringify(req.ret,null,3));
+                        res.end(JSON.stringify(req.ret,null,3));
                     })
                 })
             }
@@ -1565,9 +1604,9 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                req.ret={ok:false,msg:'File not found'}
                req.file=__dirname+'/../rec/'+req.params.ke+'/'+req.params.ff+'/'+'.json';
                 if(fs.existSync(req.file)){
-                    res.send(fs.readFileSync(req.file,'UTF8'));
+                    res.end(fs.readFileSync(req.file,'UTF8'));
                 }else{
-                    res.send(JSON.stringify(req.ret,null,3));
+                    res.end(JSON.stringify(req.ret,null,3));
                 }
             }else{
                 sql.query('SELECT * FROM Recordings WHERE ke=?',[req.params.ke],function(err,r){
@@ -1576,16 +1615,11 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                     }else{
                         req.ret=r;
                     }
-                    res.send(JSON.stringify(req.ret,null,3));
+                    res.end(JSON.stringify(req.ret,null,3));
                 })
             }
         break;
     }
-});
-//
-app.post(['/p/r','/p/c'], function (req,res){
-    req.proto=req.headers['x-forwarded-proto'];
-    res.send('Disabled');
 });
 //contact form
 app.post('/contact/:ke', function (req,res){
@@ -1669,7 +1703,7 @@ app.post('/rating/:ke', function (req,res){
                 }
                 delete(req.body.chat);
                 req.body.ke=req.params.ke;
-                req.body.ip=req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                req.body.ip=req.connection.remoteAddress;
                 req.body.user=JSON.stringify(req.body.user);
                 req.InsertKeys=Object.keys(req.body)
                 req.questions=[]
@@ -1714,7 +1748,7 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
     sql.query('SELECT ke,detail FROM API WHERE code=?',[req.params.id],function(err,r){
         if(r&&r[0]){
-            r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.headers['x-forwarded-for'] || req.connection.remoteAddress)};
+            r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.connection.remoteAddress)};
             if(req.body.data){req.body=JSON.parse(req.body.data)}
             
 //            if(r.detail.origins&&r.detail.origins.length>3){
@@ -1722,13 +1756,13 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
 //                r.detail.origins.split(',').forEach(function(v){
 //                    if(e.origin.indexOf(v)>-1){e.t=1;}
 //                });
-//                if(e.t===0){res.send({ok:false,msg:'Unauthorized Domain'});return false;}
+//                if(e.t===0){res.end({ok:false,msg:'Unauthorized Domain'});return false;}
 //            }
             switch(req.params.type){
                 case'logs':
                     if(req.params.var){e.st="LOG_"+r.ke+"_"+req.params.var;}else{e.st="LOG_"+r.ke;}
                     red.get(e.st,function(err,rd){
-                        rd=s.jp(rd,[]);res.send({ok:true,logs:rd});
+                        rd=s.jp(rd,[]);res.end({ok:true,logs:rd});
                     })
                 break;
                 case'data':
@@ -1766,26 +1800,26 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
                         s.log(r.ke,req.body.log);
                         if(e.a.hook.id){s.log(r.ke,req.body.log,e.a.hook.id);}
                     }
-                    res.send(e.s);
+                    res.end(e.s);
                 break;
                 case'app':
                     
                 break;
                 default:
                     s.log(r.ke,{c:18,ip:e.ip,origin:e.origin});
-                    res.send({ok:false,msg:'Invalid API'});
+                    res.end({ok:false,msg:'Invalid API'});
                 break;
             }
             
         }else{
-            res.send({ok:false,msg:'no key found'});
+            res.end({ok:false,msg:'no key found'});
         }
     })
 });
 //app.post('/upload', function(req, res) {
 //    var sampleFile;
 //    if (!req.files) {
-//        res.send('No files were uploaded.');
+//        res.end('No files were uploaded.');
 //        return;
 //    }
 // 
@@ -1795,7 +1829,7 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
 //            res.status(500).send(err);
 //        }
 //        else {
-//            res.send('File uploaded!');
+//            res.end('File uploaded!');
 //        }
 //    });
 //});
