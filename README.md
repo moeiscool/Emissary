@@ -35,20 +35,31 @@ Emissary is made from an early live chat prototype written in PHP called CloudCh
     sudo systemctl enable redis-server.service
     ```
     
-- Install mysql
+- Install MariaDB (or MySQL)
 
     ```
     sudo apt install mariadb-server
     ```
     
-- Install node.js
+- Install Node.js
 
     ```
     sudo apt install nodejs npm
+    ```
+
+- Update Node.js and Node Package Manager.
+
+    ```
     sudo npm cache clean -f
     sudo npm install -g n
     sudo n stable
     npm install npm -g
+    ```
+    
+- Install the Node.js Process Manager, PM2
+    
+    ```
+    
     npm install pm2 -g
     ```
 
