@@ -48,6 +48,14 @@ if(config.title===undefined){config.title='Emissary'}
 if(config.port===undefined){config.port=80}
 if(config.peerJS===undefined){config.peerJS=true}
 //
+s.cloneObject=function(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
+}
 s.validateEmail=function(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
@@ -1511,7 +1519,7 @@ app.all(['/get/:stuff','/get/:stuff/:f','/get/:stuff/:f/:ff','/get/:stuff/:f/:ff
             request({url:req.url,method:'GET',encoding:'utf8'},function(err,data){
                 req.ret.ok=true;
                 req.ret.text=JSON.parse(data.body)['text'][0];
-                res.send(JSON.stringify(req.ret,null,3));
+                res.end(JSON.stringify(req.ret,null,3));
             })
         break;
     }
@@ -1521,6 +1529,16 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
     res.setHeader('Content-Type','application/json');
     req.ret={ok:false}
     switch(req.params.stuff){
+        case'onlineVisitors':
+            req.newArray=Object.values(JSON.parse(JSON.stringify(s.r[req.params.ke])))
+            req.newArray.forEach(function(v){
+                delete(v.ip)
+                if(v.geo){
+                    delete(v.geo.ip)
+                }
+            })
+            res.end(s.s(req.newArray,null,3))
+        break;
         case'missed':
             req.vals=[req.params.ke];
             req.query='';
@@ -1529,7 +1547,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
             sql.query('SELECT * FROM Missed WHERE ke=? '+req.query+'ORDER BY start ASC LIMIT 20',req.vals,function(err,r){
                 req.ret.ok=true;
                 req.ret.missed=r;
-                res.send(JSON.stringify(req.ret,null,3));
+                res.end(JSON.stringify(req.ret,null,3));
             })
         break;
         case'chat':
@@ -1541,7 +1559,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                         req.ret.ok=true,
                         req.ret.chat=r,
                         req.ret.crumbs=rr;
-                        res.send(JSON.stringify(req.ret,null,3));
+                        res.end(JSON.stringify(req.ret,null,3));
                     })
                 })
             }else{
@@ -1555,7 +1573,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                         req.ret.ok=true,
                         req.ret.chat=r,
                         req.ret.crumbs=rr;
-                        res.send(JSON.stringify(req.ret,null,3));
+                        res.end(JSON.stringify(req.ret,null,3));
                     })
                 })
             }
@@ -1565,9 +1583,9 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                req.ret={ok:false,msg:'File not found'}
                req.file=__dirname+'/../rec/'+req.params.ke+'/'+req.params.ff+'/'+'.json';
                 if(fs.existSync(req.file)){
-                    res.send(fs.readFileSync(req.file,'UTF8'));
+                    res.end(fs.readFileSync(req.file,'UTF8'));
                 }else{
-                    res.send(JSON.stringify(req.ret,null,3));
+                    res.end(JSON.stringify(req.ret,null,3));
                 }
             }else{
                 sql.query('SELECT * FROM Recordings WHERE ke=?',[req.params.ke],function(err,r){
@@ -1576,16 +1594,11 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
                     }else{
                         req.ret=r;
                     }
-                    res.send(JSON.stringify(req.ret,null,3));
+                    res.end(JSON.stringify(req.ret,null,3));
                 })
             }
         break;
     }
-});
-//
-app.post(['/p/r','/p/c'], function (req,res){
-    req.proto=req.headers['x-forwarded-proto'];
-    res.send('Disabled');
 });
 //contact form
 app.post('/contact/:ke', function (req,res){
@@ -1722,13 +1735,13 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
 //                r.detail.origins.split(',').forEach(function(v){
 //                    if(e.origin.indexOf(v)>-1){e.t=1;}
 //                });
-//                if(e.t===0){res.send({ok:false,msg:'Unauthorized Domain'});return false;}
+//                if(e.t===0){res.end({ok:false,msg:'Unauthorized Domain'});return false;}
 //            }
             switch(req.params.type){
                 case'logs':
                     if(req.params.var){e.st="LOG_"+r.ke+"_"+req.params.var;}else{e.st="LOG_"+r.ke;}
                     red.get(e.st,function(err,rd){
-                        rd=s.jp(rd,[]);res.send({ok:true,logs:rd});
+                        rd=s.jp(rd,[]);res.end({ok:true,logs:rd});
                     })
                 break;
                 case'data':
@@ -1766,26 +1779,26 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
                         s.log(r.ke,req.body.log);
                         if(e.a.hook.id){s.log(r.ke,req.body.log,e.a.hook.id);}
                     }
-                    res.send(e.s);
+                    res.end(e.s);
                 break;
                 case'app':
                     
                 break;
                 default:
                     s.log(r.ke,{c:18,ip:e.ip,origin:e.origin});
-                    res.send({ok:false,msg:'Invalid API'});
+                    res.end({ok:false,msg:'Invalid API'});
                 break;
             }
             
         }else{
-            res.send({ok:false,msg:'no key found'});
+            res.end({ok:false,msg:'no key found'});
         }
     })
 });
 //app.post('/upload', function(req, res) {
 //    var sampleFile;
 //    if (!req.files) {
-//        res.send('No files were uploaded.');
+//        res.end('No files were uploaded.');
 //        return;
 //    }
 // 
@@ -1795,7 +1808,7 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
 //            res.status(500).send(err);
 //        }
 //        else {
-//            res.send('File uploaded!');
+//            res.end('File uploaded!');
 //        }
 //    });
 //});
