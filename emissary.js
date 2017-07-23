@@ -184,6 +184,10 @@ s.geo=function(z,y,x){
     if(freegeoip){
         freegeoip.getLocation(z, function(err,loc) {
          if(loc){
+             if(loc.country_code==='IL'){
+                 loc.country_code='PS'
+                 loc.country_name='Palestine'
+             }
             loc.flag=loc.country_code.toLowerCase()
             s.r[x][y].geo=loc
             atx({geo:loc,bid:y,uid:x},x)
@@ -1703,7 +1707,7 @@ app.post('/rating/:ke', function (req,res){
                 }
                 delete(req.body.chat);
                 req.body.ke=req.params.ke;
-                req.body.ip=req.connection.remoteAddress;
+                req.body.ip=req.headers['cf-connecting-ip']||req.headers["CF-Connecting-IP"]||req.headers["'x-forwarded-for"]||req.connection.remoteAddress;
                 req.body.user=JSON.stringify(req.body.user);
                 req.InsertKeys=Object.keys(req.body)
                 req.questions=[]
@@ -1748,7 +1752,7 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
     sql.query('SELECT ke,detail FROM API WHERE code=?',[req.params.id],function(err,r){
         if(r&&r[0]){
-            r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.connection.remoteAddress)};
+            r=r[0];r.detail=JSON.parse(r.detail);e={ip:(req.headers['cf-connecting-ip']||req.headers["CF-Connecting-IP"]||req.headers["'x-forwarded-for"]||req.connection.remoteAddress)};
             if(req.body.data){req.body=JSON.parse(req.body.data)}
             
 //            if(r.detail.origins&&r.detail.origins.length>3){
