@@ -20,7 +20,7 @@
 process.on('uncaughtException', function (err) {
     console.error('uncaughtException',err);
 });
-s={ver:'Emissary 0.1',s:JSON.stringify},s.r={},s.a={},s.p={},s.ao={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
+s={ver:'Emissary 0.1',s:JSON.stringify},s.visitors={},s.a={},s.p={},s.onlineOperators={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
 
 var http=require('http'),
     https=require('https'),
@@ -144,7 +144,7 @@ s.moment=function(e){if(!e){e=new Date};return moment(e).utcOffset('-0800').form
 s.lr=function(h){try{return s.obk(io.sockets.adapter.rooms[h])}catch(e){return []}};s.gs=function(h){return io.sockets.connected[h]};
 //Count Admins
 s.ca=function(gt){
-    if(s.ao[gt]){return s.obk(s.ao[gt]).length+1}else{return 1}
+    if(s.onlineOperators[gt]){return s.obk(s.onlineOperators[gt]).length+1}else{return 1}
 }
 //admin object for client side
 s.ad=function(u,v){
@@ -152,10 +152,10 @@ s.ad=function(u,v){
 }
 //Get admin details
 s.cd=function(gt,e){
-    if(s.ao[gt]){
+    if(s.onlineOperators[gt]){
         e={e:{}};
-        s.obk(s.ao[gt]).forEach(function(v){
-            e.u=s.ao[gt][v].u;
+        s.obk(s.onlineOperators[gt]).forEach(function(v){
+            e.u=s.onlineOperators[gt][v].u;
             if(s.a[e.u]&&s.a[e.u][v]){
                 e.e[v]=s.ad(s.a[e.u][v],v);
             }
@@ -189,7 +189,7 @@ s.geo=function(z,y,x){
                  loc.country_name='Palestine'
              }
             loc.flag=loc.country_code.toLowerCase()
-            s.r[x][y].geo=loc
+            s.visitors[x][y].geo=loc
             atx({geo:loc,bid:y,uid:x},x)
          }
         });
@@ -301,7 +301,7 @@ function tx(z){//Connection Sender
 //                switch(d.ff){
 //                    case's'://save recording
 //                            
-//                            d.start=s.r[cn.uid][cn.bid].fti;
+//                            d.start=s.visitors[cn.uid][cn.bid].fti;
 //                            sql.query("SELECT * from Recordings WHERE ke=? AND id=? AND start=?",[cn.uid,cn.bid,d.start],function(er,r,g){
 //                                if(r&&r[0]){
 //                                    sql.query("UPDATE Recordings SET data=? WHERE ke=? AND id=? AND start=?",[d.d,cn.uid,cn.bid,d.start])
@@ -430,7 +430,7 @@ function tx(z){//Connection Sender
                             if(!d.u){d.u=d.uid}
                             if(!d.s){d.bi=d.bid}else{d.bi=d.s;}
                             red.get("CHAT_"+d.u+"_"+d.bi,function(err,rd){
-                                if(rd==='{}'){rd='[]'};rd=s.jp(rd,[]);if(!rd){if(!d.y&&(!s.r[d.u]||!s.r[d.u][d.bi])){
+                                if(rd==='{}'){rd='[]'};rd=s.jp(rd,[]);if(!rd){if(!d.y&&(!s.visitors[d.u]||!s.visitors[d.u][d.bi])){
 //                                    sql.query("SELECT history,user FROM Chats where ke=? AND id=? DESC LIMIT 1",[d.u,d.bi],function(er,r,g){
 //                                        r=JSON.parse(r[0].user);
 //                                        if(r.mail&&s.vmail(r.mail)){
@@ -519,10 +519,10 @@ function tx(z){//Connection Sender
                                                             d.lr=s.lr('1AA_A_'+d.uid)
                                                             if((d.lr instanceof Object || d.lr instanceof Array)&&d.lr.length>0){
                                                                 d.lr.forEach(function(v){
-                                                                    if(s.a[s.ao[cn.uid][v].u]&&s.a[s.ao[cn.uid][v].u][v]){
-                                                                        s.ao[cn.uid][v]={u:d.uid}
+                                                                    if(s.a[s.onlineOperators[cn.uid][v].u]&&s.a[s.onlineOperators[cn.uid][v].u][v]){
+                                                                        s.onlineOperators[cn.uid][v]={u:d.uid}
                                                                         s.gs(v).join('1AA_A_'+cn.uid)
-                                                                        s.tx({users:s.r[cn.uid],pnote:{title:'Lucky you!',type:'success',text:s.a[cn.uid][cn.id].n+' Shared their visitors with you.'}},v)
+                                                                        s.tx({users:s.visitors[cn.uid],pnote:{title:'Lucky you!',type:'success',text:s.a[cn.uid][cn.id].n+' Shared their visitors with you.'}},v)
                                                                         aatx({ao:s.cd(cn.uid),uid:cn.uid},cn.uid)
                                                                     }
                                                                 })
@@ -540,8 +540,8 @@ function tx(z){//Connection Sender
                                                         d.lr=s.lr('1AA_A_'+d.uid)
                                                         if((d.lr instanceof Object || d.lr instanceof Array)&&d.lr.length>0){
                                                             d.lr.forEach(function(v){
-                                                                if(s.a[s.ao[cn.uid][v].u]&&s.a[s.ao[cn.uid][v].u][v]){
-                                                                    s.gs(v).leave('1AA_A_'+cn.uid),delete(s.ao[cn.uid][v]),s.tx({remove:['[uid="'+cn.uid+'"]']},v);
+                                                                if(s.a[s.onlineOperators[cn.uid][v].u]&&s.a[s.onlineOperators[cn.uid][v].u][v]){
+                                                                    s.gs(v).leave('1AA_A_'+cn.uid),delete(s.onlineOperators[cn.uid][v]),s.tx({remove:['[uid="'+cn.uid+'"]']},v);
                                                                     aatx({ao:s.cd(cn.uid),uid:cn.uid},cn.uid);
                                                                 }
                                                             })
@@ -604,7 +604,7 @@ function tx(z){//Connection Sender
                         }
                     break;
                     case'diag'://get all current server info
-tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_convos:s.c,version:s.ver})
+tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOperators[d.uid],active_convos:s.c,version:s.ver})
                     break;
                     case'ccj'://join operator channel
                         if(d.x===1){
@@ -633,7 +633,7 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         }
                     break;
                     case'cj'://join chatroom for user
-                        if(s.a[cn.uid]&&s.r[d.uid]){
+                        if(s.a[cn.uid]&&s.visitors[d.uid]){
                             if(!d.uid){d.uid=cn.uid}
                             //start join
                             d.ret={cj:d.cj,x:d.x,adm:{x:d.x,u:cn.uid,b:cn.bid,n:s.a[cn.uid][cn.id].n,peer:s.a[cn.uid][cn.id].peer},uid:d.uid,bid:d.bid};
@@ -646,43 +646,43 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                 });
                                 if(d.q>5){tx({f:'cjx',uid:d.uid,bid:d.bid});return;}
                             }
-                                if(s.r[d.uid]&&s.r[d.uid][d.bid]){
-                                    if(!s.r[d.uid][d.bid].pj[cn.uid]){
-                                        s.r[d.uid][d.bid].pj[cn.uid]={};
+                                if(s.visitors[d.uid]&&s.visitors[d.uid][d.bid]){
+                                    if(!s.visitors[d.uid][d.bid].pj[cn.uid]){
+                                        s.visitors[d.uid][d.bid].pj[cn.uid]={};
                                     }
-                                    if(!s.r[d.uid][d.bid].pj[cn.uid][cn.bid]){
-                                        s.r[d.uid][d.bid].pj[cn.uid][cn.bid]={t:[],te:[]};
+                                    if(!s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid]){
+                                        s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid]={t:[],te:[]};
                                     }
-                                    s.r[d.uid][d.bid].pj[cn.uid][cn.bid].t.push(s.moment())
-                                    if(!s.r[d.uid][d.bid].joined[cn.uid]){
-                                        s.r[d.uid][d.bid].joined[cn.uid]={};
+                                    s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid].t.push(s.moment())
+                                    if(!s.visitors[d.uid][d.bid].joined[cn.uid]){
+                                        s.visitors[d.uid][d.bid].joined[cn.uid]={};
                                     }
-                                    s.r[d.uid][d.bid].joined[cn.uid][cn.bid]={u:cn.uid,b:cn.bid,n:s.a[cn.uid][cn.id].n}
+                                    s.visitors[d.uid][d.bid].joined[cn.uid][cn.bid]={u:cn.uid,b:cn.bid,n:s.a[cn.uid][cn.id].n}
                                     if(!s.a[cn.uid][cn.id].joined[d.uid]){
                                         s.a[cn.uid][cn.id].joined[d.uid]={};
                                     }
-                                    s.a[cn.uid][cn.id].joined[d.uid][d.bid]={u:d.uid,n:s.r[d.uid][d.bid].name}
-                                    if(s.r[d.uid][d.bid].cap==0){d.mom=s.moment(),s.r[d.uid][d.bid].cap=d.mom;d.ret.cap=d.mom};
+                                    s.a[cn.uid][cn.id].joined[d.uid][d.bid]={u:d.uid,n:s.visitors[d.uid][d.bid].name}
+                                    if(s.visitors[d.uid][d.bid].cap==0){d.mom=s.moment(),s.visitors[d.uid][d.bid].cap=d.mom;d.ret.cap=d.mom};
                                     d.ret.adm.pp=s.a[cn.uid][cn.id].pp;
                                     if(!d.xx){s.tx(d.ret,d.uid+'_'+d.bid);};
-                                    atx({uid:d.uid,bid:d.bid,joined:s.r[d.uid][d.bid].joined},d.uid);
+                                    atx({uid:d.uid,bid:d.bid,joined:s.visitors[d.uid][d.bid].joined},d.uid);
                                     cn.join(d.uid+'_'+d.bid);
-                                    s.tx({uid:d.uid,bid:d.bid,cap:s.r[d.uid][d.bid].cap,pj:s.r[d.uid][d.bid].pj},d.uid+'_'+d.bid);
+                                    s.tx({uid:d.uid,bid:d.bid,cap:s.visitors[d.uid][d.bid].cap,pj:s.visitors[d.uid][d.bid].pj},d.uid+'_'+d.bid);
                                 }
                             }else{
                                 cn.leave(d.uid+'_'+d.bid)
                                 if(s.a[cn.uid]&&s.a[cn.uid][cn.id]&&s.a[cn.uid][cn.id].joined[d.uid]&&s.a[cn.uid][cn.id].joined[d.uid][d.bid]){
                                     delete(s.a[cn.uid][cn.id].joined[d.uid][d.bid]);
                                 }
-                                if(s.r[d.uid]&&s.r[d.uid][d.bid]&&s.r[d.uid][d.bid].joined[cn.uid]&&s.r[d.uid][d.bid].joined[cn.uid][cn.bid]&&s.r[d.uid][d.bid].pj[cn.uid]){
-                                    if(s.r[d.uid][d.bid].pj[cn.uid][cn.bid]){s.r[d.uid][d.bid].pj[cn.uid][cn.bid].te.push(s.moment())};
-                                    delete(s.r[d.uid][d.bid].joined[cn.uid][cn.bid]);
-                                    if(s.obk(s.r[d.uid][d.bid].joined[cn.uid]).length===0){
-                                        delete(s.r[d.uid][d.bid].joined[cn.uid]);
+                                if(s.visitors[d.uid]&&s.visitors[d.uid][d.bid]&&s.visitors[d.uid][d.bid].joined[cn.uid]&&s.visitors[d.uid][d.bid].joined[cn.uid][cn.bid]&&s.visitors[d.uid][d.bid].pj[cn.uid]){
+                                    if(s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid]){s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid].te.push(s.moment())};
+                                    delete(s.visitors[d.uid][d.bid].joined[cn.uid][cn.bid]);
+                                    if(s.obk(s.visitors[d.uid][d.bid].joined[cn.uid]).length===0){
+                                        delete(s.visitors[d.uid][d.bid].joined[cn.uid]);
                                     }
                                     if(!d.xx){s.tx(d.ret,d.uid+'_'+d.bid);};
-                                    atx({uid:d.uid,bid:d.bid,joined:s.r[d.uid][d.bid].joined},d.uid);
-                                    s.tx({uid:d.uid,bid:d.bid,cap:s.r[d.uid][d.bid].cap,pj:s.r[d.uid][d.bid].pj},d.uid+'_'+d.bid);
+                                    atx({uid:d.uid,bid:d.bid,joined:s.visitors[d.uid][d.bid].joined},d.uid);
+                                    s.tx({uid:d.uid,bid:d.bid,cap:s.visitors[d.uid][d.bid].cap,pj:s.visitors[d.uid][d.bid].pj},d.uid+'_'+d.bid);
                                 }
                             }
                         }
@@ -715,10 +715,10 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                             break;
                             case'c'://chat
                                 if(s.a[cn.uid]&&s.a[cn.uid][cn.id]){
-                                    if(d.tbid&&s.r[d.uid]&&s.r[d.uid][d.tbid]&&s.r[d.uid][d.tbid].vid){
-                                tx({bid:d.tbid,vid:s.r[d.uid][d.tbid].vid,cid:cn.id})
-                                if(s.r[d.uid][d.tbid].brd){
-                                    tx({brd:s.r[d.uid][d.tbid].brd,bid:d.tbid})
+                                    if(d.tbid&&s.visitors[d.uid]&&s.visitors[d.uid][d.tbid]&&s.visitors[d.uid][d.tbid].vid){
+                                tx({bid:d.tbid,vid:s.visitors[d.uid][d.tbid].vid,cid:cn.id})
+                                if(s.visitors[d.uid][d.tbid].brd){
+                                    tx({brd:s.visitors[d.uid][d.tbid].brd,bid:d.tbid})
                                 }
                                 d.arr={bid:d.tbid,uid:d.uid};
                                         red.get("CHAT_"+d.uid+"_"+d.tbid,function(err,rd){rd=s.jp(rd);
@@ -946,9 +946,9 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         }
                     break;
                     case'e':
-                        if(d.form&&d.bid&&d.uid&&s.r[d.uid]&&s.r[d.uid][d.bid]){
-                            if(d.form.name){s.r[d.uid][d.bid].name=d.form.name}
-                            if(d.form.mail){s.r[d.uid][d.bid].mail=d.form.mail}
+                        if(d.form&&d.bid&&d.uid&&s.visitors[d.uid]&&s.visitors[d.uid][d.bid]){
+                            if(d.form.name){s.visitors[d.uid][d.bid].name=d.form.name}
+                            if(d.form.mail){s.visitors[d.uid][d.bid].mail=d.form.mail}
                             s.tx(d,d.uid+'_'+d.bid);
                         }
                     break;
@@ -982,10 +982,10 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                                                     //s.log(xx,{id:d.bid,ip:cn.ip,status:1});//log
                                                     //admin init with online count check
                                                     z=function(){
-                                                        if(!s.ao[xx]){s.ao[xx]={}}
-                                                        s.ao[xx][cn.id]={u:cn.uid}
+                                                        if(!s.onlineOperators[xx]){s.onlineOperators[xx]={}}
+                                                        s.onlineOperators[xx][cn.id]={u:cn.uid}
                                                         cn.join('1AA_A_'+xx)
-                                                        aatx({ao:s.cd(xx),uid:xx},xx),tx({f:'i',cid:cn.id,users:s.r[xx],uid:xx})
+                                                        aatx({ao:s.cd(xx),uid:xx},xx),tx({f:'i',cid:cn.id,users:s.visitors[xx],uid:xx})
                                                     }
                                                     if(r.type==0){
                                                         if(!r.perm.online){r.perm.online=5;}
@@ -1034,9 +1034,9 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         s.tx(d,d.cn)
                     break;
                     case'n'://name/mail change by user
-                        if(d.form&&cn.bid&&cn.uid&&s.r[cn.uid]&&s.r[cn.uid][cn.bid]){
-                            if(d.form.name){s.r[cn.uid][cn.bid].name=d.form.name}
-                            if(d.form.mail){s.r[cn.uid][cn.bid].mail=d.form.mail}
+                        if(d.form&&cn.bid&&cn.uid&&s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]){
+                            if(d.form.name){s.visitors[cn.uid][cn.bid].name=d.form.name}
+                            if(d.form.mail){s.visitors[cn.uid][cn.bid].mail=d.form.mail}
                             d.f='a';d.ff='e';aatx(d,cn.uid+'_'+cn.bid,cn);
                         }
                     break;
@@ -1063,43 +1063,43 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         cn.join(d.uid+'_'+d.bid),cn.join(d.uid);
                         clearTimeout(s.nf[d.bid+'_'+d.uid]);delete(s.nf[d.bid+'_'+d.uid]);
                         cn.uid=d.uid,cn.bid=d.bid,d.u.bid=d.bid,d.u.uid=d.uid
-                        if(!s.r[d.uid]){s.r[d.uid]={}}
-                        if(!s.r[d.uid][d.bid]){
-                            d.u.ft=1,d.u.joined={},s.r[d.uid][d.bid]=d.u;
-                        }else{++s.r[d.uid][d.bid].ft}
+                        if(!s.visitors[d.uid]){s.visitors[d.uid]={}}
+                        if(!s.visitors[d.uid][d.bid]){
+                            d.u.ft=1,d.u.joined={},s.visitors[d.uid][d.bid]=d.u;
+                        }else{++s.visitors[d.uid][d.bid].ft}
                         d.r=d.u.referrer
                         if(d.r===null||d.r===undefined){d.r=''}
-                        if(!s.r[d.uid][d.bid].vid){
-                            s.r[d.uid][d.bid].vid={}
+                        if(!s.visitors[d.uid][d.bid].vid){
+                            s.visitors[d.uid][d.bid].vid={}
                         }
-                        s.r[cn.uid][cn.bid].url=d.u.url;
-                        s.r[cn.uid][cn.bid].time=moment().format();
-                        s.r[cn.uid][cn.bid].user_time=d.u.time;
-                        s.r[cn.uid][cn.bid].title=d.u.title;
-                        if(!s.r[d.uid][d.bid].geo){
+                        s.visitors[cn.uid][cn.bid].url=d.u.url;
+                        s.visitors[cn.uid][cn.bid].time=moment().format();
+                        s.visitors[cn.uid][cn.bid].user_time=d.u.time;
+                        s.visitors[cn.uid][cn.bid].title=d.u.title;
+                        if(!s.visitors[d.uid][d.bid].geo){
                             s.geo(cn.ip,d.bid,d.uid)
                         }
-                        if(!s.r[d.uid][d.bid].cap){s.r[d.uid][d.bid].cap=0}
-                        s.r[d.uid][d.bid].pj={};s.r[d.uid][d.bid].referrer=d.u.referrer,s.r[d.uid][d.bid].ip=cn.ip,s.r[d.uid][d.bid].url=d.u.url,s.r[d.uid][d.bid].time=d.u.time,s.r[d.uid][d.bid].vid[cn.id]={u:d.u.url},s.r[d.uid][d.bid].chat=0,s.r[d.uid][d.bid].open=0;
-                        if(s.r[d.uid][d.bid].ll!==2){s.r[d.uid][d.bid].ll=0}
-                        if(!s.r[d.uid][d.bid].brd){s.r[d.uid][d.bid].brd=[]}
-                        s.r[d.uid][d.bid].brd.push({href:d.u.url,referrer:d.r,ft:s.r[d.uid][d.bid].ft,time:s.moment()});d.kl=s.r[d.uid][d.bid].brd.length;if(d.kl>250){s.r[d.uid][d.bid].brd=s.r[d.uid][d.bid].brd.splice(0,(d.kl-250))}
+                        if(!s.visitors[d.uid][d.bid].cap){s.visitors[d.uid][d.bid].cap=0}
+                        s.visitors[d.uid][d.bid].pj={};s.visitors[d.uid][d.bid].referrer=d.u.referrer,s.visitors[d.uid][d.bid].ip=cn.ip,s.visitors[d.uid][d.bid].url=d.u.url,s.visitors[d.uid][d.bid].time=d.u.time,s.visitors[d.uid][d.bid].vid[cn.id]={u:d.u.url},s.visitors[d.uid][d.bid].chat=0,s.visitors[d.uid][d.bid].open=0;
+                        if(s.visitors[d.uid][d.bid].ll!==2){s.visitors[d.uid][d.bid].ll=0}
+                        if(!s.visitors[d.uid][d.bid].brd){s.visitors[d.uid][d.bid].brd=[]}
+                        s.visitors[d.uid][d.bid].brd.push({href:d.u.url,referrer:d.r,ft:s.visitors[d.uid][d.bid].ft,time:s.moment()});d.kl=s.visitors[d.uid][d.bid].brd.length;if(d.kl>250){s.visitors[d.uid][d.bid].brd=s.visitors[d.uid][d.bid].brd.splice(0,(d.kl-250))}
                         red.get("FB_"+d.uid,function(err,rd){rd=s.jp(rd);
                         if(rd&&s.obk(rd).length===0){rd={apiKey:"AIzaSyBZ68U1anJHhKLLt30f66BwmB7ED1ipht0",authDomain: "cloudchat-5bb80.firebaseapp.com",storageBucket: "cloudchat-5bb80.appspot.com"}}
-                        s.r[d.uid][d.bid].fti=s.moment();d.tx={firebase:rd,ao:s.cd(d.uid),uid:d.uid};if(!s.r[d.uid][d.bid].fs||s.r[d.uid][d.bid].fs=="1"){d.tx.fs=s.moment();s.r[d.uid][d.bid].fs=d.tx.fs;};
+                        s.visitors[d.uid][d.bid].fti=s.moment();d.tx={firebase:rd,ao:s.cd(d.uid),uid:d.uid};if(!s.visitors[d.uid][d.bid].fs||s.visitors[d.uid][d.bid].fs=="1"){d.tx.fs=s.moment();s.visitors[d.uid][d.bid].fs=d.tx.fs;};
                         tx(d.tx);
-                        atx({f:'v',u:s.r[d.uid][d.bid],vid:s.r[d.uid][d.bid].vid,bid:d.bid,cid:cn.id,al:0},d.uid)
+                        atx({f:'v',u:s.visitors[d.uid][d.bid],vid:s.visitors[d.uid][d.bid].vid,bid:d.bid,cid:cn.id,al:0},d.uid)
                         })
                        break;
                     case'b'://chat end
-                        if(s.r[cn.uid][cn.bid].chat===1){s.log(cn.uid,{c:3,ip:cn.ip},cn.bid);}
-                        s.r[cn.uid][cn.bid].chat=0
+                        if(s.visitors[cn.uid][cn.bid].chat===1){s.log(cn.uid,{c:3,ip:cn.ip},cn.bid);}
+                        s.visitors[cn.uid][cn.bid].chat=0
                         atx(d,cn.uid,cn);
-                        d.k=s.obk(s.r[cn.uid][cn.bid].vid)
+                        d.k=s.obk(s.visitors[cn.uid][cn.bid].vid)
                         ex({f:'x',ff:0},d.k);
                         //save chat because it ended
                         red.get("CHAT_"+cn.uid+"_"+cn.bid,function(err,rd){rd=s.jp(rd);
-                        q={rr:s.r[cn.uid][cn.bid]};q.user=JSON.stringify({name:q.rr.name,mail:q.rr.mail,ip:cn.ip,pj:q.rr.pj})
+                        q={rr:s.visitors[cn.uid][cn.bid]};q.user=JSON.stringify({name:q.rr.name,mail:q.rr.mail,ip:cn.ip,pj:q.rr.pj})
                         if(rd&&rd[0]){q.time=rd[0].time}
                         if(q.rr.cap==0&&rd&&rd[0]&&rd.length>1){
                             q.qu="INSERT INTO Missed (start,id,ke,user) VALUES (?,?,?,?)";
@@ -1126,19 +1126,19 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                         })
                     break;
                     case'o':
-                        if(d.bid&&s.r[d.uid]&&s.r[d.uid][d.bid]){s.r[d.uid][d.bid].open=d.o
+                        if(d.bid&&s.visitors[d.uid]&&s.visitors[d.uid][d.bid]){s.visitors[d.uid][d.bid].open=d.o
                         s.tx(d,d.uid+'_'+d.bid);
                         atx(d,d.uid);}
                     break;
                     default://chat init
-                        if(s.r[cn.uid]&&s.r[cn.uid][cn.bid]){
-                            if(s.r[cn.uid][cn.bid].chat!==1){s.log(cn.uid,{c:2,ip:cn.ip},cn.bid);}
-                        if(s.obk(s.r[cn.uid][cn.bid].joined).length>0){
-                            tx({ad:s.r[cn.uid][cn.bid].joined})
+                        if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]){
+                            if(s.visitors[cn.uid][cn.bid].chat!==1){s.log(cn.uid,{c:2,ip:cn.ip},cn.bid);}
+                        if(s.obk(s.visitors[cn.uid][cn.bid].joined).length>0){
+                            tx({ad:s.visitors[cn.uid][cn.bid].joined})
                         }
-                        s.r[cn.uid][cn.bid].name=d.u.name;
-                        s.r[cn.uid][cn.bid].mail=d.u.mail;
-                        s.r[cn.uid][cn.bid].dept=d.u.dept;
+                        s.visitors[cn.uid][cn.bid].name=d.u.name;
+                        s.visitors[cn.uid][cn.bid].mail=d.u.mail;
+                        s.visitors[cn.uid][cn.bid].dept=d.u.dept;
                         if(d.ch){d.chc=0;
                             d.fn=function(g,h){
                                 if(s.a[g]){
@@ -1163,8 +1163,8 @@ tx({active_users:s.r[d.uid],active_admins:s.a,online_admins:s.ao[d.uid],active_c
                             })
                         }
 clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
-                        d.k=s.obk(s.r[d.uid][d.bid].vid),s.r[d.uid][d.bid].chat=1;
-                        d.tt={f:'ii',u:s.r[d.uid][d.bid],bid:d.bid,cid:cn.id};
+                        d.k=s.obk(s.visitors[d.uid][d.bid].vid),s.visitors[d.uid][d.bid].chat=1;
+                        d.tt={f:'ii',u:s.visitors[d.uid][d.bid],bid:d.bid,cid:cn.id};
                         atx(d.tt,d.uid);
                         red.get("CHAT_"+d.uid+"_"+d.bid,function(err,rd){rd=s.jp(rd);
                         if(!rd||(rd&&rd.length===0)){
@@ -1179,9 +1179,9 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                                     })
                         }else{
                             ex({f:'x',ff:1,history:rd},d.k)
-                            if(s.r[d.uid][d.bid].ft===1){++s.r[d.uid][d.bid].co;}
+                            if(s.visitors[d.uid][d.bid].ft===1){++s.visitors[d.uid][d.bid].co;}
                         }
-                        if(s.r[d.uid][d.bid].ll==0){d.tt.al=1;s.r[d.uid][d.bid].ll=2}
+                        if(s.visitors[d.uid][d.bid].ll==0){d.tt.al=1;s.visitors[d.uid][d.bid].ll=2}
                         })
                         }
                     break;
@@ -1212,9 +1212,9 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                 d.fn=function(xx){
                     s.obk(s.a[xx][cn.id].joined).forEach(function(v){
                         s.obk(s.a[xx][cn.id].joined[v]).forEach(function(b){
-                            if(s.r[v]&&s.r[v][b]&&s.r[v][b].joined[xx]){
-                                if(s.r[v][b].pj&&s.r[v][b].pj[xx]&&s.r[v][b].pj[xx][cn.bid]){s.r[v][b].pj[xx][cn.bid].te.push(s.moment())};
-                                delete(s.r[v][b].joined[xx][cn.bid]);d.qq=s.r[v][b];
+                            if(s.visitors[v]&&s.visitors[v][b]&&s.visitors[v][b].joined[xx]){
+                                if(s.visitors[v][b].pj&&s.visitors[v][b].pj[xx]&&s.visitors[v][b].pj[xx][cn.bid]){s.visitors[v][b].pj[xx][cn.bid].te.push(s.moment())};
+                                delete(s.visitors[v][b].joined[xx][cn.bid]);d.qq=s.visitors[v][b];
                                 s.tx({cj:s.a[xx][cn.id].n,x:0,adm:{x:0,u:cn.uid,n:s.a[xx][cn.id],peer:s.a[xx][cn.id].peer,b:cn.bid},cap:d.qq.cap,pj:d.qq.pj,uid:v,bid:b},v+'_'+b)
                                 atx({joined:d.qq.joined,uid:v,bid:b},v);
                             }
@@ -1229,7 +1229,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                         })
                     });s.a[xx][cn.id].status="0";
                     aatx({at:s.ad(s.a[xx][cn.id],cn.id),x:1,uid:cn.uid},xx)
-                    delete(s.ao[xx][cn.id])
+                    delete(s.onlineOperators[xx][cn.id])
                     delete(s.a[xx][cn.id])
                     //s.log(xx,{id:cn.bid,ip:cn.ip,status:2});
                 }
@@ -1244,17 +1244,17 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                     }
                 })
             }
-            if(s.r[cn.uid]&&s.r[cn.uid][cn.bid]&&!(s.p[cn.uid]&&s.p[cn.uid][cn.id])){
+            if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&!(s.p[cn.uid]&&s.p[cn.uid][cn.id])){
                 atx({f:'dii',d:cn.bid,uid:cn.uid,cn:cn.id},cn.uid)
-                if(s.r[cn.uid][cn.bid].vid[cn.id]){delete(s.r[cn.uid][cn.bid].vid[cn.id])}
-                if(s.r[cn.uid]&&s.r[cn.uid][cn.bid]&&s.r[cn.uid][cn.bid].brd&&s.obk(s.r[cn.uid][cn.bid].vid).length===0){
+                if(s.visitors[cn.uid][cn.bid].vid[cn.id]){delete(s.visitors[cn.uid][cn.bid].vid[cn.id])}
+                if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&s.visitors[cn.uid][cn.bid].brd&&s.obk(s.visitors[cn.uid][cn.bid].vid).length===0){
                 s.nf[cn.bid+'_'+cn.uid]=setTimeout(function(q){
-                    if(s.r[cn.uid]&&s.r[cn.uid][cn.bid]&&s.r[cn.uid][cn.bid].vid){
-                    atx({f:'li',bid:cn.bid,vid:s.r[cn.uid][cn.bid].vid,uid:cn.uid},cn.uid);
+                    if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&s.visitors[cn.uid][cn.bid].vid){
+                    atx({f:'li',bid:cn.bid,vid:s.visitors[cn.uid][cn.bid].vid,uid:cn.uid},cn.uid);
                     red.get("CHAT_"+cn.uid+"_"+cn.bid,function(err,rd){rd=s.jp(rd);
                     red.get("LOG_"+cn.uid+"_"+cn.bid,function(err,rlog){rlog=s.jp(rlog,[]);
                     //Breadcrumbs
-                        q={rr:s.r[cn.uid][cn.bid]};if(rd){q.ch=rd}
+                        q={rr:s.visitors[cn.uid][cn.bid]};if(rd){q.ch=rd}
                         q.time=q.rr.brd[0].time,q.qu="SELECT id FROM Crumbs WHERE id=? AND ke=? AND `start`=?",q.qa=[cn.bid,cn.uid,q.time];
                         sql.query(q.qu,q.qa,function(err,r){
                         q.j=q.rr.brd;if((q.j instanceof Array)===false){q.j=[]};q.j=JSON.stringify(q.j);
@@ -1313,7 +1313,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                                 })
                             }
                             red.del("CHAT_"+cn.uid+"_"+cn.bid)
-                            delete(s.r[cn.uid][cn.bid]);
+                            delete(s.visitors[cn.uid][cn.bid]);
                             })
                         })
                     })
@@ -1333,12 +1333,6 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
 //main page
 app.get('/', function (req,res){
     res.render('index');
-});
-//login
-app.get('/embed/:ke', function (req,res){
-    req.proto=req.headers['x-forwarded-proto']||req.protocol;
-    res.header("Access-Control-Allow-Origin",req.headers.origin);
-    res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
 });
 //dashboard
 app.get(['/dashboard','/dashboard/:ke'], function (req,res){
@@ -1535,7 +1529,7 @@ app.all(['/:api/:ke/get/:stuff','/:api/:ke/get/:stuff/:f','/:api/:ke/get/:stuff/
         case'onlineVisitors':
             req.cities={}
             req.countries={}
-            req.newArray=Object.values(s.cloneObject(s.r[req.params.ke]))
+            req.newArray=Object.values(s.cloneObject(s.visitors[req.params.ke]))
             req.newArray.forEach(function(v){
                 delete(v.ip)
                 //city group
@@ -1820,20 +1814,9 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
         }
     })
 });
-//app.post('/upload', function(req, res) {
-//    var sampleFile;
-//    if (!req.files) {
-//        res.end('No files were uploaded.');
-//        return;
-//    }
-// 
-//    sampleFile = req.files.sampleFile;
-//    sampleFile.mv('/somewhere/on/your/server/filename.jpg', function(err) {
-//        if (err) {
-//            res.status(500).send(err);
-//        }
-//        else {
-//            res.end('File uploaded!');
-//        }
-//    });
-//});
+//embed
+app.get('/embed/:ke', function (req,res){
+    req.proto=req.headers['x-forwarded-proto']||req.protocol;
+    res.header("Access-Control-Allow-Origin",req.headers.origin);
+    res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
+});
