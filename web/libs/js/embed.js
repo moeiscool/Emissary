@@ -13,7 +13,44 @@ $.CloudChat.init=function(e,f){
         clearInterval($.CloudChat.base.swf);
             if(!f.oo.fs){f.oo.fs="1";};
             $.each(['dp','sc','ry'],function(n,v){if(!f.oo[v]){$.CloudChat.op(v,' ')}});
-        $.CloudChat.cx({f:'j',ff:'x',trust:location.hostname,ver:f.oo.ver,dp:f.oo.dp,ry:f.oo.ry,sc:f.oo.sc,u:{fs:f.oo.fs,dept:f.oo.dept,title:document.title,browser:$.CloudChat.browser(),url:location.href,referrer:document.referrer,time:moment().format()}})
+        $.CloudChat.cx({
+            f:'j',
+            ff:'x',
+            ip:"<%-clientIP%>",
+            trust:location.hostname,
+            ver:f.oo.ver,
+            dp:f.oo.dp,
+            ry:f.oo.ry,
+            sc:f.oo.sc,
+            u:{
+                fs:f.oo.fs,
+                dept:f.oo.dept,
+                title:document.title,
+                browser:$.CloudChat.browser(),
+                url:location.href,
+                referrer:document.referrer,
+                time:moment().format()
+            }
+        })
+            console.log({
+            f:'j',
+            ff:'x',
+            ip:"<%-clientIP%>",
+            trust:location.hostname,
+            ver:f.oo.ver,
+            dp:f.oo.dp,
+            ry:f.oo.ry,
+            sc:f.oo.sc,
+            u:{
+                fs:f.oo.fs,
+                dept:f.oo.dept,
+                title:document.title,
+                browser:$.CloudChat.browser(),
+                url:location.href,
+                referrer:document.referrer,
+                time:moment().format()
+            }
+        })
         clearInterval($.CloudChat.base.swg);
         $.CloudChat.timeOut=setTimeout(function(){if(!$.CloudChat.ao){$.CloudChat.ao={}};if(f.oo.open!==1&&Object.keys($.CloudChat.ao).length>0&&f.oo.greet!==1){$.CloudChat.init(3)}},2000)
         break;

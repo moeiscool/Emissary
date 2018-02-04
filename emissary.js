@@ -20,7 +20,7 @@
 process.on('uncaughtException', function (err) {
     console.error('uncaughtException',err);
 });
-s={ver:'Emissary 0.1',s:JSON.stringify},s.visitors={},s.a={},s.p={},s.onlineOperators={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.y={},s.cv={};
+s={ver:'Emissary 0.1',s:JSON.stringify},s.visitors={},s.a={},s.p={},s.onlineOperators={},s.c={},s.ci={},s.nf={},s.dp={},s.ban={},s.channels={},s.cv={};
 
 var http=require('http'),
     https=require('https'),
@@ -74,6 +74,15 @@ s.checkRelativePath=function(x){
     }
     return x
 }
+//cloudflare client ip
+s.getClientIPthroughCloudFlare=function(req){
+    var ip = req.headers["'x-forwarded-for"]||(req.connection.remoteAddress ? req.connection.remoteAddress : req.remoteAddress);
+    if (typeof req.headers['cf-connecting-ip']==='string'){
+        ip=req.headers['cf-connecting-ip'];
+    }
+    return ip
+}
+
 //json parse
 s.jp=function(d,x){if(!d||d==""||d=="null"){if(x){d=x}else{d={}}};try{d=JSON.parse(d)}catch(er){if(x){d=x}else{d={}}};return d;}
 //json string
@@ -139,12 +148,11 @@ s.log=function(x,xx,xxx,tt,ti){
     });xx.time=ti;
     if(xxx){atx({ulog:xx,bid:xxx,uid:x},x)}
 }
-s.obk=Object.keys;
 s.moment=function(e){if(!e){e=new Date};return moment(e).utcOffset('-0800').format('YYYY-MM-DD HH:mm:ss')}
-s.lr=function(h){try{return s.obk(io.sockets.adapter.rooms[h])}catch(e){return []}};s.gs=function(h){return io.sockets.connected[h]};
+s.lr=function(h){try{return Object.keys(io.sockets.adapter.rooms[h])}catch(e){return []}};s.gs=function(h){return io.sockets.connected[h]};
 //Count Admins
 s.ca=function(gt){
-    if(s.onlineOperators[gt]){return s.obk(s.onlineOperators[gt]).length+1}else{return 1}
+    if(s.onlineOperators[gt]){return Object.keys(s.onlineOperators[gt]).length+1}else{return 1}
 }
 //admin object for client side
 s.ad=function(u,v){
@@ -154,7 +162,7 @@ s.ad=function(u,v){
 s.cd=function(gt,e){
     if(s.onlineOperators[gt]){
         e={e:{}};
-        s.obk(s.onlineOperators[gt]).forEach(function(v){
+        Object.keys(s.onlineOperators[gt]).forEach(function(v){
             e.u=s.onlineOperators[gt][v].u;
             if(s.a[e.u]&&s.a[e.u][v]){
                 e.e[v]=s.ad(s.a[e.u][v],v);
@@ -267,28 +275,28 @@ s.chats.fM=function(d,e){e=[];
     });
     return e;
 };
-s.channels={};
-s.channels.ch=function(d){
-    if(s.c[d.uid]&&s.c[d.uid][d.bid]&&s.obk(s.c[d.uid][d.bid]).length>0&&(!s.cv[d.uid]||!s.cv[d.uid][d.bid]||s.obk(s.cv[d.uid][d.bid]).length===0)&&(!s.y[d.uid]||!s.y[d.uid][d.bid]||s.obk(s.y[d.uid][d.bid].j).length===0)){
-        d.fn=function(){
-            if(s.y[d.uid]){delete(s.y[d.uid][d.bid])};if(s.cv[d.uid]){delete(s.cv[d.uid][d.bid])};if(s.c[d.uid]){delete(s.c[d.uid][d.bid])};
-        }
-        d.le=s.chats.fM(s.c[d.uid][d.bid]);d.lo=JSON.stringify(d.le);
-        if(s.c[d.uid][d.bid].length>30){
-            sql.query('SELECT id FROM Chats WHERE ke=? AND id=? AND start=?',[d.uid,d.bid,s.y[d.uid][d.bid].s],function(er,r){
-                if(r&&r[0]){
-                    sql.query("UPDATE Chats SET history=? WHERE ke=? AND id=? AND start=?",[d.lo,d.uid,d.bid,s.y[d.uid][d.bid].s],function(){
-                         d.fn();
-                    });
-                }else{
-                    sql.query("INSERT INTO Chats (start,history,id,ke,co) VALUES (?,?,?,?,?)",[s.y[d.uid][d.bid].s,d.lo,d.bid,d.uid,0],function(){
-                         d.fn();
-                    });
-                }
-            });
-        }
-    }
-};
+//s.channels={};
+//s.channels.ch=function(d){
+//    if(s.c[d.uid]&&s.c[d.uid][d.bid]&&Object.keys(s.c[d.uid][d.bid]).length>0&&(!s.cv[d.uid]||!s.cv[d.uid][d.bid]||Object.keys(s.cv[d.uid][d.bid]).length===0)&&(!s.channels[d.uid]||!s.channels[d.uid][d.bid]||Object.keys(s.channels[d.uid][d.bid].j).length===0)){
+//        d.fn=function(){
+//            if(s.channels[d.uid]){delete(s.channels[d.uid][d.bid])};if(s.cv[d.uid]){delete(s.cv[d.uid][d.bid])};if(s.c[d.uid]){delete(s.c[d.uid][d.bid])};
+//        }
+//        d.le=s.chats.fM(s.c[d.uid][d.bid]);d.lo=JSON.stringify(d.le);
+//        if(s.c[d.uid][d.bid].length>30){
+//            sql.query('SELECT id FROM Chats WHERE ke=? AND id=? AND start=?',[d.uid,d.bid,s.channels[d.uid][d.bid].s],function(er,r){
+//                if(r&&r[0]){
+//                    sql.query("UPDATE Chats SET history=? WHERE ke=? AND id=? AND start=?",[d.lo,d.uid,d.bid,s.channels[d.uid][d.bid].s],function(){
+//                         d.fn();
+//                    });
+//                }else{
+//                    sql.query("INSERT INTO Chats (start,history,id,ke,co) VALUES (?,?,?,?,?)",[s.channels[d.uid][d.bid].s,d.lo,d.bid,d.uid,0],function(){
+//                         d.fn();
+//                    });
+//                }
+//            });
+//        }
+//    }
+//};
 io.on('connect', function (cn) {
 cn.on('f',function(d,q){
     try{
@@ -514,7 +522,7 @@ function tx(z){//Connection Sender
                                                     if(d.i===-1){
                                                             r.shto.push(d.uid)
                                     sql.query("SELECT name,mail from Users where ke='"+d.uid+"'",function(er,rr,g){rr=rr[0];
-                                                            tx({pnote:'lg',pnotm:1,name:rr.name,mail:rr.mail,ke:d.uid})
+                                       tx({pnote:'lg',pnotm:1,name:rr.name,mail:rr.mail,ke:d.uid})
                                     })
                                                             d.lr=s.lr('1AA_A_'+d.uid)
                                                             if((d.lr instanceof Object || d.lr instanceof Array)&&d.lr.length>0){
@@ -610,25 +618,25 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                         if(d.x===1){
                             if(!s.cv[d.uid])s.cv[d.uid]={};
                             if(!s.cv[d.uid][d.bid])s.cv[d.uid][d.bid]={};
-                            if(!s.y[d.uid])s.y[d.uid]={};
+                            if(!s.channels[d.uid])s.channels[d.uid]={};
                             red.get("CHAT_"+d.uid+"_"+d.bid,function(err,rd){rd=s.jp(rd);
-                                if(!s.y[d.uid][d.bid])s.y[d.uid][d.bid]={j:{},s:s.moment()};
+                                if(!s.channels[d.uid][d.bid])s.channels[d.uid][d.bid]={j:{},s:s.moment()};
                                 if(!rd)rd=[];
-                                if(!s.y[d.uid][d.bid].j[cn.uid+'_'+cn.bid]){
+                                if(!s.channels[d.uid][d.bid].j[cn.uid+'_'+cn.bid]){
                                     cn.join(d.uid+'_'+d.bid);
                                     if(s.a[cn.uid]&&s.a[cn.uid][cn.id]&&!s.a[cn.uid][cn.id].chh[d.uid]){s.a[cn.uid][cn.id].chh[d.uid]={}}
                                     s.a[cn.uid][cn.id].chh[d.uid][d.bid]={}
-                                    s.y[d.uid][d.bid].j[cn.uid+'_'+cn.bid]=s.ad(s.a[cn.uid][cn.id],cn.id);
-                                    s.tx({chan:s.y[d.uid][d.bid],uid:d.uid,bid:d.bid},d.uid+'_'+d.bid);
+                                    s.channels[d.uid][d.bid].j[cn.uid+'_'+cn.bid]=s.ad(s.a[cn.uid][cn.id],cn.id);
+                                    s.tx({chan:s.channels[d.uid][d.bid],uid:d.uid,bid:d.bid},d.uid+'_'+d.bid);
                                     tx({chad:rd,uid:d.uid,bid:d.bid,chxa:s.cv[d.uid][d.bid]})
                                 }
 //                            s.stt("CHAT_"+d.u+"_"+d.bi,s.js(rd))
                             });
                         }else{
-                            if(s.y[d.uid]&&s.y[d.uid][d.bid]&&s.y[d.uid][d.bid].j[cn.uid+'_'+cn.bid]){
+                            if(s.channels[d.uid]&&s.channels[d.uid][d.bid]&&s.channels[d.uid][d.bid].j[cn.uid+'_'+cn.bid]){
                                 cn.leave(d.uid+'_'+d.bid);
-                                delete(s.a[cn.uid][cn.id].chh[d.uid][d.bid]);delete(s.y[d.uid][d.bid].j[cn.uid+'_'+cn.bid]);
-                                s.tx({chan:s.y[d.uid][d.bid],uid:d.uid,bid:d.bid,chxa:s.cv[d.uid][d.bid]},d.uid+'_'+d.bid);
+                                delete(s.a[cn.uid][cn.id].chh[d.uid][d.bid]);delete(s.channels[d.uid][d.bid].j[cn.uid+'_'+cn.bid]);
+                                s.tx({chan:s.channels[d.uid][d.bid],uid:d.uid,bid:d.bid,chxa:s.cv[d.uid][d.bid]},d.uid+'_'+d.bid);
                             }
                         }
                     break;
@@ -641,8 +649,8 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                             //check if free
                             if(s.a[cn.uid][cn.id].level===0){
                                 d.q=0;
-                                s.obk(s.a[cn.uid][cn.id].joined).forEach(function(v){
-                                    d.q=d.q+s.obk(s.a[cn.uid][cn.id].joined[v]).length;
+                                Object.keys(s.a[cn.uid][cn.id].joined).forEach(function(v){
+                                    d.q=d.q+Object.keys(s.a[cn.uid][cn.id].joined[v]).length;
                                 });
                                 if(d.q>5){tx({f:'cjx',uid:d.uid,bid:d.bid});return;}
                             }
@@ -677,7 +685,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                                 if(s.visitors[d.uid]&&s.visitors[d.uid][d.bid]&&s.visitors[d.uid][d.bid].joined[cn.uid]&&s.visitors[d.uid][d.bid].joined[cn.uid][cn.bid]&&s.visitors[d.uid][d.bid].pj[cn.uid]){
                                     if(s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid]){s.visitors[d.uid][d.bid].pj[cn.uid][cn.bid].te.push(s.moment())};
                                     delete(s.visitors[d.uid][d.bid].joined[cn.uid][cn.bid]);
-                                    if(s.obk(s.visitors[d.uid][d.bid].joined[cn.uid]).length===0){
+                                    if(Object.keys(s.visitors[d.uid][d.bid].joined[cn.uid]).length===0){
                                         delete(s.visitors[d.uid][d.bid].joined[cn.uid]);
                                     }
                                     if(!d.xx){s.tx(d.ret,d.uid+'_'+d.bid);};
@@ -768,7 +776,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                                         switch(d.ws){
                                             case'app':
                                                 d.fn=function(){
-                                                    s.obk(d.s).forEach(function(v){
+                                                    Object.keys(d.s).forEach(function(v){
                                                         if(v=='firebase'&&d.s[v]['apiKey']===''){return}
                                                         d.ar[v]=d.s[v];
                                                     })
@@ -823,7 +831,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                                             case'profile':
                                               sql.query("SELECT ids FROM Users WHERE ke=?",[cn.uid],function(er,r){
                                                 if(r&&r[0]){
-                                                    d.vv=s.obk(d.s);d.ar=[];d.arr=[];
+                                                    d.vv=Object.keys(d.s);d.ar=[];d.arr=[];
                                                     d.vv.forEach(function(v){
                                                      switch(v){
                                                          case'name':case'mail':case'login':case'pass':case'ref':
@@ -878,7 +886,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                                                         switch(d.ws){
                                                             case 1://sub account limit check
                                                                 d.s=JSON.parse(d.s);
-                                                                d.ss=s.obk(d.s);
+                                                                d.ss=Object.keys(d.s);
                                                                 d.sss={}
                                                                 switch(r.type){
                                                                     case 0:
@@ -1047,18 +1055,23 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                         if(!s.cv[d.uid])s.cv[d.uid]={};
                         if(!s.cv[d.uid][d.$bid])s.cv[d.uid][d.$bid]={};
                         if(!s.cv[d.uid][d.$bid][d.bid]){s.cv[d.uid][d.$bid][d.bid]=d.u;}
-                        s.cv[d.uid][d.$bid][d.bid].ip=cn.request.connection.remoteAddress,s.cv[d.uid][d.$bid][d.bid].vid={};
+                        s.cv[d.uid][d.$bid][d.bid].ip=d.ip||cn.request.connection.remoteAddress
+                        s.cv[d.uid][d.$bid][d.bid].vid={};
                         s.cv[d.uid][d.$bid][d.bid].vid[cn.id]={};
                                     red.get("CHAT_"+d.uid+"_"+d.$bid,function(err,rd){rd=s.jp(rd);
                         if(!rd)rd=[];
                         d.tx={ao:s.cd(d.uid),uid:d.uid,chxa:s.cv[d.uid][d.$bid]};
-                        if(s.y[d.uid]&&s.y[d.uid][d.$bid]){d.tx.chan=s.y[d.uid][d.$bid]};d.tx.history=rd;
+                        if(s.channels[d.uid]&&s.channels[d.uid][d.$bid]){d.tx.chan=s.channels[d.uid][d.$bid]};d.tx.history=rd;
                         tx(d.tx);s.tx({chxn:1,$bid:d.$bid,bid:d.bid,uid:d.uid},d.uid+'_'+d.$bid);
                         cn.join(d.uid+'_'+d.$bid);
                                     })
                     break;
                     case'x'://user init
-                        cn.ip=cn.request.connection.remoteAddress;
+                        if(!d.ip){
+                            cn.ip=cn.request.connection.remoteAddress
+                        }else{
+                            cn.ip=d.ip;
+                        }
                         if(d.u.push!==1){s.stf(d.uid,{ip:cn.ip,trust:d.trust,sc:d.sc,ry:d.ry,dp:d.dp,cn:cn.disconnect},tx);}
                         cn.join(d.uid+'_'+d.bid),cn.join(d.uid);
                         clearTimeout(s.nf[d.bid+'_'+d.uid]);delete(s.nf[d.bid+'_'+d.uid]);
@@ -1085,7 +1098,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                         if(!s.visitors[d.uid][d.bid].brd){s.visitors[d.uid][d.bid].brd=[]}
                         s.visitors[d.uid][d.bid].brd.push({href:d.u.url,referrer:d.r,ft:s.visitors[d.uid][d.bid].ft,time:s.moment()});d.kl=s.visitors[d.uid][d.bid].brd.length;if(d.kl>250){s.visitors[d.uid][d.bid].brd=s.visitors[d.uid][d.bid].brd.splice(0,(d.kl-250))}
                         red.get("FB_"+d.uid,function(err,rd){rd=s.jp(rd);
-                        if(rd&&s.obk(rd).length===0){rd={apiKey:"AIzaSyBZ68U1anJHhKLLt30f66BwmB7ED1ipht0",authDomain: "cloudchat-5bb80.firebaseapp.com",storageBucket: "cloudchat-5bb80.appspot.com"}}
+                        if(rd&&Object.keys(rd).length===0){rd={apiKey:"AIzaSyBZ68U1anJHhKLLt30f66BwmB7ED1ipht0",authDomain: "cloudchat-5bb80.firebaseapp.com",storageBucket: "cloudchat-5bb80.appspot.com"}}
                         s.visitors[d.uid][d.bid].fti=s.moment();d.tx={firebase:rd,ao:s.cd(d.uid),uid:d.uid};if(!s.visitors[d.uid][d.bid].fs||s.visitors[d.uid][d.bid].fs=="1"){d.tx.fs=s.moment();s.visitors[d.uid][d.bid].fs=d.tx.fs;};
                         tx(d.tx);
                         atx({f:'v',u:s.visitors[d.uid][d.bid],vid:s.visitors[d.uid][d.bid].vid,bid:d.bid,cid:cn.id,al:0},d.uid)
@@ -1095,7 +1108,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                         if(s.visitors[cn.uid][cn.bid].chat===1){s.log(cn.uid,{c:3,ip:cn.ip},cn.bid);}
                         s.visitors[cn.uid][cn.bid].chat=0
                         atx(d,cn.uid,cn);
-                        d.k=s.obk(s.visitors[cn.uid][cn.bid].vid)
+                        d.k=Object.keys(s.visitors[cn.uid][cn.bid].vid)
                         ex({f:'x',ff:0},d.k);
                         //save chat because it ended
                         red.get("CHAT_"+cn.uid+"_"+cn.bid,function(err,rd){rd=s.jp(rd);
@@ -1133,7 +1146,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                     default://chat init
                         if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]){
                             if(s.visitors[cn.uid][cn.bid].chat!==1){s.log(cn.uid,{c:2,ip:cn.ip},cn.bid);}
-                        if(s.obk(s.visitors[cn.uid][cn.bid].joined).length>0){
+                        if(Object.keys(s.visitors[cn.uid][cn.bid].joined).length>0){
                             tx({ad:s.visitors[cn.uid][cn.bid].joined})
                         }
                         s.visitors[cn.uid][cn.bid].name=d.u.name;
@@ -1142,7 +1155,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                         if(d.ch){d.chc=0;
                             d.fn=function(g,h){
                                 if(s.a[g]){
-                                    d.o=s.obk(s.a[g]);
+                                    d.o=Object.keys(s.a[g]);
                                     d.o.forEach(function(b){
                                         if(s.a[g][b].bid===h){
                                             s.tx({poke:{uid:cn.uid,bid:cn.bid}},s.a[g][b].vid)
@@ -1150,8 +1163,8 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                                     })
                                 }
                             }
-                            s.obk(d.ch).forEach(function(v){
-                                d.a=s.obk(d.ch)[d.chc];
+                            Object.keys(d.ch).forEach(function(v){
+                                d.a=Object.keys(d.ch)[d.chc];
                                 if(d.ch[d.a] instanceof Array){
                                     v.forEach(function(b){
                                         d.fn(d.a,b)
@@ -1163,7 +1176,7 @@ tx({active_users:s.visitors[d.uid],active_admins:s.a,online_admins:s.onlineOpera
                             })
                         }
 clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
-                        d.k=s.obk(s.visitors[d.uid][d.bid].vid),s.visitors[d.uid][d.bid].chat=1;
+                        d.k=Object.keys(s.visitors[d.uid][d.bid].vid),s.visitors[d.uid][d.bid].chat=1;
                         d.tt={f:'ii',u:s.visitors[d.uid][d.bid],bid:d.bid,cid:cn.id};
                         atx(d.tt,d.uid);
                         red.get("CHAT_"+d.uid+"_"+d.bid,function(err,rd){rd=s.jp(rd);
@@ -1200,7 +1213,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
         if(cn.id&&cn.uid&&cn.bid){d={};
             if(s.cv[cn.uid]&&s.cv[cn.uid][cn.$bid]&&s.cv[cn.uid][cn.$bid][cn.bid]){
                 delete(s.cv[cn.uid][cn.$bid][cn.bid].vid[cn.id])
-                if(s.obk(s.cv[cn.uid][cn.$bid][cn.bid].vid).length===0){
+                if(Object.keys(s.cv[cn.uid][cn.$bid][cn.bid].vid).length===0){
                     s.nf[cn.bid+'_'+cn.uid+'_'+cn.$bid]=setTimeout(function(q){
                         delete(s.cv[cn.uid][cn.$bid][cn.bid]);
                         s.tx({chxn:0,$bid:cn.$bid,uid:cn.uid,bid:cn.bid},cn.uid+'_'+cn.$bid);
@@ -1210,8 +1223,8 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
             }
             if(s.a[cn.uid]&&s.a[cn.uid][cn.id]){
                 d.fn=function(xx){
-                    s.obk(s.a[xx][cn.id].joined).forEach(function(v){
-                        s.obk(s.a[xx][cn.id].joined[v]).forEach(function(b){
+                    Object.keys(s.a[xx][cn.id].joined).forEach(function(v){
+                        Object.keys(s.a[xx][cn.id].joined[v]).forEach(function(b){
                             if(s.visitors[v]&&s.visitors[v][b]&&s.visitors[v][b].joined[xx]){
                                 if(s.visitors[v][b].pj&&s.visitors[v][b].pj[xx]&&s.visitors[v][b].pj[xx][cn.bid]){s.visitors[v][b].pj[xx][cn.bid].te.push(s.moment())};
                                 delete(s.visitors[v][b].joined[xx][cn.bid]);d.qq=s.visitors[v][b];
@@ -1220,11 +1233,11 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
                             }
                         })
                     })
-                    s.obk(s.a[xx][cn.id].chh).forEach(function(v){
-                        s.obk(s.a[xx][cn.id].chh[v]).forEach(function(b){
-                            if(s.y[v]&&s.y[v][b]){
-                                delete(s.y[v][b].j[xx+'_'+cn.bid]);
-                                s.tx({chan:s.y[v][b],uid:v,bid:b},v+'_'+b);
+                    Object.keys(s.a[xx][cn.id].chh).forEach(function(v){
+                        Object.keys(s.a[xx][cn.id].chh[v]).forEach(function(b){
+                            if(s.channels[v]&&s.channels[v][b]){
+                                delete(s.channels[v][b].j[xx+'_'+cn.bid]);
+                                s.tx({chan:s.channels[v][b],uid:v,bid:b},v+'_'+b);
                             }
                         })
                     });s.a[xx][cn.id].status="0";
@@ -1247,7 +1260,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
             if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&!(s.p[cn.uid]&&s.p[cn.uid][cn.id])){
                 atx({f:'dii',d:cn.bid,uid:cn.uid,cn:cn.id},cn.uid)
                 if(s.visitors[cn.uid][cn.bid].vid[cn.id]){delete(s.visitors[cn.uid][cn.bid].vid[cn.id])}
-                if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&s.visitors[cn.uid][cn.bid].brd&&s.obk(s.visitors[cn.uid][cn.bid].vid).length===0){
+                if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&s.visitors[cn.uid][cn.bid].brd&&Object.keys(s.visitors[cn.uid][cn.bid].vid).length===0){
                 s.nf[cn.bid+'_'+cn.uid]=setTimeout(function(q){
                     if(s.visitors[cn.uid]&&s.visitors[cn.uid][cn.bid]&&s.visitors[cn.uid][cn.bid].vid){
                     atx({f:'li',bid:cn.bid,vid:s.visitors[cn.uid][cn.bid].vid,uid:cn.uid},cn.uid);
@@ -1324,7 +1337,7 @@ clearTimeout(s.nf[cn.bid+'_'+cn.uid]);delete(s.nf[cn.bid+'_'+cn.uid])
             }
             if(cn.uuid&&s.p[cn.uuid]&&s.p[cn.uuid][cn.id]){
                 delete(s.p[cn.uuid][cn.id])
-                if(s.obk(s.p[cn.uuid]).length===0){s.p[cn.uuid]}
+                if(Object.keys(s.p[cn.uuid]).length===0){s.p[cn.uuid]}
             }
         }
     });
@@ -1818,5 +1831,5 @@ app.all(['/api/:id/:type','/api/:id/:type/:var'], function(req,res,e) {
 app.get('/embed/:ke', function (req,res){
     req.proto=req.headers['x-forwarded-proto']||req.protocol;
     res.header("Access-Control-Allow-Origin",req.headers.origin);
-    res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config});
+    res.render('embed',{data:req.params,$_GET:req.query,https:(req.proto==='https'),host:req.protocol+'://'+req.hostname,config:config,clientIP:s.getClientIPthroughCloudFlare(req)});
 });

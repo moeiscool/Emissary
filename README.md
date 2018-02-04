@@ -93,3 +93,8 @@ Emissary is made from an early live chat prototype written in PHP called CloudCh
     ```
     pm2 start emissary.js
     ```
+    
+# Links
+
+Website - http://emissary.chat
+Community Chat (Discord) - https://discord.gg/kpt3CVp
